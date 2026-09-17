@@ -1,6 +1,4 @@
 import re
-import base64
-
 from Utility import signatures
 
 
@@ -88,9 +86,6 @@ class Fingerprint:
         }
 
     def _detect_php(self, raw: str, lower: str) -> dict:
-        if len(raw) < 8:
-            return {"score": 0, "risk_level": "Low", "subtype": None}
-
         score   = 0
         subtype = None
 

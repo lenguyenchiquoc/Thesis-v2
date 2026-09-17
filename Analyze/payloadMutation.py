@@ -150,7 +150,7 @@ class PayloadMutation:
 
         for chain in chains:
             for cmd in self.TEST_COMMANDS:
-                print(f"[*] Trying {chain} → {cmd}")
+                print(f"[*] Trying {chain} -> {cmd}")
                 b64 = self._run_ysoserial(chain, cmd)
                 if b64:
                     results.append(self._make_payload("java_deser", chain, cmd, b64))

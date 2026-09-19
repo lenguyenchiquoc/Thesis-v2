@@ -47,7 +47,6 @@ class Fingerprint:
         bin_data   = b" ".join(
             item.encode('latin-1', errors='ignore') for item in self.data
         )
-        clean_text = lower_text.replace('\x00', ' ').replace('\x05', ' ').replace('\x04', ' ')
 
         scores = {
             "PHP":           self._detect_php(raw_text, lower_text),
@@ -68,7 +67,7 @@ class Fingerprint:
         best_type = max(matched, key=lambda k: matched[k]["score"])
         best      = matched[best_type]
 
-        gadget_hits     = [kw for kw in self.GADGET_KEYWORDS if kw.lower() in clean_text]
+        gadget_hits     = [kw for kw in self.GADGET_KEYWORDS if kw.lower() in lower_text]
         gadget_detected = len(gadget_hits) > 0
 
         risk_level      = "Critical" if gadget_detected else best["risk_level"]

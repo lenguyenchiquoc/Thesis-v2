@@ -5,6 +5,7 @@ import urllib.parse
 from collections import deque
 
 from Utility import signatures
+from Utility.schemas import NormalizedCandidates
 
 
 class DataNormalizer:
@@ -13,7 +14,7 @@ class DataNormalizer:
         self.max_depth = max_depth
         self.max_candidate = max_candidate
 
-    def normalize(self) -> list[str]:
+    def normalize(self) -> NormalizedCandidates:
         seen = set()
         queue = deque([(self.data,0)])
         meaningfull_data = []

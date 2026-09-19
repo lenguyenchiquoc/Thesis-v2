@@ -3,6 +3,9 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from typing import cast
+
+from Utility.schemas import HttpProbeSample, Mutation, ReplayResult, ReplaySkipped
 
 
 class ReplayRequest:
@@ -20,11 +23,11 @@ class ReplayRequest:
         self.timeout = timeout
         self.verify_tls = verify_tls
 
-    def replay(self, payload: dict) -> dict:
-        url = payload.get("url")
-        location = payload.get("location")
-        name = payload.get("name")
-        method = (payload.get("method") or "GET").upper()
+    def replay(self, payload: Mutation) -> ReplayResult:
+        url = cast("str | None", payload.get("url"))
+        location = cast("str | None", payload.get("location"))
+        name = cast("str | None", payload.get("name"))
+        method = (cast("str | None", payload.get("method")) or "GET").upper()
         if location in ("body", "form_body") and method == "GET":
             method = "POST"
 
@@ -48,26 +51,28 @@ class ReplayRequest:
             "method": method,
             "location": location,
             "name": name,
-            "payload_type": payload.get("type"),
+            "payload_type": cast("str | None", payload.get("type")),
             "baseline": baseline,
             "mutated": mutated,
             "indicators": indicators,
             "likely_vulnerable": len(indicators) > 0,
         }
 
-    def replay_all(self, payloads: list[dict]) -> list[dict]:
+    def replay_all(self, payloads: list[Mutation]) -> list[ReplayResult]:
         return [self.replay(p) for p in payloads if "error" not in p]
 
-    def _select_payload_value(self, payload: dict) -> str | None:
-        encoding = payload.get("encoding")
-        if encoding == "base64" and payload.get("payload"):
+    def _select_payload_value(self, payload: Mutation) -> str | None:
+        encoding = cast("str | None", payload.get("encoding"))
+        b64_payload = cast("str | None", payload.get("payload"))
+        payload_raw = cast("str | None", payload.get("payload_raw"))
+        if encoding == "base64" and b64_payload:
             try:
-                return base64.b64decode(payload["payload"]).decode("utf-8", errors="replace")
+                return base64.b64decode(b64_payload).decode("utf-8", errors="replace")
             except Exception:
-                return payload.get("payload_raw") or payload.get("payload")
-        return payload.get("payload_raw") or payload.get("payload")
+                return payload_raw or b64_payload
+        return payload_raw or b64_payload
 
-    def _send(self, url: str, method: str, location: str, name: str, value: str | None) -> dict:
+    def _send(self, url: str, method: str, location: str, name: str, value: str | None) -> HttpProbeSample:
         headers = {"User-Agent": "EthicalQuoc/replay"}
         cookies = {}
         body = None
@@ -122,7 +127,7 @@ class ReplayRequest:
                 "body_sample": raw[:2000].decode("utf-8", errors="replace"),
             }
 
-    def _compare(self, baseline: dict, mutated: dict) -> list[str]:
+    def _compare(self, baseline: HttpProbeSample, mutated: HttpProbeSample) -> list[str]:
         indicators = []
 
         delay_delta = mutated["elapsed_sec"] - baseline["elapsed_sec"]
@@ -149,12 +154,12 @@ class ReplayRequest:
 
         return indicators
 
-    def _skip_result(self, payload: dict, reason: str) -> dict:
+    def _skip_result(self, payload: Mutation, reason: str) -> ReplaySkipped:
         return {
-            "url": payload.get("url"),
-            "location": payload.get("location"),
-            "name": payload.get("name"),
-            "payload_type": payload.get("type"),
+            "url": cast("str | None", payload.get("url")),
+            "location": cast("str | None", payload.get("location")),
+            "name": cast("str | None", payload.get("name")),
+            "payload_type": cast("str | None", payload.get("type")),
             "skipped": True,
             "reason": reason,
             "likely_vulnerable": False,

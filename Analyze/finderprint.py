@@ -1,5 +1,6 @@
 import re
 from Utility import signatures
+from Utility.schemas import FingerprintResult, NormalizedCandidates
 
 
 class Fingerprint:
@@ -34,10 +35,10 @@ class Fingerprint:
 
     GADGET_KEYWORDS = signatures.GADGET_KEYWORDS
 
-    def __init__(self, data_list: list[str]):
+    def __init__(self, data_list: NormalizedCandidates):
         self.data = [str(item).strip() for item in data_list if str(item).strip()]
 
-    def fingerprint_serial(self) -> dict:
+    def fingerprint_serial(self) -> FingerprintResult:
         if not self.data:
             return self._unknown_result()
 
@@ -278,7 +279,7 @@ class Fingerprint:
             return "Medium"
         return "Low"
 
-    def _unknown_result(self) -> dict:
+    def _unknown_result(self) -> FingerprintResult:
         return {
             "value":           " ".join(self.data),
             "type":            "Unknown",

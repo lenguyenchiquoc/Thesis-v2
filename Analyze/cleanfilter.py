@@ -1,6 +1,7 @@
 import re
 
 from Utility import signatures
+from Utility.schemas import CleanedVector, ScanVector
 
 class cleanfilter:
 
@@ -14,7 +15,7 @@ class cleanfilter:
 
     COOKIE_HEADER_NAMES = {"cookie", "set-cookie"}
 
-    def __init__(self, filter_output):
+    def __init__(self, filter_output: list[ScanVector]):
         self.data = filter_output
     def _clean(self, value:str, location: str | None = None, name: str | None = None) -> str:
         if not isinstance(value,str) or not value.strip():
@@ -43,18 +44,16 @@ class cleanfilter:
         cleaned = cleaned.strip('= \t\n\r;,"')
         return cleaned
     
-    def _clean_all(self) -> list[dict]:
-        cleaned_vector = []
+    def _clean_all(self) -> list[CleanedVector]:
+        cleaned_vector: list[CleanedVector] = []
         for vector in self.data:
             original_value = vector.get('value','')
             clean_value = self._clean(original_value, vector.get('location'), vector.get('name'))
-            
-            new_vector = vector.copy()
-            new_vector["original_value"] = original_value
-            new_vector["cleaned_value"] = clean_value
-            
+
+            new_vector: CleanedVector = {**vector, "original_value": original_value, "cleaned_value": clean_value}
+
             cleaned_vector.append(new_vector)
-            
+
         return cleaned_vector
     
     def clean_and_output(self):

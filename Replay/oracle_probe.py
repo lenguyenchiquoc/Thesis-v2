@@ -1,12 +1,14 @@
 import base64
 import re
 
+from Utility.schemas import OracleProbeResult, OracleUnsupported, OracleNotRun, OracleRan
+
 
 class OracleProbe:
     def __init__(self, replayer):
         self.replayer = replayer
 
-    def probe(self, fingerprint_type: str, vector: dict) -> dict:
+    def probe(self, fingerprint_type: str, vector: dict) -> OracleProbeResult:
         if fingerprint_type == "PHP":
             return self._probe_php(vector)
         return {
@@ -22,7 +24,7 @@ class OracleProbe:
         corrupted_len = declared_len + 97
         return value[:match.start()] + f's:{corrupted_len}:"{match.group(2)}"' + value[match.end():]
 
-    def _probe_php(self, vector: dict) -> dict:
+    def _probe_php(self, vector: dict) -> OracleNotRun | OracleRan:
         url = vector.get("url")
         location = vector.get("location")
         name = vector.get("name")

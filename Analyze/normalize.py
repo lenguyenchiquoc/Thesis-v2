@@ -1,5 +1,6 @@
 import base64
 import gzip
+import json
 import re
 import urllib.parse
 from collections import deque
@@ -45,35 +46,37 @@ class DataNormalizer:
 
     def _generate_decodes(self, value: str) -> list[str]:
         results = []
+        is_jwt_shaped = bool(re.match(r'^[A-Za-z0-9_-]{16,}\.[A-Za-z0-9_-]{16,}\.[A-Za-z0-9_-]*$', value))
         try:
             ud = urllib.parse.unquote(value)
             if ud != value and ud.strip():
                 results.append(ud.strip())
         except:
             pass
-        try:
-            val = value.replace('-', '+').replace('_', '/').rstrip('=')
-            if len(val) % 4 != 0:
-                val += '=' * (4 - len(val) % 4)
-            if len(val) >= 16:
-                decoded_bytes = base64.b64decode(val, validate=False)
-                if decoded_bytes.startswith(b'\x1f\x8b'):
-                    try:
-                        decompressed = gzip.decompress(decoded_bytes)
-                        txt = decompressed.decode('latin-1').strip()
-                        if txt:
-                            results.append(txt)
-                    except:
-                        pass
-                else:
-                    try:
-                        txt = decoded_bytes.decode('latin-1').strip()
-                        if txt and len(txt) >= 10:
-                            results.append(txt)
-                    except:
-                        pass
-        except:
-            pass
+        if not is_jwt_shaped:
+            try:
+                val = value.replace('-', '+').replace('_', '/').rstrip('=')
+                if len(val) % 4 != 0:
+                    val += '=' * (4 - len(val) % 4)
+                if len(val) >= 16:
+                    decoded_bytes = base64.b64decode(val, validate=False)
+                    if decoded_bytes.startswith(b'\x1f\x8b'):
+                        try:
+                            decompressed = gzip.decompress(decoded_bytes)
+                            txt = decompressed.decode('latin-1').strip()
+                            if txt:
+                                results.append(txt)
+                        except:
+                            pass
+                    else:
+                        try:
+                            txt = decoded_bytes.decode('latin-1').strip()
+                            if txt and len(txt) >= 10:
+                                results.append(txt)
+                        except:
+                            pass
+            except:
+                pass
         if re.fullmatch(r'^[0-9a-fA-F]+$', value) and len(value) % 2 == 0 and len(value) >= 16:
             try:
                 hex_bytes = bytes.fromhex(value)
@@ -82,6 +85,26 @@ class DataNormalizer:
                     results.append(txt)
             except:
                 pass
+        if is_jwt_shaped:
+            for seg in value.split('.'):
+                if not seg:
+                    continue
+                try:
+                    padded = seg + '=' * (-len(seg) % 4)
+                    decoded_bytes = base64.urlsafe_b64decode(padded)
+                    txt = decoded_bytes.decode('latin-1').strip()
+                    if txt:
+                        results.append(txt)
+                        try:
+                            claims = json.loads(txt)
+                            if isinstance(claims, dict):
+                                for claim_value in claims.values():
+                                    if isinstance(claim_value, str) and claim_value.strip():
+                                        results.append(claim_value.strip())
+                        except:
+                            pass
+                except:
+                    pass
         return results
 
     def _serialized_score(self, value: str) -> float:

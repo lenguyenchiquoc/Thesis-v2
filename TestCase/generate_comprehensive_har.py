@@ -129,6 +129,21 @@ def realistic_jwt(seed: int) -> str:
     return f"{header}.{payload}.{sig}"
 
 
+def jwt_with_claim(seed: int, extra_claims: dict, alg_none: bool = False) -> str:
+    """JWT giong that, nhung nhet them 1 claim chua gadget deserialize —
+    dung de test Normalize co tach va decode tung doan JWT roi phat hien
+    duoc gadget nam trong claim hay khong (thay vi bo sot ca token)."""
+    header_obj = {"alg": "none", "typ": "JWT"} if alg_none else {"alg": "HS256", "typ": "JWT"}
+    header = base64.urlsafe_b64encode(json.dumps(header_obj).encode()).decode().rstrip("=")
+    payload_obj = {"sub": f"user{seed}", "iat": 1700000000 + seed, "exp": 1700003600 + seed}
+    payload_obj.update(extra_claims)
+    payload = base64.urlsafe_b64encode(json.dumps(payload_obj).encode()).decode().rstrip("=")
+    if alg_none:
+        return f"{header}.{payload}."
+    sig = base64.urlsafe_b64encode(bytes([(seed * 31 + i) % 256 for i in range(32)])).decode().rstrip("=")
+    return f"{header}.{payload}.{sig}"
+
+
 def common_browser_headers(i):
     return {
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -320,6 +335,22 @@ malicious_entries = [
     entry(f"{BASE}/api/upload-avatar", method="POST",
           headers={"Content-Disposition": f'form-data; name="avatar"; filename="{b64(php_priv_esc.encode())}.jpg"'},
           post_text="binary file placeholder", post_mime="multipart/form-data"),
+
+    # --- JWT voi gadget nhung trong claim (Normalize JWT-split: header.payload.sig,
+    #     tung doan phai duoc tach va decode rieng thi moi lo ra gadget ben trong) ---
+    entry(f"{BASE}/api/account/profile", headers={
+        "Authorization": f"Bearer {jwt_with_claim(900, {'sub': php_priv_esc})}",
+        "Accept": "application/json",
+    }),
+    entry(f"{BASE}/api/account/settings", headers={
+        "Authorization": f"Bearer {jwt_with_claim(901, {'config': yaml_payload.decode()})}",
+        "Accept": "application/json",
+    }),
+    # --- JWT alg:none (RFC7519 "Unsecured JWT" — chu ky rong) mang theo gadget ---
+    entry(f"{BASE}/api/account/profile-legacy", headers={
+        "Authorization": f"Bearer {jwt_with_claim(902, {'sub': php_priv_esc}, alg_none=True)}",
+        "Accept": "application/json",
+    }),
 ]
 
 random.shuffle(malicious_entries)

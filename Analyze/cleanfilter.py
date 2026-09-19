@@ -14,6 +14,7 @@ class cleanfilter:
     ]
 
     COOKIE_HEADER_NAMES = {"cookie", "set-cookie"}
+    AUTH_HEADER_NAMES = {"authorization"}
 
     def __init__(self, filter_output: list[ScanVector]):
         self.data = filter_output
@@ -27,11 +28,11 @@ class cleanfilter:
             suspicious = [s for s in segments if signatures.looks_like_serialized(s)]
             cleaned = suspicious[0] if suspicious else segments[0]
 
-        is_raw_cookie_header = (
+        is_prefixed_header = (
             isinstance(location, str) and location.lower() == "header"
-            and isinstance(name, str) and name.lower() in self.COOKIE_HEADER_NAMES
+            and isinstance(name, str) and name.lower() in (self.COOKIE_HEADER_NAMES | self.AUTH_HEADER_NAMES)
         )
-        if is_raw_cookie_header:
+        if is_prefixed_header:
             changed = True
             while changed:
                 changed = False

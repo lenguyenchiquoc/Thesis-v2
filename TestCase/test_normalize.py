@@ -164,20 +164,23 @@ class TestBfsTraversalBehavior(unittest.TestCase):
         self.assertIn('O:4:"User":2:{s:8:"username";s:6:"wiener";s:5:"admin";b:1;}', result)
 
 
-class TestKnownLimitations(unittest.TestCase):
-    """Cac gioi han da biet, ghi lai thanh test CHAY DUOC (khong chi nam trong
-    note.md) de khong bi lang quen - neu sau nay co ai fix duoc thi test se tu
-    dong bao PASS thay vi phai nho di tra lai ghi chu cu."""
+class TestThresholdGapFixed(unittest.TestCase):
+    """Regression test cho bug da fix: khoang trong giua Gate 1
+    (_generate_decodes() dong 91: len(txt) >= 10) va Gate 2 cu
+    (_is_serialized_payload() dong 43: len(value) < 12). Da dong bo ca 2 ve
+    cung nguong 10 - test nay dam bao khong ai vo tinh nang nguong Gate 2
+    len tro lai > 10 khien khoang trong tai xuat hien."""
 
-    @unittest.expectedFailure
-    def test_11_byte_decoded_payload_falls_into_the_threshold_gap(self):
-        # _generate_decodes() chi them candidate neu decode ra >= 10 ky tu (dong 91),
-        # nhung _is_serialized_payload() chi chap nhan neu >= 12 ky tu (dong 43).
-        # 1 payload PHP hop le nhung ngan (11 byte) lot qua duoc gate dau (thanh
-        # candidate) nhung bi tu choi o gate sau (khong duoc coi la "meaningful"),
-        # khien normalize() fallback tra ve ban ma hoa goc thay vi ban da giai ma.
+    def test_11_byte_decoded_payload_is_no_longer_lost(self):
         target = "i:12345678;"  # PHP serialize so nguyen, dung 11 ky tu
         self.assertEqual(len(target), 11)
+        encoded = base64.b64encode(target.encode()).decode()
+        result = DataNormalizer(encoded).normalize()
+        self.assertIn(target, result)
+
+    def test_10_byte_boundary_also_recognized(self):
+        target = "i:1234567;"  # dung 10 ky tu - dung bien duoi cua Gate 1
+        self.assertEqual(len(target), 10)
         encoded = base64.b64encode(target.encode()).decode()
         result = DataNormalizer(encoded).normalize()
         self.assertIn(target, result)

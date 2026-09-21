@@ -40,7 +40,7 @@ class DataNormalizer:
         return [self.data]
 
     def _is_serialized_payload(self, value: str) -> bool:
-        if len(value) < 12:
+        if len(value) < 10:
             return False
         return signatures.looks_like_serialized(value)
 

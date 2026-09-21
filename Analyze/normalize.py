@@ -44,6 +44,23 @@ class DataNormalizer:
             return False
         return signatures.looks_like_serialized(value)
 
+    def _extract_claim_strings(self, obj, depth: int = 0) -> list[str]:
+        if depth > 5:
+            return []
+        if isinstance(obj, str):
+            return [obj.strip()] if obj.strip() else []
+        if isinstance(obj, dict):
+            found = []
+            for v in obj.values():
+                found.extend(self._extract_claim_strings(v, depth + 1))
+            return found
+        if isinstance(obj, list):
+            found = []
+            for v in obj:
+                found.extend(self._extract_claim_strings(v, depth + 1))
+            return found
+        return []
+
     def _generate_decodes(self, value: str) -> list[str]:
         results = []
         is_jwt_shaped = bool(re.match(r'^[A-Za-z0-9_-]{16,}\.[A-Za-z0-9_-]{16,}\.[A-Za-z0-9_-]*$', value))
@@ -97,10 +114,7 @@ class DataNormalizer:
                         results.append(txt)
                         try:
                             claims = json.loads(txt)
-                            if isinstance(claims, dict):
-                                for claim_value in claims.values():
-                                    if isinstance(claim_value, str) and claim_value.strip():
-                                        results.append(claim_value.strip())
+                            results.extend(self._extract_claim_strings(claims))
                         except:
                             pass
                 except:

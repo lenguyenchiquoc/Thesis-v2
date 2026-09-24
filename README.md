@@ -107,10 +107,10 @@ Third-party exploitation tools are **not bundled with a fixed absolute path** �
 ```json
 {
     "tools": {
-        "ysoserial": "Analyze/third_tool/java/ysoserial-all.jar",
-        "phpggc": "Analyze/third_tool/phpggc/phpggc",
-        "ysoserial_net": "Analyze/third_tool/dotnet/ysoserial.exe",
-        "gopherus": "Analyze/third_tool/gopherus/gopherus.py"
+        "ysoserial": "tools/java/ysoserial-all.jar",
+        "phpggc": "tools/phpggc/phpggc",
+        "ysoserial_net": "tools/dotnet/ysoserial.exe",
+        "gopherus": "tools/gopherus/gopherus.py"
     },
     "oob_domain": ""
 }
@@ -118,7 +118,7 @@ Third-party exploitation tools are **not bundled with a fixed absolute path** �
 
 - Relative paths are resolved against the project root, so the tool works regardless of the drive letter or clone location.
 - To point at tools installed elsewhere, either edit `config.json` directly or set the `ETHICALQUOC_CONFIG` environment variable to a different config file path.
-- `ysoserial-all.jar` and `phpggc` are vendored under `Analyze/third_tool/`. `ysoserial.net` and `Gopherus` are not bundled — install them separately and update `config.json` if you need the .NET/SSRF mutation paths.
+- `ysoserial-all.jar` and `phpggc` are vendored under `tools/`. `ysoserial.net` and `Gopherus` are not bundled — install them separately and update `config.json` if you need the .NET/SSRF mutation paths.
 - `oob_domain` — set this to your own Burp Collaborator or Interactsh subdomain (or set `ETHICALQUOC_OOB_DOMAIN`) to have URLDNS and blind-SSRF payloads embed a real canary instead of a placeholder. Interaction logs must still be checked manually — this tool does not poll an OOB provider's API for you.
 
 ## Project structure
@@ -127,6 +127,7 @@ Third-party exploitation tools are **not bundled with a fixed absolute path** �
 main.py                     CLI entry point (scan / analyze / assess / report)
 tool_config.py               third-party tool path resolution
 config.json                  tool path configuration
+note.md                      running fix log (before/after code, root cause, how verified)
 
 Scanner/
   har_loader.py               parses HAR files into HTTP vectors
@@ -139,7 +140,6 @@ Analyze/
   finderprint.py                Stage 5 — serialization fingerprinting
   ExploitabilityAnalysis.py    Stage 6 — exploit type, severity, suggested probe
   payloadMutation.py           Stage 7 — payload generation per format
-  third_tool/                  vendored ysoserial-all.jar, phpggc
 
 Replay/
   replay_request.py            Stage 8 — request replay + Confirmed/Suspected evidence
@@ -149,13 +149,23 @@ Input/, Output/                schema-validated JSON load/save helpers
 Utility/
   signatures.py                 shared serialization signatures (single source of
                                  truth for postfiltered.py, cleanfilter.py, finderprint.py)
+  schemas.py                    TypedDict schemas for every stage's I/O
+
+tools/                          vendored ysoserial-all.jar, phpggc (not project source —
+                                 external exploitation tools, see Configuration above)
+
+docs/
+  PAYLOAD_MUTATION_REVIEW.md    Stage 7 design review — idea, per-format implementation detail
 
 results/                       pipeline output, organized as results/<DDMMYYYY>/<phase>_<HHMMSS>.json
-                                when -o isn't given; result1.json/result2.json are real captured lab data
+                                when -o isn't given; only result1.json is real captured lab data
+                                (PortSwigger) — result2.json/comprehensive_scan.json are synthetic
+                                test fixtures, not real traffic
 TestCase/
   generate_comprehensive_har.py  regenerates comprehensive.har (reproducible, not a static blob)
-  comprehensive.har               benchmark fixture: ~640 realistic requests (mostly noise) +
-                                   22 malicious payloads covering all 8 formats and known edge cases
+  comprehensive.har               benchmark fixture: synthetic realistic requests (mostly noise) +
+                                   malicious payloads covering all 8 formats and known edge cases
+  test_*.py                       unit tests (run: python -m unittest discover -s TestCase)
 ```
 
 ## Known limitations

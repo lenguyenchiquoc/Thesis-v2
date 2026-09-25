@@ -20,6 +20,7 @@ class DataNormalizer:
         queue = deque([(self.data,0)])
         meaningfull_data = []
         all_layer = []
+        children_of: dict[str, list[str]] = {}
         while queue:
             current, depth = queue.popleft()
             if current in seen:
@@ -30,12 +31,45 @@ class DataNormalizer:
                 meaningfull_data.append(current)
             if depth >= self.max_depth and len(seen) >= self.max_candidate:
                 continue
-            for next_value in self._generate_decodes(current):
+            decodes = self._generate_decodes(current)
+            children_of[current] = decodes
+            for next_value in decodes:
                 if next_value and next_value not in seen:
                     queue.append((next_value, depth+1))
+
         if meaningfull_data:
-            meaningfull_data.sort(key = lambda x: (-self._serialized_score(x),abs(len(x)-120),-x.count(':')))
-            return list(dict.fromkeys(meaningfull_data))[:2]
+            meaningful_data_dedup = list(dict.fromkeys(meaningfull_data))
+            score = {v: self._serialized_score(v) for v in meaningful_data_dedup}
+            meaningful_set = set(meaningful_data_dedup)
+
+            memo: dict[str, frozenset] = {}
+
+            def collapse(value: str, in_progress: set[str]) -> frozenset:
+                if value in memo:
+                    return memo[value]
+                if value in in_progress:
+                    return frozenset()
+                in_progress.add(value)
+                downstream: set[str] = set()
+                for child in children_of.get(value, []):
+                    if child and child != value:
+                        downstream |= collapse(child, in_progress)
+                in_progress.discard(value)
+
+                if value in meaningful_set:
+                    total = sum(score[d] for d in downstream)
+                    result = downstream if (downstream and total >= score[value]) else frozenset({value})
+                else:
+                    result = frozenset(downstream)
+
+                memo[value] = result
+                return result
+
+            deduped = sorted(
+                collapse(self.data, set()),
+                key = lambda x: (-score[x],abs(len(x)-120),-x.count(':'))
+            )
+            return deduped
 
         return [self.data]
 
@@ -112,13 +146,14 @@ class DataNormalizer:
                     txt = decoded_bytes.decode('latin-1').strip()
                     if txt:
                         results.append(txt)
-                        try:
-                            claims = json.loads(txt)
-                            results.extend(self._extract_claim_strings(claims))
-                        except:
-                            pass
                 except:
                     pass
+        try:
+            claims = json.loads(value)
+            if isinstance(claims, (dict, list)):
+                results.extend(self._extract_claim_strings(claims))
+        except:
+            pass
         return results
 
     def _serialized_score(self, value: str) -> float:

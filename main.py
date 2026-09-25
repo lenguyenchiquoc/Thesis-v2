@@ -143,29 +143,30 @@ def handle_arg(args):
                 value = i["cleaned_value"]
                 value_normalize = DataNormalizer(value).normalize()
                 print(f"Normalize is: {value_normalize}")
-                fingerprint = Fingerprint(value_normalize).fingerprint_serial()
-                print(json.dumps(fingerprint, indent=4, ensure_ascii=False))
-                ExploitAnalyze_rs = ExploitAnalyze(fingerprint).analyze()
-                print(json.dumps(ExploitAnalyze_rs, indent=4, ensure_ascii=False))
+                for candidate in value_normalize:
+                    fingerprint = Fingerprint([candidate]).fingerprint_serial()
+                    print(json.dumps(fingerprint, indent=4, ensure_ascii=False))
+                    ExploitAnalyze_rs = ExploitAnalyze(fingerprint).analyze()
+                    print(json.dumps(ExploitAnalyze_rs, indent=4, ensure_ascii=False))
 
-                mutation_vector = dict(i)
-                mutation_vector["value"] = value_normalize[0] if value_normalize else value
-                mutations = PayloadMutation(ExploitAnalyze_rs, mutation_vector).mutate()
-                print(mutations)
+                    mutation_vector = dict(i)
+                    mutation_vector["value"] = candidate
+                    mutations = PayloadMutation(ExploitAnalyze_rs, mutation_vector).mutate()
+                    print(mutations)
 
-                results.append({
-                    "vector": {
-                        "url": i.get("url"),
-                        "method": i.get("method"),
-                        "location": i.get("location"),
-                        "name": i.get("name"),
-                        "original_value": i.get("original_value"),
-                    },
-                    "normalized": value_normalize,
-                    "fingerprint": fingerprint,
-                    "exploit_analysis": ExploitAnalyze_rs,
-                    "mutations": mutations,
-                })
+                    results.append({
+                        "vector": {
+                            "url": i.get("url"),
+                            "method": i.get("method"),
+                            "location": i.get("location"),
+                            "name": i.get("name"),
+                            "original_value": i.get("original_value"),
+                        },
+                        "normalized": [candidate],
+                        "fingerprint": fingerprint,
+                        "exploit_analysis": ExploitAnalyze_rs,
+                        "mutations": mutations,
+                    })
 
         save_output_file_type(
             vectors=results,

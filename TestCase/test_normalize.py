@@ -138,7 +138,7 @@ class TestAdvancedEncodingLayers(unittest.TestCase):
 
 class TestBfsTraversalBehavior(unittest.TestCase):
     """Hanh vi cua thuat toan BFS multi-layer trong normalize() (queue, seen-set,
-    gioi han max_depth/max_candidate, chon top-2 candidate theo diem)."""
+    gioi han max_depth/max_candidate, sort theo diem nhung KHONG cat bot candidate)."""
 
     def test_plain_text_with_no_encoding_falls_back_unchanged(self):
         text = "just a normal short piece of text, nothing dangerous here"
@@ -149,11 +149,23 @@ class TestBfsTraversalBehavior(unittest.TestCase):
         result = DataNormalizer("").normalize()
         self.assertEqual(result, [""])
 
-    def test_returns_at_most_two_candidates(self):
-        payload = 'O:4:"User":2:{s:8:"username";s:6:"wiener";s:5:"admin";b:1;}'
-        b64 = base64.b64encode(payload.encode()).decode()
-        result = DataNormalizer(b64).normalize()
-        self.assertLessEqual(len(result), 2, "normalize() chi duoc tra toi da 2 candidate theo thiet ke")
+    def test_no_hard_cap_all_independent_gadgets_survive(self):
+        # Truoc day normalize() cat cung con [:2], lam mat cac candidate doc lap
+        # (vd 2 gadget PHP khac nhau nam trong 2 claim JWT khac nhau). Da bo cap,
+        # gio phai giu du ca 3 candidate doc lap, khong chi giu 2.
+        def php_gadget(tag: str) -> str:
+            return f'O:19:"Monolog\\Handler\\X":1:{{s:7:"Monolog";s:{len(tag)}:"{tag}";}}'
+
+        claims = {"sub": php_gadget("payloadA"), "role": php_gadget("payloadB"),
+                  "session": php_gadget("payloadC")}
+        header = base64.urlsafe_b64encode(b'{"alg":"none","typ":"JWT"}').decode().rstrip("=")
+        payload_b64 = base64.urlsafe_b64encode(json.dumps(claims).encode()).decode().rstrip("=")
+        token = f"{header}.{payload_b64}."
+
+        result = DataNormalizer(token).normalize()
+        self.assertIn(php_gadget("payloadA"), result)
+        self.assertIn(php_gadget("payloadB"), result)
+        self.assertIn(php_gadget("payloadC"), result)
 
     def test_deep_chain_within_max_depth_still_resolves(self):
         # Boc 5 lop base64 lien tiep - van trong gioi han max_depth mac dinh (12).

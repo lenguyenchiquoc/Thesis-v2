@@ -203,8 +203,8 @@ def looks_like_serialized(value: str) -> bool:
         if any(k in decoded_lower for k in ["__class__", "__wakeup", "__destruct", "java.lang", "java.util", "gadget", "phar"]):
             return True
 
-    value_clean = value.replace('%3d', '=').replace('%3D', '=').replace('-', '+').replace('_', '/').rstrip('=')
-    if len(value_clean) > 40 and re.match(r'^[A-Za-z0-9+/]{20,}$', value_clean):
+    value_clean = decoded_value.replace('-', '+').replace('_', '/').rstrip('=')
+    if len(value_clean) >= 20 and re.match(r'^[A-Za-z0-9+/]{20,}$', value_clean):
         padded = value_clean + '=' * (-len(value_clean) % 4)
         try:
             base64.b64decode(padded, validate=True)
@@ -223,7 +223,7 @@ def looks_like_serialized(value: str) -> bool:
     if unique_ratio > 0.65 and len(decoded_value) > 60:
         return True
 
-    if any(kw in decoded_lower for kw in ["phar://", "gopher://", "expect://", "file://", "data://", "serialize", "unserialize", "pickle", "marshal"]):
+    if any(kw in decoded_lower for kw in ["phar://", "gopher://", "expect://", "php://", "file://", "data://", "serialize", "unserialize", "pickle", "marshal", "jndi:", "ldap://", "rmi://"]):
         return True
 
     return False

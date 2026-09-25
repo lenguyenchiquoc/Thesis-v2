@@ -58,7 +58,7 @@ class DataNormalizer:
 
                 if value in meaningful_set:
                     total = sum(score[d] for d in downstream)
-                    result = downstream if (downstream and total >= score[value]) else frozenset({value})
+                    result = frozenset(downstream) if (downstream and total >= score[value]) else frozenset({value})
                 else:
                     result = frozenset(downstream)
 
@@ -184,10 +184,28 @@ class DataNormalizer:
 
         indicators = ['O:', 'rO0', 'ACED', '__class__', '!!', 'pickle']
         score += sum(value.count(ind) for ind in indicators)
-        score += value.count(':') * 0.5
-        score += value.count('"') * 0.3
+
+        # Dau ':' / '"' la cu phap BAT BUOC cua JSON (moi cap key:value, moi
+        # string deu can 1 cap dau nhay) - khong noi len gi ve exploit. Neu
+        # cong diem theo mat do ':'/'"' ngay ca khi value la JSON hop le, 1
+        # envelope JSON nhieu key vo hai (vd claim JWT sub/iat/exp/profile)
+        # co the "vuot diem" 1 gadget PHP thuc nam long ben trong no - da
+        # verify thuc te: envelope 17.3 > gadget rieng 14.9 diem, chi vi
+        # JSON co nhieu key/string hon. Chi cong diem nay cho van ban KHONG
+        # phai JSON (PHP serialize/Ruby Marshal text... - noi ':'/'"' day dac
+        # THUC SU la tin hieu cau truc gadget).
+        if not self._is_generic_json(value):
+            score += value.count(':') * 0.5
+            score += value.count('"') * 0.3
 
         if re.fullmatch(r'[A-Za-z0-9+/=\-_]{20,}', value.strip()):
             score -= 3
 
         return score
+
+    def _is_generic_json(self, value: str) -> bool:
+        try:
+            parsed = json.loads(value)
+        except (json.JSONDecodeError, ValueError):
+            return False
+        return isinstance(parsed, (dict, list))

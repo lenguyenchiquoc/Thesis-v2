@@ -64,7 +64,19 @@ All mutation paths that shell out to an external tool (`ysoserial`, `phpggc`, `y
 
 ## Installation
 
-### Option A — Docker (recommended, everything pre-installed)
+### Option A — Windows via WSL2 (recommended on Windows: all 5 tools work in one command)
+
+```powershell
+git clone https://github.com/lenguyenchiquoc/Thesis.git
+cd Thesis
+.\setup.ps1                 # one-time: installs Ubuntu (WSL2) + java/php/ruby/python3 inside it
+.\ethicalquoc.ps1 analyze -i results/scan_output.json -o results/analyze_output.json
+```
+`setup.ps1` is idempotent (safe to re-run) — it installs the `Ubuntu` WSL distro if missing, then `java`/`php`/`ruby`/`python3` inside it, and enables `phar.readonly=0` for phpggc. After that, `ethicalquoc.ps1 <args>` runs `main.py` inside that Ubuntu WSL environment for every command — arguments are passed straight through, e.g. `.\ethicalquoc.ps1 scan --har TestCase/comprehensive.har -o results/scan.json`.
+
+This gets **all 5 mutation paths working from one command** (`ysoserial`, `phpggc`, Ruby Marshal, `ysonet`, `scan --url` once you additionally `pip install playwright` inside the same Ubuntu WSL). The key trick: WSL2 has built-in Windows interop, so a Linux process running inside it can directly execute `tools/dotnet/ysonet.exe` (a real Windows binary) — unlike a Docker container, which is isolated from the Windows kernel and needs `mono` (confirmed by testing not to work for this tool's gadgets, see [Known limitations](#known-limitations)). Requires Windows 10 (2004+) or 11 with virtualization enabled; `setup.ps1` tells you the exact command to run if WSL itself isn't installed yet.
+
+### Option B — Docker (cross-platform, but `.NET` mutation does not work)
 
 ```bash
 git clone https://github.com/lenguyenchiquoc/Thesis.git
@@ -72,9 +84,11 @@ cd Thesis
 docker build -t ethicalquoc .
 docker run --rm -v "$(pwd)/results:/app/results" ethicalquoc analyze -i results/scan_output.json
 ```
-The image bundles Python, Java (JRE), PHP CLI, Ruby, and Playwright/Chromium — every mutation path (`ysoserial`, `phpggc`, Ruby Marshal, `scan --url`) works out of the box, no manual runtime install needed. Trade-off: ~2.4GB image (mostly Chromium + its headless dependencies).
+The image bundles Python, Java (JRE), PHP CLI, Ruby, and Playwright/Chromium — every mutation path except `.NET`/`ysonet` works out of the box. Trade-off: ~2.4GB image (mostly Chromium + its headless dependencies). Use this on macOS/Linux, or on Windows if you'd rather not set up WSL2.
 
-### Option B — Local install
+**`.NET` mutation (`ysonet`) does not work inside the Docker container.** `ysonet.exe` is a Windows .NET Framework binary; running it under Linux requires `mono`, and testing confirmed all 3 gadgets this project uses fail under `mono` — `ObjectDataProvider` because it depends on WPF (`PresentationFramework`), which mono never implemented, and `TypeConfuseDelegate`/`ActivitySurrogateSelector` fail with unrelated errors (mono is an independent reimplementation of .NET Framework, not a 1:1 port, and these gadgets rely on low-level reflection tricks mono doesn't replicate exactly).
+
+### Option C — Manual local install (no wrapper, full control)
 
 Requires Python 3.10+. The core pipeline (`scan --har`, `analyze`, `assess`, `report`) only needs the standard library (`json`, `re`, `base64`, `subprocess`, `urllib`) — no extra Python packages. Additional runtimes are needed only for the features that shell out to them:
 
@@ -84,7 +98,7 @@ Requires Python 3.10+. The core pipeline (`scan --har`, `analyze`, `assess`, `re
 | Java mutation (`ysoserial`) | `java` on PATH |
 | PHP mutation (`phpggc`) | `php` on PATH |
 | Ruby mutation (Marshal payloads) | `ruby` on PATH |
-| .NET mutation (`ysonet`) | download `ysonet.exe` (see [Configuration](#configuration)) — Windows only, or `mono` on Linux |
+| .NET mutation (`ysonet`) | already vendored, works out of the box on Windows 10/11 — not available on Linux/macOS (`mono` cannot run it, see [Known limitations](#known-limitations)) |
 
 If a runtime is missing, the corresponding mutation returns a clear `{"error": ..., "hint": ...}` entry instead of failing silently — everything else in the pipeline still works.
 
@@ -131,7 +145,8 @@ Third-party exploitation tools are **not bundled with a fixed absolute path** �
 
 - Relative paths are resolved against the project root, so the tool works regardless of the drive letter or clone location.
 - To point at tools installed elsewhere, either edit `config.json` directly or set the `ETHICALQUOC_CONFIG` environment variable to a different config file path.
-- `ysoserial-all.jar` and `phpggc` are vendored under `tools/`. [ysonet](https://github.com/irsdl/ysonet) (actively maintained fork/replacement of the now largely inactive `pwntester/ysoserial.net`) and Gopherus are not bundled — download the release matching your OS from ysonet's [releases page](https://github.com/irsdl/ysonet/releases), place `ysonet.exe` (plus its `.dll` files) at the path above, and update `config.json` if you need the .NET/SSRF mutation paths.
+- `ysoserial-all.jar`, `phpggc`, and [ysonet](https://github.com/irsdl/ysonet) (actively maintained fork/replacement of the now largely inactive `pwntester/ysoserial.net`) are all vendored under `tools/` — cloning the repo is enough, nothing to download separately for Java/PHP/.NET mutation. Only Gopherus is not bundled — install it separately and update `config.json` if you need the enhanced SSRF path (a manual fallback payload is generated even without it).
+- `ysonet.exe` targets .NET Framework — it runs out of the box on Windows 10/11, which ship .NET Framework 4.8 pre-installed as an OS component (no separate .NET install needed). It does **not** run on Linux/macOS or inside the Docker image (see [Known limitations](#known-limitations)); on those platforms, `.NET` mutation returns a clear error/hint instead of a payload.
 - `oob_domain` — set this to your own Burp Collaborator or Interactsh subdomain (or set `ETHICALQUOC_OOB_DOMAIN`) to have URLDNS and blind-SSRF payloads embed a real canary instead of a placeholder. Interaction logs must still be checked manually — this tool does not poll an OOB provider's API for you.
 
 ## Project structure
@@ -141,6 +156,10 @@ main.py                     CLI entry point (scan / analyze / assess / report)
 tool_config.py               third-party tool path resolution
 config.json                  tool path configuration
 note.md                      running fix log (before/after code, root cause, how verified)
+setup.ps1                    one-time Windows setup: installs Ubuntu (WSL2) + java/php/ruby/python3
+setup-wsl.sh                 apt-get install + phar.readonly=0, run inside WSL by setup.ps1
+ethicalquoc.ps1              runs main.py inside Ubuntu WSL, forwarding all arguments as-is
+Dockerfile, .dockerignore    cross-platform Docker build (Option B) — everything except .NET
 
 Scanner/
   har_loader.py               parses HAR files into HTTP vectors
@@ -187,8 +206,7 @@ TestCase/
 - Attacks requiring a prerequisite step (e.g. forging an HMAC-signed cookie, leaking a signing key such as Django's `SECRET_KEY` or Rails' `secret_key_base`) are out of scope — the tool assumes the observed payload is directly mutable.
 - Out-of-band (OOB) confirmation is semi-manual: `assess` will embed a configured canary domain (`oob_domain`) into URLDNS/blind-SSRF payloads, but does not poll an Interactsh/Burp Collaborator API for interactions — checking the interaction log is still a manual step.
 - The oracle probe currently only supports PHP (length-corruption technique); Java/Pickle/YAML/.NET/NodeJS/Ruby/Wrapper probes still go straight to full payload replay without a cheap pre-check.
-- No automated test suite yet — correctness of fingerprinting/exploitability heuristics has been validated manually against PortSwigger Web Security Academy labs.
-- `scan --url` (live browser capture via Playwright) has not been extensively exercised end to end.
+- `.NET` mutation (`ysonet`) only runs on Windows. `mono` cannot run it on Linux/macOS or inside the Docker image — tested directly: `ObjectDataProvider` fails because it depends on WPF (`PresentationFramework`), which mono never implemented, and `TypeConfuseDelegate`/`ActivitySurrogateSelector` fail with unrelated errors, since mono is an independent reimplementation of .NET Framework rather than a 1:1 port and doesn't replicate every low-level reflection trick these gadgets rely on.
 
 ## Credits
 

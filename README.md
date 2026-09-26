@@ -57,23 +57,36 @@ A failed or skipped replay (timeout, unreachable target) never downgrades a find
 | YAML | ✅ | ✅ | ✅ inline `!!python/object/apply` payload |
 | NodeJS | ✅ | ✅ | ✅ node-serialize IIFE + prototype pollution |
 | Ruby Marshal | ✅ | ✅ | ✅ `ruby -e` subprocess (requires Ruby installed) |
-| .NET (ViewState / BinaryFormatter / JSON.NET) | ✅ | ✅ | ✅ ysoserial.net subprocess + inline JSON.NET `$type` payload |
+| .NET (ViewState / BinaryFormatter / JSON.NET) | ✅ | ✅ | ✅ ysonet subprocess + inline JSON.NET `$type` payload |
 | Wrapper (`phar://`, `expect://`, `gopher://`, `php://`, `data://`, `glob://`, ...) | ✅ | ✅ | ✅ inline construction + phpggc phar output + optional Gopherus |
 
-All mutation paths that shell out to an external tool (`ysoserial`, `phpggc`, `ysoserial.net`, `Gopherus`) fail gracefully with a clear error/hint when the tool isn't installed, instead of silently returning nothing.
+All mutation paths that shell out to an external tool (`ysoserial`, `phpggc`, `ysonet`, `Gopherus`) fail gracefully with a clear error/hint when the tool isn't installed, instead of silently returning nothing.
 
 ## Installation
 
-Requires Python 3.10+. On Windows, PHP and Java are needed for the PHP/Java mutation paths (see [Configuration](#configuration) for third-party tool setup).
+### Option A — Docker (recommended, everything pre-installed)
 
 ```bash
 git clone https://github.com/lenguyenchiquoc/Thesis.git
 cd Thesis
-pip install playwright   # only needed for `scan --url` (live browser capture)
-playwright install chromium
+docker build -t ethicalquoc .
+docker run --rm -v "$(pwd)/results:/app/results" ethicalquoc analyze -i results/scan_output.json
 ```
+The image bundles Python, Java (JRE), PHP CLI, Ruby, and Playwright/Chromium — every mutation path (`ysoserial`, `phpggc`, Ruby Marshal, `scan --url`) works out of the box, no manual runtime install needed. Trade-off: ~2.4GB image (mostly Chromium + its headless dependencies).
 
-No other Python dependencies — the rest of the pipeline uses only the standard library (`json`, `re`, `base64`, `subprocess`, `urllib`).
+### Option B — Local install
+
+Requires Python 3.10+. The core pipeline (`scan --har`, `analyze`, `assess`, `report`) only needs the standard library (`json`, `re`, `base64`, `subprocess`, `urllib`) — no extra Python packages. Additional runtimes are needed only for the features that shell out to them:
+
+| Feature | Requires |
+|---|---|
+| `scan --url` (live browser capture) | `pip install playwright` + `playwright install chromium` |
+| Java mutation (`ysoserial`) | `java` on PATH |
+| PHP mutation (`phpggc`) | `php` on PATH |
+| Ruby mutation (Marshal payloads) | `ruby` on PATH |
+| .NET mutation (`ysonet`) | download `ysonet.exe` (see [Configuration](#configuration)) — Windows only, or `mono` on Linux |
+
+If a runtime is missing, the corresponding mutation returns a clear `{"error": ..., "hint": ...}` entry instead of failing silently — everything else in the pipeline still works.
 
 ## Usage
 
@@ -109,7 +122,7 @@ Third-party exploitation tools are **not bundled with a fixed absolute path** �
     "tools": {
         "ysoserial": "tools/java/ysoserial-all.jar",
         "phpggc": "tools/phpggc/phpggc",
-        "ysoserial_net": "tools/dotnet/ysoserial.exe",
+        "ysonet": "tools/dotnet/ysonet.exe",
         "gopherus": "tools/gopherus/gopherus.py"
     },
     "oob_domain": ""
@@ -118,7 +131,7 @@ Third-party exploitation tools are **not bundled with a fixed absolute path** �
 
 - Relative paths are resolved against the project root, so the tool works regardless of the drive letter or clone location.
 - To point at tools installed elsewhere, either edit `config.json` directly or set the `ETHICALQUOC_CONFIG` environment variable to a different config file path.
-- `ysoserial-all.jar` and `phpggc` are vendored under `tools/`. `ysoserial.net` and `Gopherus` are not bundled — install them separately and update `config.json` if you need the .NET/SSRF mutation paths.
+- `ysoserial-all.jar` and `phpggc` are vendored under `tools/`. [ysonet](https://github.com/irsdl/ysonet) (actively maintained fork/replacement of the now largely inactive `pwntester/ysoserial.net`) and Gopherus are not bundled — download the release matching your OS from ysonet's [releases page](https://github.com/irsdl/ysonet/releases), place `ysonet.exe` (plus its `.dll` files) at the path above, and update `config.json` if you need the .NET/SSRF mutation paths.
 - `oob_domain` — set this to your own Burp Collaborator or Interactsh subdomain (or set `ETHICALQUOC_OOB_DOMAIN`) to have URLDNS and blind-SSRF payloads embed a real canary instead of a placeholder. Interaction logs must still be checked manually — this tool does not poll an OOB provider's API for you.
 
 ## Project structure
@@ -179,9 +192,10 @@ TestCase/
 
 ## Credits
 
-Payload generation for Java and PHP builds on top of:
+Payload generation for Java, PHP, and .NET builds on top of:
 - [ysoserial](https://github.com/frohoff/ysoserial) — Java deserialization gadget chains
 - [phpggc](https://github.com/ambionics/phpggc) — PHP deserialization gadget chains
+- [ysonet](https://github.com/irsdl/ysonet) — .NET deserialization gadget chains (fork/replacement of [ysoserial.net](https://github.com/pwntester/ysoserial.net))
 
 ## Disclaimer
 

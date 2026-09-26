@@ -7,7 +7,7 @@ DEFAULT_CONFIG_PATH = os.path.join(PROJECT_ROOT, "config.json")
 _DEFAULT_TOOLS = {
     "ysoserial": "tools/java/ysoserial-all.jar",
     "phpggc": "tools/phpggc/phpggc",
-    "ysoserial_net": "tools/dotnet/ysoserial.exe",
+    "ysonet": "tools/dotnet/ysonet.exe",
     "gopherus": "tools/gopherus/gopherus.py",
 }
 

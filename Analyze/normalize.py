@@ -185,15 +185,6 @@ class DataNormalizer:
         indicators = ['O:', 'rO0', 'ACED', '__class__', '!!', 'pickle']
         score += sum(value.count(ind) for ind in indicators)
 
-        # Dau ':' / '"' la cu phap BAT BUOC cua JSON (moi cap key:value, moi
-        # string deu can 1 cap dau nhay) - khong noi len gi ve exploit. Neu
-        # cong diem theo mat do ':'/'"' ngay ca khi value la JSON hop le, 1
-        # envelope JSON nhieu key vo hai (vd claim JWT sub/iat/exp/profile)
-        # co the "vuot diem" 1 gadget PHP thuc nam long ben trong no - da
-        # verify thuc te: envelope 17.3 > gadget rieng 14.9 diem, chi vi
-        # JSON co nhieu key/string hon. Chi cong diem nay cho van ban KHONG
-        # phai JSON (PHP serialize/Ruby Marshal text... - noi ':'/'"' day dac
-        # THUC SU la tin hieu cau truc gadget).
         if not self._is_generic_json(value):
             score += value.count(':') * 0.5
             score += value.count('"') * 0.3

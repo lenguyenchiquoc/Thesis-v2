@@ -8,7 +8,6 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
 from Scanner.har_loader import HarLoader
-from Scanner.browser_automated_scan import BrowserScanner
 from Output.save_output import save_output_file_type, default_output_path
 from Input.input_loader import InputLoader
 from Analyze.postfiltered import VectorFiltering
@@ -110,6 +109,7 @@ def handle_arg(args):
             print(f"[+] HAR collected: {len(har_vectors)} vectors")
 
         if args.url:
+            from Scanner.browser_automated_scan import BrowserScanner
             scanner = BrowserScanner(args.url)
             browser_vectors = asyncio.run(scanner.start())
             total_vectors.extend(browser_vectors)

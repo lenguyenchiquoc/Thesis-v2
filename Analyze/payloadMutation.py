@@ -473,16 +473,22 @@ class PayloadMutation:
             return {"start": pos, "end": i, "kind": kind}
         return None
 
-    def _iter_php_pairs(self, payload: str) -> list[tuple[dict | None, dict]]:
-        body_start = payload.find("{")
+    def _iter_php_pairs(
+        self, payload: str, start: int = 0, end: int | None = None, depth: int = 0
+    ) -> list[tuple[dict | None, dict]]:
+        if depth > 20:
+            return []
+        if end is None:
+            end = len(payload)
+
+        body_start = payload.find("{", start, end)
         if body_start == -1:
-            val_tok = self._read_php_token(payload, 0)
+            val_tok = self._read_php_token(payload, start)
             return [(None, val_tok)] if val_tok else []
 
         pos = body_start + 1
         pairs: list[tuple[dict | None, dict]] = []
-        n = len(payload)
-        while pos < n and payload[pos] != "}":
+        while pos < end and payload[pos] != "}":
             key_tok = self._read_php_token(payload, pos)
             if key_tok is None:
                 break
@@ -491,7 +497,10 @@ class PayloadMutation:
             if val_tok is None:
                 break
             pos = val_tok["end"]
-            pairs.append((key_tok, val_tok))
+            if val_tok["kind"] in ("a", "O"):
+                pairs.extend(self._iter_php_pairs(payload, val_tok["start"], val_tok["end"], depth + 1))
+            else:
+                pairs.append((key_tok, val_tok))
         return pairs
 
     def __flip_boolean(self, payload: str) -> Mutations:
@@ -511,7 +520,9 @@ class PayloadMutation:
         test_values = ["administrator", "admin", "root", "superuser"]
         all_hints = [
             "username", "user", "email", "login", "name",
-            "role", "admin", "level", "access", "privilege"
+            "role", "admin", "level", "access", "privilege",
+            "taikhoan", "tendangnhap", "nguoidung", "dangnhap",
+            "vaitro", "quantri", "quyen", "capdo", "truycap",
         ]
 
         for key_tok, val_tok in self._iter_php_pairs(payload):

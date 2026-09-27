@@ -64,15 +64,29 @@ class TestModifyStringTargetsValuesNotKeys(unittest.TestCase):
             self.assertTrue(p.endswith(";}"), f"Payload hong cu phap: {p!r}")
             self.assertNotIn('"c"d"e"', p)
 
-    def test_nested_object_container_is_skipped_not_recursed_into(self):
+    def test_nested_object_with_no_matching_field_produces_no_mutation(self):
         # Payload that tu lab PortSwigger "Developing a custom gadget chain
-        # for PHP deserialization" - co object O:... long ben trong.
+        # for PHP deserialization" - co object O:... long ben trong, nhung
+        # KHONG field nao (o bat ky tang nao) khop hint username/admin/...
         payload = ('O:14:"CustomTemplate":2:{s:17:"default_desc_type";'
                    's:26:"rm /home/carlos/morale.txt";s:4:"desc";'
                    'O:10:"DefaultMap":1:{s:8:"callback";s:4:"exec";}}')
         results = mutate(payload, "modify_string")
-        # Khong field nao (default_desc_type/desc) khop hint username/admin/...
         self.assertEqual(results, [])
+
+    def test_nested_object_field_is_now_recursed_into_and_mutated(self):
+        # Field "role" nam LONG BEN TRONG object con "Profile" (khong phai
+        # top-level) - phai duoc _iter_php_pairs() de quy vao moi thay va
+        # mutate duoc (truoc day bi bo qua hoan toan vi container duoc coi
+        # la "opaque", chi lay span roi bo qua khong doc noi dung ben trong).
+        payload = ('O:4:"User":1:{s:7:"profile";'
+                   'O:7:"Profile":1:{s:4:"role";s:4:"user";}}')
+        results = mutate(payload, "modify_string")
+        mutated = decoded_payloads(results)
+        self.assertEqual(len(mutated), 4)  # administrator/admin/root/superuser, khong cai nao trung "user"
+        for p in mutated:
+            self.assertIn('s:7:"profile"', p)  # key ngoai giu nguyen
+            self.assertNotIn('s:4:"user"', p)  # gia tri "role" da bi doi
 
     def test_key_name_containing_hint_word_is_not_itself_mutated(self):
         # Class name "User" tinh co chua tu "user" - dam bao field KEY
@@ -115,6 +129,17 @@ class TestFlipBooleanIsolatesEachField(unittest.TestCase):
         self.assertEqual(len(payloads), 1)
         self.assertTrue(payloads[0].endswith('b:1;}'))
 
+    def test_boolean_field_nested_inside_object_is_now_found_and_flipped(self):
+        # "admin" nam trong object con "Profile", khong phai top-level cua
+        # "User" - _iter_php_pairs() phai de quy vao moi thay duoc.
+        payload = ('O:4:"User":1:{s:7:"profile";'
+                   'O:7:"Profile":1:{s:5:"admin";b:0;}}')
+        results = mutate(payload, "flip_boolean")
+        payloads = decoded_payloads(results)
+        self.assertEqual(len(payloads), 1)
+        self.assertIn('s:7:"profile"', payloads[0])
+        self.assertTrue(payloads[0].endswith('"admin";b:1;}}'))
+
 
 class TestModifyIntegerUsesPositionalReplace(unittest.TestCase):
     def test_two_fields_with_same_integer_value_mutated_independently(self):
@@ -126,6 +151,17 @@ class TestModifyIntegerUsesPositionalReplace(unittest.TestCase):
         self.assertEqual(len(payloads), 10)
         for p in payloads:
             self.assertEqual(p.count("i:5;"), 1, f"Phai con dung 1 vi tri i:5; chua doi: {p!r}")
+
+    def test_integer_field_nested_inside_object_is_now_found_and_mutated(self):
+        # "level" nam trong object con "Profile", khong phai top-level.
+        payload = ('O:4:"User":1:{s:7:"profile";'
+                   'O:7:"Profile":1:{s:5:"level";i:1;}}')
+        results = mutate(payload, "modify_integer")
+        payloads = decoded_payloads(results)
+        self.assertEqual(len(payloads), 4)  # int_values = [1,2,99,100,9999], tru gia tri goc 1
+        for p in payloads:
+            self.assertIn('s:7:"profile"', p)
+            self.assertNotIn("i:1;", p)
 
 
 class TestJavaChainMapAndExceptionHandling(unittest.TestCase):

@@ -501,6 +501,16 @@ class PayloadMutation:
                 pairs.extend(self._iter_php_pairs(payload, val_tok["start"], val_tok["end"], depth + 1))
             else:
                 pairs.append((key_tok, val_tok))
+            #pairs = [
+            #     (
+            #         {'start': 14, 'end': 29, 'kind': 's', 'content': 'username'},   # key_tok
+            #         {'start': 29, 'end': 42, 'kind': 's', 'content': 'wiener'}       # val_tok
+            #     ),
+            #     (
+            #         {'start': 42, 'end': 54, 'kind': 's', 'content': 'admin'},      # key_tok
+            #         {'start': 54, 'end': 58, 'kind': 'b'}                           # val_tok (khong co 'content' vi la boolean)
+            #     ),
+            # ]
         return pairs
 
     def __flip_boolean(self, payload: str) -> Mutations:
@@ -810,7 +820,12 @@ class PayloadMutation:
             b64 = base64.b64encode(raw.encode()).decode()
             payload = self._make_payload("jsonnet_typeconfusion", "ObjectDataProvider", cmd, b64)
             payload["payload_raw"] = raw
-            payload["note"] = "Requires target to use TypeNameHandling.All/Objects/Auto with a weakly-typed property"
+            payload["note"] = (
+                "Requires target to use TypeNameHandling.All/Objects/Auto with a weakly-typed "
+                "property, AND target must run classic .NET Framework (PresentationFramework is "
+                "preloaded in its GAC by default). Does NOT work against .NET Core/.NET 5+ "
+                "targets — no GAC, WPF assemblies are not bundled unless explicitly referenced."
+            )
             results.append(payload)
         return results
 

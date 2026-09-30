@@ -1,6 +1,7 @@
 import argparse
 import asyncio
 import io
+import platform
 import sys
 
 if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
@@ -127,6 +128,17 @@ def handle_arg(args):
     elif args.command == "analyze":
 
         print(f"[*] Analyzing: {args.input}")
+
+        if platform.system() != "Windows":
+            print(
+                "[!] WARNING: running on a non-Windows platform (Docker/Linux/macOS). "
+                ".NET deserialization detection (ysonet gadgets: ObjectDataProvider / "
+                "TypeConfuseDelegate / ActivitySurrogateSelector) cannot execute here — mono "
+                "does not implement enough of the real .NET Framework CLR for these gadgets "
+                "to run. An absence of .NET findings in this run means the tool could NOT "
+                "test that vector class, NOT that the target is safe. For full .NET coverage, "
+                "run natively on Windows or via WSL2 (see README)."
+            )
 
         results = []
 

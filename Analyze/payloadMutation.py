@@ -140,6 +140,7 @@ class PayloadMutation:
             "url":               self.vector.get("url"),
             "method":            self.vector.get("method"),
             "encoding":          "base64",
+            "encoding_chain":    self.vector.get("encoding_chain") or [],
         }
 
     def _mutate_java(self) -> Mutations:

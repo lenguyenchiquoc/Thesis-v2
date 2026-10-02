@@ -48,7 +48,7 @@ class TestBasicBase64RFC4648(unittest.TestCase):
         encoded = base64.b64encode(plaintext.encode()).decode()
         self.assertGreaterEqual(len(encoded), 16)
         candidates = DataNormalizer(encoded)._generate_decodes(encoded)
-        self.assertIn(plaintext, candidates)
+        self.assertIn(plaintext, [v for _, v in candidates])
 
     def test_base64url_variant_dash_underscore_decodes_correctly(self):
         # RFC 4648 section 5: bien the "URL and Filename Safe" dung '-'/'_'
@@ -56,7 +56,7 @@ class TestBasicBase64RFC4648(unittest.TestCase):
         plaintext = b"\xfb\xff\xbf\x00\x01\x02\x03\x04\x05\x06\x07\x08"
         b64url = base64.urlsafe_b64encode(plaintext).decode().rstrip("=")
         candidates = DataNormalizer(b64url)._generate_decodes(b64url)
-        self.assertIn(plaintext.decode("latin-1"), candidates)
+        self.assertIn(plaintext.decode("latin-1"), [v for _, v in candidates])
 
 
 class TestGzipRFC1952(unittest.TestCase):
@@ -74,7 +74,7 @@ class TestGzipRFC1952(unittest.TestCase):
         original = original.strip()
         b64 = base64.b64encode(gzip.compress(original.encode())).decode()
         candidates = DataNormalizer(b64)._generate_decodes(b64)
-        self.assertIn(original, candidates)
+        self.assertIn(original, [v for _, v in candidates])
 
 
 class TestRealPortSwiggerPayloads(unittest.TestCase):

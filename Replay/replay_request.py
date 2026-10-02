@@ -1,4 +1,5 @@
 import base64
+import gzip
 import time
 import urllib.error
 import urllib.parse
@@ -61,16 +62,46 @@ class ReplayRequest:
     def replay_all(self, payloads: list[Mutation]) -> list[ReplayResult]:
         return [self.replay(p) for p in payloads if "error" not in p]
 
+    REWRAPPABLE_OPS = {"url", "base64", "base64_gzip", "hex"}
+
     def _select_payload_value(self, payload: Mutation) -> str | None:
         encoding = cast("str | None", payload.get("encoding"))
         b64_payload = cast("str | None", payload.get("payload"))
         payload_raw = cast("str | None", payload.get("payload_raw"))
+        encoding_chain = cast("list[str] | None", payload.get("encoding_chain")) or []
+
+        raw_value: str | None
         if encoding == "base64" and b64_payload:
             try:
-                return base64.b64decode(b64_payload).decode("utf-8", errors="replace")
+                # latin-1 la bijection 1:1 voi moi gia tri byte (0-255), khong
+                # nhu utf-8 (lossy voi byte nhi phan khong hop le) - dam bao
+                # round-trip chinh xac tung byte khi _send() encode lai.
+                raw_value = base64.b64decode(b64_payload).decode("latin-1")
             except Exception:
-                return payload_raw or b64_payload
-        return payload_raw or b64_payload
+                raw_value = payload_raw or b64_payload
+        else:
+            raw_value = payload_raw or b64_payload
+
+        if raw_value is None:
+            return None
+
+        if encoding_chain and all(op in self.REWRAPPABLE_OPS for op in encoding_chain):
+            return self._reapply_encoding_chain(raw_value, encoding_chain)
+        return raw_value
+
+    def _reapply_encoding_chain(self, value: str, chain: list[str]) -> str:
+        current = value
+        for op in reversed(chain):
+            if op == "base64":
+                current = base64.b64encode(current.encode("latin-1")).decode("ascii")
+            elif op == "base64_gzip":
+                compressed = gzip.compress(current.encode("latin-1"))
+                current = base64.b64encode(compressed).decode("ascii")
+            elif op == "hex":
+                current = current.encode("latin-1").hex()
+            elif op == "url":
+                current = urllib.parse.quote(current, safe="", encoding="latin-1")
+        return current
 
     def _send(self, url: str, method: str, location: str, name: str, value: str | None) -> HttpProbeSample:
         headers = {"User-Agent": "EthicalQuoc/replay"}
@@ -85,21 +116,28 @@ class ReplayRequest:
             if value is not None:
                 headers[name] = value
         elif location in ("query", "url_param"):
+            # Cac param KHAC giu nguyen encoding mac dinh cua urlencode() (khong
+            # dong vao); chi rieng param dang test duoc percent-encode bang
+            # latin-1 thu cong, tranh UnicodeEncodeError khi 1 param khac co
+            # ky tu Unicode thuc su (vuot pham vi latin-1 0-255).
             parsed = urllib.parse.urlsplit(url)
-            qs = urllib.parse.parse_qs(parsed.query, keep_blank_values=True)
-            if value is not None:
-                qs[name] = [value]
+            qs = [(k, v) for k, v in urllib.parse.parse_qsl(parsed.query, keep_blank_values=True) if k != name]
             new_query = urllib.parse.urlencode(qs, doseq=True)
+            if value is not None:
+                encoded_value = urllib.parse.quote(value, safe="", encoding="latin-1")
+                sep = "&" if new_query else ""
+                new_query = f"{new_query}{sep}{name}={encoded_value}"
             target_url = urllib.parse.urlunsplit(
                 (parsed.scheme, parsed.netloc, parsed.path, new_query, parsed.fragment)
             )
         elif location in ("body", "form_body"):
             if value is not None:
-                body = urllib.parse.urlencode({name: value}).encode()
+                encoded_value = urllib.parse.quote(value, safe="", encoding="latin-1")
+                body = f"{name}={encoded_value}".encode("ascii")
                 headers["Content-Type"] = "application/x-www-form-urlencoded"
         elif location == "raw_body":
             if value is not None:
-                body = value.encode("utf-8", errors="replace")
+                body = value.encode("latin-1")
 
         if cookies:
             headers["Cookie"] = "; ".join(f"{k}={v}" for k, v in cookies.items())

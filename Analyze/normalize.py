@@ -14,6 +14,7 @@ class DataNormalizer:
         self.data = value.strip()
         self.max_depth = max_depth
         self.max_candidate = max_candidate
+        self._parent_of: dict[str, tuple[str, str]] = {}
 
     def normalize(self) -> NormalizedCandidates:
         seen = set()
@@ -21,6 +22,7 @@ class DataNormalizer:
         meaningfull_data = []
         all_layer = []
         children_of: dict[str, list[str]] = {}
+        self._parent_of = {}
         while queue:
             current, depth = queue.popleft()
             if current in seen:
@@ -32,9 +34,13 @@ class DataNormalizer:
             if depth >= self.max_depth and len(seen) >= self.max_candidate:
                 continue
             decodes = self._generate_decodes(current)
-            children_of[current] = decodes
-            for next_value in decodes:
-                if next_value and next_value not in seen:
+            children_of[current] = [v for _, v in decodes]
+            for op_label, next_value in decodes:
+                if not next_value:
+                    continue
+                if next_value != self.data and next_value not in self._parent_of:
+                    self._parent_of[next_value] = (op_label, current)
+                if next_value not in seen:
                     queue.append((next_value, depth+1))
 
         if meaningfull_data:
@@ -95,13 +101,13 @@ class DataNormalizer:
             return found
         return []
 
-    def _generate_decodes(self, value: str) -> list[str]:
-        results = []
+    def _generate_decodes(self, value: str) -> list[tuple[str, str]]:
+        results: list[tuple[str, str]] = []
         is_jwt_shaped = bool(re.match(r'^[A-Za-z0-9_-]{16,}\.[A-Za-z0-9_-]{16,}\.[A-Za-z0-9_-]*$', value))
         try:
-            ud = urllib.parse.unquote(value)
+            ud = urllib.parse.unquote(value, encoding='latin-1')
             if ud != value and ud.strip():
-                results.append(ud.strip())
+                results.append(("url", ud.strip()))
         except:
             pass
         if not is_jwt_shaped:
@@ -116,14 +122,14 @@ class DataNormalizer:
                             decompressed = gzip.decompress(decoded_bytes)
                             txt = decompressed.decode('latin-1').strip()
                             if txt:
-                                results.append(txt)
+                                results.append(("base64_gzip", txt))
                         except:
                             pass
                     else:
                         try:
                             txt = decoded_bytes.decode('latin-1').strip()
                             if txt and len(txt) >= 10:
-                                results.append(txt)
+                                results.append(("base64", txt))
                         except:
                             pass
             except:
@@ -133,7 +139,7 @@ class DataNormalizer:
                 hex_bytes = bytes.fromhex(value)
                 txt = hex_bytes.decode('latin-1').strip()
                 if txt:
-                    results.append(txt)
+                    results.append(("hex", txt))
             except:
                 pass
         if is_jwt_shaped:
@@ -145,16 +151,31 @@ class DataNormalizer:
                     decoded_bytes = base64.urlsafe_b64decode(padded)
                     txt = decoded_bytes.decode('latin-1').strip()
                     if txt:
-                        results.append(txt)
+                        results.append(("jwt_segment", txt))
                 except:
                     pass
         try:
             claims = json.loads(value)
             if isinstance(claims, (dict, list)):
-                results.extend(self._extract_claim_strings(claims))
+                for claim_str in self._extract_claim_strings(claims):
+                    results.append(("json_claim", claim_str))
         except:
             pass
         return results
+
+    REWRAPPABLE_OPS = {"url", "base64", "base64_gzip", "hex"}
+
+    def get_encoding_chain(self, candidate: str) -> list[str]:
+        chain: list[str] = []
+        current = candidate
+        visited: set[str] = set()
+        while current in self._parent_of and current not in visited:
+            visited.add(current)
+            op_label, parent = self._parent_of[current]
+            chain.append(op_label)
+            current = parent
+        chain.reverse()
+        return chain
 
     def _serialized_score(self, value: str) -> float:
         score = 0.0

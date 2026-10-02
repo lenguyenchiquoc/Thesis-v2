@@ -212,6 +212,71 @@ python debug_pipeline.py -i results/scan.json --step 7   # + PayloadMutation
   - **Hướng xử lý đề xuất cho luận văn**: (1) nêu rõ đây là giới hạn phương pháp luận trong Threats to Validity — bài toán này giống signature-based detection (YARA/Suricata) hơn là ML kinh điển, ngành vẫn ưu tiên rule-based vì cần giải thích được lý do flag; (2) có thể thêm 1 mục Future Work nhỏ: dùng `generate_comprehensive_har.py` sinh thêm dữ liệu synthetic có label, thử fit logistic regression trên các feature hiện có (magic bytes có/không, số colon/quote, gadget keyword có/không...) để so sánh với weight tay — chỉ cần đề xuất hướng, chưa cần chạy thật.
 - [ ] **Contribution Statement** — chưa có đoạn tóm tắt rõ ràng đóng góp chính, để hội đồng dễ so khớp với RQ
 
+-18. **[FIXED — bug thật, user tự phát hiện bằng câu hỏi "unquote hình như nó dùng utf-8, có sao ko"]** `normalize.py:_generate_decodes()` dòng `ud = urllib.parse.unquote(value)` — KHÔNG truyền `encoding`, mặc định `urllib.parse.unquote()` dùng **UTF-8** (`errors='replace'`) — cùng loại bug corrupt byte nhị phân đã sửa ở mục -17 (Bug A), nhưng lần này ở BƯỚC ĐẦU TIÊN của `normalize()`, trước cả khi dữ liệu tới Stage 7/8. Đáng chú ý: ĐÂY LÀ NHÁNH DUY NHẤT trong cả hàm `_generate_decodes()` còn dùng UTF-8 — 4 nhánh khác (`base64`/`base64_gzip`/`hex`/`jwt_segment`) đều đã chủ động dùng `latin-1` — xác nhận đây là sơ suất bỏ sót, không phải chủ ý.
+
+  **Verify tay trước khi sửa**: byte giả lập `AC ED 00 05 FF FE` (không hợp lệ UTF-8) → percent-encode → `unquote()` mặc định → encode lại bằng latin-1 → **KHÁC byte gốc**; `unquote(..., encoding='latin-1')` → encode lại → **khớp CHÍNH XÁC** byte gốc.
+
+  **Fix** ([normalize.py:108](Analyze/normalize.py#L108)): `urllib.parse.unquote(value)` → `urllib.parse.unquote(value, encoding='latin-1')`.
+
+  **Verify sau fix**: 64/64 unit test pass, mypy sạch. Chạy lại toàn bộ `comprehensive.har` (158 entry) — exit=0, 0 traceback, số liệu KHÔNG đổi (`exploitable=57`, mutation=125) — xác nhận fix không ảnh hưởng case thông thường (payload text/ASCII), chỉ sửa đúng case byte nhị phân bị corrupt trước đây.
+
+-17. **[FIXED — 2 bug thật phát hiện qua Q&A, cả 2 đã sửa xong]** Stage 8 (`assess`/`replay_request.py`) có 2 lỗ hổng khiến payload gửi đi KHÔNG KHỚP với payload Stage 7 sinh ra — cả 2 đều dẫn tới false negative âm thầm (gửi được request, không crash, nhưng target không bao giờ thấy đúng payload để deserialize).
+
+  **Bug A — corrupt byte nhị phân qua UTF-8 lossy decode**: `_select_payload_value()` cũ dùng `base64.b64decode(...).decode("utf-8", errors="replace")` — với payload TEXT (PHP serialize/JSON/YAML) thì ổn, nhưng với payload NHỊ PHÂN THẬT (Java qua ysoserial, .NET qua ysonet — không phải UTF-8 hợp lệ), `errors="replace"` âm thầm thay byte lỗi bằng `U+FFFD`, không raise exception nên không bị `except` bắt. Verify tay: byte giả lập Java serialization (32 byte) → qua decode/encode round-trip → **40 byte, khác hoàn toàn byte gốc**.
+
+  **Fix**: đổi toàn bộ UTF-8 (`_select_payload_value()`, và trong `_send()`: `urlencode()`/`.encode("utf-8")`) sang **latin-1** — latin-1 là bijection 1:1 với MỌI giá trị byte (0-255), decode rồi encode lại luôn ra ĐÚNG byte gốc, không như UTF-8 (chỉ round-trip đúng với byte hợp lệ UTF-8). Riêng `query`/`url_param` KHÔNG áp latin-1 cho toàn bộ `urlencode()` (sẽ vỡ nếu param KHÁC trong URL có ký tự Unicode thật ngoài phạm vi 0-255) — chỉ percent-encode ĐÚNG param đang test bằng `urllib.parse.quote(..., encoding="latin-1")`, giữ nguyên encoding mặc định cho các param không liên quan.
+
+  **Bug B — mất lớp encoding gốc khi gửi lại (câu hỏi "b64->gzip->json thì encode lại theo đúng thứ tự không")**: `normalize()` dùng BFS lột nhiều lớp encode (base64/gzip/url/hex/jwt/json-claim) để tìm payload "có nghĩa" bên trong, nhưng trước đây CHỈ trả về chuỗi cuối cùng (`NormalizedCandidates = list[str]`, [schemas.py:22](Utility/schemas.py#L22)) — toàn bộ lịch sử "đã lột qua lớp nào, thứ tự nào" bị XOÁ SẠCH. Hệ quả: Stage 8 gửi THẲNG giá trị đã lột trần (VD PHP serialize thô) cho target, dù target thật cần `unserialize(gzinflate(base64_decode($_COOKIE[...])))` — target không bao giờ chạm được payload thật.
+
+  **Fix** (xuyên 5 file):
+  1. `normalize.py` — `_generate_decodes()` đổi return type thành `list[tuple[str,str]]` (gắn label `"url"`/`"base64"`/`"base64_gzip"`/`"hex"`/`"jwt_segment"`/`"json_claim"` cho từng phép decode); `normalize()` track thêm `self._parent_of: dict[str, tuple[str,str]]` (child → (label, parent)) lúc BFS; thêm `get_encoding_chain(candidate)` — đi ngược `_parent_of` từ candidate về root, trả list label theo đúng thứ tự NGOÀI→TRONG (thứ tự wrap gốc).
+  2. `schemas.py` — thêm field `encoding_chain: list[str]` vào `MutationVector` và `MutationPayloadCore`.
+  3. `main.py` — giữ instance `normalizer` (không tạo mới mỗi candidate), gắn `mutation_vector["encoding_chain"] = normalizer.get_encoding_chain(candidate)`.
+  4. `payloadMutation.py` — `_make_payload()` thêm `"encoding_chain": self.vector.get("encoding_chain") or []`.
+  5. `replay_request.py` — thêm `_reapply_encoding_chain()`: áp lại từng op theo thứ tự NGƯỢC (`reversed(chain)`, trong→ngoài) để bọc lại ĐÚNG như payload gốc, trước khi gửi. **Chỉ áp dụng khi TOÀN BỘ chain nằm trong `REWRAPPABLE_OPS = {"url","base64","base64_gzip","hex"}`** — `jwt_segment`/`json_claim` là EXTRACTION CẤU TRÚC (lấy 1 string ra khỏi cây JSON/JWT lớn hơn), không phải transform tuyến tính nên KHÔNG re-wrap được bằng cách này — cố ý bỏ qua (giữ hành vi cũ: gửi giá trị trần) chứ không áp sai, tránh gửi sai còn nguy hiểm hơn không gửi.
+
+  **Verify thật** (không chỉ unit test):
+  - Giả lập chain `["base64_gzip"]` (đúng ví dụ user nêu): PHP gadget → mutate boolean → re-wrap → decode lại bằng `gzip.decompress(base64.b64decode(...))` → **khớp CHÍNH XÁC** giá trị đã mutate.
+  - Giả lập byte Java serialization nhị phân → qua `_select_payload_value()` → encode lại bằng latin-1 → **khớp CHÍNH XÁC** byte gốc (trước đó UTF-8 sẽ làm sai khác 8 byte).
+  - Chạy thật `result1.json` (data THẬT, 11 vector PortSwigger): `encoding_chain: ['url', 'base64']` xuất hiện đúng trên mutation thật — xác nhận cookie thật của lab này VỐN được URL-encode bọc ngoài base64, đúng loại case bug B nhắm tới.
+  - Full suite: 64/64 unit test pass (3 test cũ của `test_normalize.py` phải sửa assertion cho khớp return type mới — không đổi hành vi, chỉ đổi cách đọc tuple), mypy sạch cả 8 file chuẩn của project, `analyze` trên `result1.json` vẫn đúng 11/11, 0 traceback.
+  - **Chạy lại toàn bộ `comprehensive.har` (158 entry) sau fix** — theo yêu cầu "chạy test comprehensive chưa": `scan`+`analyze` exit=0, 0 traceback, số liệu khớp CHÍNH XÁC baseline trước fix (154 vector sau filter, `exploitable=57`, tổng mutation=125, 30 lỗi thiếu tool) — xác nhận 2 fix này chỉ THÊM metadata/sửa cách encode lúc gửi, không đổi logic phát hiện/sinh mutation nào. 95/125 mutation (loại trừ 30 lỗi) có đúng field `encoding_chain`, ví dụ thật `['base64']` xuất hiện trên các candidate vốn bị base64-wrap trong `comprehensive.har`.
+
+-16. **[VERIFY CUỐI — end-to-end + unit test]** Theo yêu cầu "chạy test end-to end, unit test đợt cuối đi" trước khi đóng phiên. Kết quả:
+
+  **Unit test**: `python -m unittest discover -s TestCase -p "test_*.py" -v` → **64/64 pass**, 0 fail/error.
+
+  **E2E trên `result1.json` (data THẬT, 11 vector PortSwigger)** — full pipeline `scan`(đã có sẵn)→`analyze`→`assess`→`report`:
+  - `analyze`: exit=0, 0 traceback, 11/11 `exploit_type` sinh đúng.
+  - `assess`: exit=0, 0 traceback (chạy lâu — replay thật tới lab PortSwigger đã hết hạn, mỗi request treo chờ timeout kết nối nên bị đẩy sang background, không phải lỗi).
+  - `report`: exit=0, 0 traceback, **Confirmed: 0 | Suspected: 11** — đúng kỳ vọng đã ghi nhận trước đó (lab hết hạn nên không Confirm được, không phải regression).
+
+  **E2E trên `TestCase/comprehensive.har` (synthetic, 158 vector)** — full pipeline `scan`→`analyze`:
+  - `scan --har`: exit=0, trích 10316 vector thô từ 669 HTTP entry.
+  - `analyze`: exit=0, 0 traceback, **154 vector sau filter** → 158 entry kết quả (1 vector có thể sinh nhiều candidate sau `normalize()`).
+  - **`exploitable=True`: 57** — khớp CHÍNH XÁC baseline cuối cùng đã ghi ở mục 0 ("tổng exploitable giữ nguyên 57") — xác nhận KHÔNG regression qua toàn bộ các fix của phiên này (mục -8 đến -15).
+  - **Tổng mutation: 125** (30/125 là dict `{"error":...}` do môi trường shell này chạy Windows thuần, không qua WSL2 — `java`/`php`/`ruby` không có trên PATH, chỉ `ysonet.exe` chạy được native — đúng thiết kế fallback, không phải bug).
+
+  **Kết luận**: toàn bộ pipeline ổn định, không có lỗi phát sinh từ các thay đổi trong phiên này. Giai đoạn review/fix `payloadMutation.py` (mục -15) chính thức đóng với bằng chứng verify đầy đủ.
+
+-15. **[CHỐT GIAI ĐOẠN — review/fix `payloadMutation.py` offline]** User xác nhận "bước này coi như ok được chưa? Mốt mình làm web để test thì mới tiếp tục fix tiếp được" — đồng ý đóng giai đoạn review/sửa lỗi THUẦN ĐỌC CODE (không cần target thật) cho `payloadMutation.py`. Tóm tắt những gì đã làm trong phiên này (đọc mục -9 tới -14 bên dưới để biết chi tiết từng fix):
+  - `_mutate_dotnet_jsonnet()` — thêm điều kiện .NET Framework/GAC vào note (mục -8).
+  - `main.py` — cảnh báo platform non-Windows cho `.NET` detection (mục -9).
+  - `_mutate_wrapper_ssrf()` canary — thêm `Host:` header + dòng trống kết thúc (mục -11).
+  - 5 chỗ `except (TimeoutExpired, FileNotFoundError)` quá hẹp → broaden `(SubprocessError, OSError, UnicodeDecodeError)` (mục -12).
+  - Redis fallback host — sinh cả `127.0.0.1` lẫn host target thay vì chỉ host target (mục -13).
+  - 4 fix từ review paste vào: `_mutate_wrapper_stream()` chain order, `_mutate_wrapper_traversal()` note, `_extract_host()` dùng `urlparse`, `_mutate_wrapper_lfi()` tham số hoá resource (mục -14).
+
+  **Verify cuối giai đoạn**: 64/64 unit test pass, mypy sạch — xác nhận lại 1 lần nữa trước khi đóng.
+
+  **Việc CÒN LẠI, chỉ làm tiếp được khi có môi trường web test thật** (đã note từ mục -7/-6 phía dưới, nhắc lại cho rõ vì đây là lý do chính khiến giai đoạn này dừng ở đây):
+  1. Ruby real gadget chain (Universal Deserialization Gadget Chain) — cần host file `.rz` + Bundler cache path cụ thể theo target.
+  2. YAML Java full RCE — cần host file `.jar` độc qua `ServiceLoader`.
+  3. Hiệu quả thật của SSRF Redis fallback (mục -13) — chỉ verify được bằng cách thử trên Redis thật, không verify được qua unit test tĩnh.
+  4. Toàn bộ Stage 8 (`assess`/replay) — chưa có target sống nào để confirm thật ngoài `result1.json` (lab PortSwigger đã hết hạn).
+
+  **Bước tiếp theo khi quay lại**: dựng môi trường web giả lập/vulnerable test (Docker Compose có app PHP/Java/.NET dính lỗi deserialization thật) — đã note ý định từ trước, giờ là điều kiện tiên quyết để tiếp tục, không phải việc độc lập nữa.
+
 -14. **[FIXED — theo review user paste vào, đã tự verify từng điểm trước khi sửa]** 4 fix cho nhóm `_mutate_wrapper_*`/`_extract_host()`, đúng thứ tự ưu tiên review đề xuất (Cao→Trung→Thấp). Đã tự verify TỪNG claim của review trước khi tin (WebSearch + chạy tay), không sửa mù theo review dán vào:
 
   1. **[Cao]** `_mutate_wrapper_stream()` ([payloadMutation.py:1019-1031](Analyze/payloadMutation.py#L1019-L1031)) — chain cũ `compress.zlib://php://filter/convert.base64-encode/resource=index.php` SAI THỨ TỰ: `compress.zlib://` mong đợi byte zlib nén thật phía sau, nhưng `php://filter/convert.base64-encode/...` trả ra TEXT base64 → giải nén sẽ fail, gần như chắc chắn không chạy được. Verify qua php.net: cú pháp CHUẨN để stack nhiều filter là dùng dấu `|` NGAY TRONG 1 `php://filter/` wrapper (`zlib.deflate|convert.base64-encode`), không phải lồng 2 scheme khác nhau. Fix: đổi `raw` thành `"php://filter/convert.base64-encode|zlib.deflate/resource=index.php"`, sửa `note` giải thích đúng cơ chế + lý do bản cũ không chạy.

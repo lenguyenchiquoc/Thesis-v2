@@ -64,6 +64,7 @@ class MutationVector(TypedDict):
     value: str
     original_value: str
     cleaned_value: str
+    encoding_chain: list[str]
 
 
 class MutationPayloadCore(TypedDict):
@@ -77,6 +78,7 @@ class MutationPayloadCore(TypedDict):
     url: str
     method: str
     encoding: str
+    encoding_chain: list[str]
 
 
 class MutationPayloadExtra(TypedDict, total=False):

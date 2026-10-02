@@ -153,7 +153,8 @@ def handle_arg(args):
 
             for i in clean_filter._clean_all():
                 value = i["cleaned_value"]
-                value_normalize = DataNormalizer(value).normalize()
+                normalizer = DataNormalizer(value)
+                value_normalize = normalizer.normalize()
                 print(f"Normalize is: {value_normalize}")
                 for candidate in value_normalize:
                     fingerprint = Fingerprint([candidate]).fingerprint_serial()
@@ -163,6 +164,7 @@ def handle_arg(args):
 
                     mutation_vector = dict(i)
                     mutation_vector["value"] = candidate
+                    mutation_vector["encoding_chain"] = normalizer.get_encoding_chain(candidate)
                     mutations = PayloadMutation(ExploitAnalyze_rs, mutation_vector).mutate()
                     print(mutations)
 

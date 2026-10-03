@@ -212,6 +212,60 @@ python debug_pipeline.py -i results/scan.json --step 7   # + PayloadMutation
   - **Hướng xử lý đề xuất cho luận văn**: (1) nêu rõ đây là giới hạn phương pháp luận trong Threats to Validity — bài toán này giống signature-based detection (YARA/Suricata) hơn là ML kinh điển, ngành vẫn ưu tiên rule-based vì cần giải thích được lý do flag; (2) có thể thêm 1 mục Future Work nhỏ: dùng `generate_comprehensive_har.py` sinh thêm dữ liệu synthetic có label, thử fit logistic regression trên các feature hiện có (magic bytes có/không, số colon/quote, gadget keyword có/không...) để so sánh với weight tay — chỉ cần đề xuất hướng, chưa cần chạy thật.
 - [ ] **Contribution Statement** — chưa có đoạn tóm tắt rõ ràng đóng góp chính, để hội đồng dễ so khớp với RQ
 
+-23. **[CHECKPOINT]** User xác nhận "theo tôi thấy thì replay_request ok rồi" — đã học xong `Replay/replay_request.py` (Socratic Q&A: `replay()`/`_select_payload_value()`/`_reapply_encoding_chain()`/`_send()` từng dòng, kể cả 2 bug UTF-8/encoding-chain đã fix ở mục -17/-18). Verify lần cuối trước khi đóng: 64/64 unit test pass, mypy sạch. Theo kế hoạch đã note ở mục -22, bước tiếp theo là học `Replay/oracle_probe.py` (đã giải thích sơ lược trước đó — kỹ thuật "length corruption" cho PHP), rồi mới bắt tay dựng `Web_vul_env` tuần sau.
+
+-22. **[Ý TƯỞNG — chưa làm, để tuần sau]** Kiến trúc đề xuất cho repo `Web_vul_env` (repo MỚI, tách riêng khỏi Thesis-v2, đã tạo + clone xong vào `D:\Thesis\Web vul env`, remote `lenguyenchiquoc/Web_vul_env`) — môi trường web test thật để Stage 8 (`assess`) có target sống confirm được, thay thế `result1.json` (lab PortSwigger đã hết hạn).
+
+  **Nguyên tắc**: tự viết app TỐI THIỂU (10-20 dòng) cho mỗi ngôn ngữ, KHÔNG đi tìm app CVE có sẵn (tránh vướng version/dependency/license) — chỉ cần gọi đúng hàm deserialize trên input không kiểm soát.
+
+  **Thứ tự ưu tiên đề xuất** (theo độ dễ + mức tool `payloadMutation.py` đã hỗ trợ sẵn):
+  1. **Python pickle** — dễ nhất: Flask + `pickle.loads(base64.b64decode(request.cookies['session']))`.
+  2. **YAML (Python)** — `yaml.load(value, Loader=yaml.Loader)` (unsafe loader).
+  3. **PHP** — tool mature nhất (phpggc, `flip_boolean`/`modify_string`/`modify_integer` đã test kỹ): `unserialize($_COOKIE['data'])` + `composer require monolog/monolog` (khớp `PHP_GADGET_CHAINS_MAP`).
+  4. **Java** — setup nặng hơn (cần pin đúng version CŨ `commons-collections:3.2.1` mới dính CC6) nhưng tool hỗ trợ tốt: servlet nhỏ `ObjectInputStream.readObject()` trên cookie.
+  5. **.NET (JSON.NET)** — **phát hiện quan trọng**: KHÔNG cần Windows/ysonet — `_mutate_dotnet_jsonnet()` tự build JSON tay (dòng 808-825), target chỉ cần ASP.NET Core + `TypeNameHandling.All`, chạy Docker Linux bình thường. Minimal API: `JsonConvert.DeserializeObject<object>(body, new JsonSerializerSettings{TypeNameHandling=All})`.
+  6. Node.js/Ruby — để sau, Ruby tool mới có generic Marshal (chưa gadget thật), chưa test được nhiều hơn hiện tại.
+
+  **Điểm thiết kế quan trọng, dễ bị bỏ qua**: app lab phải để lộ lỗi thật ra response (KHÔNG tự `try/except` nuốt exception) — khớp đúng `ERROR_KEYWORDS` đã có sẵn trong `replay_request.py`. Muốn test tín hiệu TIME-BASED (`TIME_DELAY_THRESHOLD_SEC = 4.0`), cần thêm biến thể lệnh `sleep 5` cạnh `TEST_COMMANDS` hiện tại (`id`/`whoami`/`hostname`) — vì output `id` không tự nhiên xuất hiện trong response để so sánh length.
+
+  **Cấu trúc đề xuất**:
+  ```
+  Web_vul_env/
+  ├── docker-compose.yml       # mỗi service 1 port
+  ├── pickle-app/ yaml-app/ php-app/ java-app/ dotnet-app/
+  └── README.md                # ghi rõ port/endpoint/param name/location mỗi app
+  ```
+
+  **Kế hoạch user tự nêu**: tuần sau (sau 2026-10-03) mới bắt tay làm — trước đó muốn nghiên cứu kỹ thêm `replay_request.py`/`oracle_probe.py` (đang học theo kiểu Socratic cùng tôi). Chưa code gì ở repo `Web_vul_env`, chỉ mới note ý tưởng.
+
+-21. **[MỚI]** `debug.ps1` — theo phản hồi "sao lệnh nó dài vậy, tôi nhớ ban đầu lệnh chạy wsl ngắn lắm mà" (so với `ethicalquoc.ps1` chỉ gọi `main.py`, không gọi được `debug_pipeline.py`, phải gõ nguyên câu `wsl -d Ubuntu --cd ... -- python3 debug_pipeline.py ...` dài). Tạo wrapper mới, Y HỆT pattern `ethicalquoc.ps1` (tính `$wslPath` động từ `$PSScriptRoot`, không hardcode), chỉ đổi script đích:
+  ```powershell
+  wsl -d Ubuntu --cd $wslPath -- python3 debug_pipeline.py @args
+  ```
+  Dùng: `.\debug.ps1 -i results/result1.json --step 7 -o debug_out.json`. Không gộp chung vào `ethicalquoc.ps1` (tránh thêm logic rẽ nhánh chọn script vào wrapper chính thức, giữ 2 tool tách biệt đúng vai: `ethicalquoc.ps1` = chạy tool thật, `debug.ps1` = chạy riêng tool debug nội bộ).
+
+  **Verify thật**: `.\debug.ps1 -i results/result1.json --step 7 -o debug_out_v2.json` qua PowerShell → chạy qua WSL2 thành công, mutation `flip_boolean` ra payload THẬT (`"error" in m` = `False`), `encoding_chain: ['url', 'base64']` đúng.
+
+-20. **[GHI CHÚ]** `debug_pipeline.py` chạy qua WSL2 (để có đủ java/php/ruby/.NET thật thay vì toàn `WinError 2` khi chạy trên shell Windows thuần, đã thấy rõ trong log paste vào). Không tạo wrapper `.ps1` riêng (tool debug nội bộ, không phải interface chính thức như `main.py`/`ethicalquoc.ps1`) — chỉ cần gọi `wsl.exe` trực tiếp, cùng cú pháp `--cd` đã dùng trong `ethicalquoc.ps1`:
+
+  **Từ Git Bash** (bắt buộc `MSYS_NO_PATHCONV=1` — không có sẽ bị lỗi `Wsl/ERROR_PATH_NOT_FOUND` do Git Bash tự dịch sai `/mnt/d/...` thành path Windows, bug đã gặp 2 lần trước đó trong phiên, lần này gặp lại y hệt khi tự tay test):
+  ```bash
+  MSYS_NO_PATHCONV=1 wsl -d Ubuntu --cd /mnt/d/Thesis/Thesis -- python3 debug_pipeline.py -i results/result1.json --step 7 -o /tmp/debug_out.json
+  ```
+
+  **Từ PowerShell** (không cần `MSYS_NO_PATHCONV`, chỉ Git Bash mới bị MSYS dịch path):
+  ```powershell
+  wsl -d Ubuntu --cd /mnt/d/Thesis/Thesis -- python3 debug_pipeline.py -i results/result1.json --step 7 -o debug_out.json
+  ```
+
+  **Verify thật**: chạy câu lệnh Git Bash trên với `result1.json --step 7` → exit=0, mutation `flip_boolean` ra payload THẬT (`"error" in m` = `False`), `encoding_chain: ['url', 'base64']` đúng — khác hẳn chạy trên Windows thuần (toàn `WinError 2`/error dict) đã thấy ở log user paste vào trước đó.
+
+-19. **[FIXED]** `debug_pipeline.py` — tool debug riêng (chạy pipeline dừng ở 1 stage chọn trước, không thuộc `main.py`) chưa đồng bộ theo fix "encoding_chain" ở mục -17: dòng 59-61 tạo `DataNormalizer(value).normalize()` mới mỗi lần, không giữ instance nên không gọi được `get_encoding_chain()`; dòng 84-86 build `mutation_vector` cho step 7 thiếu hẳn field `encoding_chain`. Không crash (vì `_make_payload()` dùng `.get("encoding_chain") or []`) nhưng field luôn rỗng `[]` khi debug qua tool này, khác hành vi `main.py analyze` thật — tự phát hiện lúc trả lời câu hỏi "command để chạy lệnh là gì".
+
+  **Fix** ([debug_pipeline.py:59-61,83-88](debug_pipeline.py#L59-L88)): giữ instance `normalizer = DataNormalizer(value)`, gán `mutation_vector["encoding_chain"] = normalizer.get_encoding_chain(candidate)` giống hệt `main.py`.
+
+  **Verify thật**: `python debug_pipeline.py -i results/result1.json --step 7 -o <file>` → exit=0, `encoding_chain: ['url', 'base64']` xuất hiện đúng trên mutation thật — khớp với kết quả `main.py analyze` đã verify ở mục -17.
+
 -18. **[FIXED — bug thật, user tự phát hiện bằng câu hỏi "unquote hình như nó dùng utf-8, có sao ko"]** `normalize.py:_generate_decodes()` dòng `ud = urllib.parse.unquote(value)` — KHÔNG truyền `encoding`, mặc định `urllib.parse.unquote()` dùng **UTF-8** (`errors='replace'`) — cùng loại bug corrupt byte nhị phân đã sửa ở mục -17 (Bug A), nhưng lần này ở BƯỚC ĐẦU TIÊN của `normalize()`, trước cả khi dữ liệu tới Stage 7/8. Đáng chú ý: ĐÂY LÀ NHÁNH DUY NHẤT trong cả hàm `_generate_decodes()` còn dùng UTF-8 — 4 nhánh khác (`base64`/`base64_gzip`/`hex`/`jwt_segment`) đều đã chủ động dùng `latin-1` — xác nhận đây là sơ suất bỏ sót, không phải chủ ý.
 
   **Verify tay trước khi sửa**: byte giả lập `AC ED 00 05 FF FE` (không hợp lệ UTF-8) → percent-encode → `unquote()` mặc định → encode lại bằng latin-1 → **KHÁC byte gốc**; `unquote(..., encoding='latin-1')` → encode lại → **khớp CHÍNH XÁC** byte gốc.

@@ -73,9 +73,6 @@ class ReplayRequest:
         raw_value: str | None
         if encoding == "base64" and b64_payload:
             try:
-                # latin-1 la bijection 1:1 voi moi gia tri byte (0-255), khong
-                # nhu utf-8 (lossy voi byte nhi phan khong hop le) - dam bao
-                # round-trip chinh xac tung byte khi _send() encode lai.
                 raw_value = base64.b64decode(b64_payload).decode("latin-1")
             except Exception:
                 raw_value = payload_raw or b64_payload
@@ -116,10 +113,6 @@ class ReplayRequest:
             if value is not None:
                 headers[name] = value
         elif location in ("query", "url_param"):
-            # Cac param KHAC giu nguyen encoding mac dinh cua urlencode() (khong
-            # dong vao); chi rieng param dang test duoc percent-encode bang
-            # latin-1 thu cong, tranh UnicodeEncodeError khi 1 param khac co
-            # ky tu Unicode thuc su (vuot pham vi latin-1 0-255).
             parsed = urllib.parse.urlsplit(url)
             qs = [(k, v) for k, v in urllib.parse.parse_qsl(parsed.query, keep_blank_values=True) if k != name]
             new_query = urllib.parse.urlencode(qs, doseq=True)

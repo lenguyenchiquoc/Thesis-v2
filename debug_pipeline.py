@@ -58,7 +58,8 @@ def main():
     results = []
     for vector in cleaned_vectors:
         value = vector["cleaned_value"]
-        value_normalize = DataNormalizer(value).normalize()
+        normalizer = DataNormalizer(value)
+        value_normalize = normalizer.normalize()
 
         entry = {
             "vector": {
@@ -81,8 +82,10 @@ def main():
             entry["exploit_analysis"] = exploit_result
 
         if args.step >= 7:
+            candidate = value_normalize[0] if value_normalize else value
             mutation_vector = dict(vector)
-            mutation_vector["value"] = value_normalize[0] if value_normalize else value
+            mutation_vector["value"] = candidate
+            mutation_vector["encoding_chain"] = normalizer.get_encoding_chain(candidate)
             entry["mutations"] = PayloadMutation(exploit_result, mutation_vector).mutate()
 
         results.append(entry)
@@ -92,7 +95,7 @@ def main():
 
 
 def _emit(data, output_path):
-    print(json.dumps(data, indent=2, ensure_ascii=False, default=str))
+    #print(json.dumps(data, indent=2, ensure_ascii=False, default=str))
     if output_path:
         with open(output_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False, default=str)

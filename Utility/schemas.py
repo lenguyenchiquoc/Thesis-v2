@@ -48,7 +48,6 @@ class ExploitResult(TypedDict):
 class ConfirmedExploitResultExtra(TypedDict, total=False):
     replay_note: str
     confirmed_indicators: list[str]
-    oracle_probe: dict
 
 
 class ConfirmedExploitResult(ExploitResult, ConfirmedExploitResultExtra):
@@ -105,28 +104,6 @@ class MutationError(MutationErrorRequired, MutationErrorExtra):
 
 Mutation = MutationPayload | MutationError
 Mutations = list[Mutation]
-
-
-class OracleUnsupported(TypedDict):
-    supported: bool
-    reason: str
-
-
-class OracleNotRun(TypedDict):
-    supported: bool
-    ran: bool
-    reason: str
-
-
-class OracleRan(TypedDict):
-    supported: bool
-    ran: bool
-    technique: str
-    indicators: list[str]
-    target_parses_payload: bool
-
-
-OracleProbeResult = OracleUnsupported | OracleNotRun | OracleRan
 
 
 class HttpProbeSample(TypedDict):

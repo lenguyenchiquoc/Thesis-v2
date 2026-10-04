@@ -34,10 +34,6 @@ Stage 9  Report                         split findings into Confirmed vs Suspect
 
 Each stage writes structured JSON, so any stage can be re-run or inspected independently without re-running the whole pipeline.
 
-### Oracle probe
-
-Before replaying a potentially large batch of exploit payloads against a live target (e.g. dozens of phpggc gadget-chain variants for a single PHP parameter), `assess` first runs one cheap, non-destructive oracle probe per vector. For PHP, this corrupts the declared length of a string field in the *original* serialized value (`s:4:"role"` → `s:101:"role"`) and compares the response to a clean baseline — a well-formed `unserialize()` call on that value will error or behave differently only if the target actually parses it. The oracle result is attached to every finding as additional evidence; it never gates or skips the full replay, since a negative/inconclusive oracle doesn't prove absence of a vulnerability, only that this particular probe didn't observe one.
-
 ### Confirmed vs Suspected
 
 A signature match alone (e.g. "this cookie contains `__wakeup`") is not proof of exploitability in a black-box setting — it only means the *shape* of the data looks dangerous. EthicalQuoc keeps this distinction explicit throughout the pipeline:
@@ -175,7 +171,6 @@ Analyze/
 
 Replay/
   replay_request.py            Stage 8 — request replay + Confirmed/Suspected evidence
-  oracle_probe.py               cheap pre-check before replaying a full payload batch
 
 Input/, Output/                schema-validated JSON load/save helpers
 Utility/
@@ -205,7 +200,6 @@ TestCase/
 - Static signature matching (e.g. detecting `monolog`/`laravel` keywords, magic method names) infers exploitability from the *shape* of the payload, not from confirmed knowledge of the target's classpath/dependencies — this is an inherent limitation of black-box analysis, not something the tool can fully resolve. The Confirmed/Suspected split exists specifically to keep this honest.
 - Attacks requiring a prerequisite step (e.g. forging an HMAC-signed cookie, leaking a signing key such as Django's `SECRET_KEY` or Rails' `secret_key_base`) are out of scope — the tool assumes the observed payload is directly mutable.
 - Out-of-band (OOB) confirmation is semi-manual: `assess` will embed a configured canary domain (`oob_domain`) into URLDNS/blind-SSRF payloads, but does not poll an Interactsh/Burp Collaborator API for interactions — checking the interaction log is still a manual step.
-- The oracle probe currently only supports PHP (length-corruption technique); Java/Pickle/YAML/.NET/NodeJS/Ruby/Wrapper probes still go straight to full payload replay without a cheap pre-check.
 - `.NET` mutation (`ysonet`) only runs on Windows. `mono` cannot run it on Linux/macOS or inside the Docker image — tested directly: `ObjectDataProvider` fails because it depends on WPF (`PresentationFramework`), which mono never implemented, and `TypeConfuseDelegate`/`ActivitySurrogateSelector` fail with unrelated errors, since mono is an independent reimplementation of .NET Framework rather than a 1:1 port and doesn't replicate every low-level reflection trick these gadgets rely on.
 
 ## Credits

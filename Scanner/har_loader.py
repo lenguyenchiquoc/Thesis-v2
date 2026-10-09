@@ -34,6 +34,13 @@ class HarLoader:
             print(f"[!] HAR Parsing failed: {e}")
             return []
 
+    def _build_request_context(self, req):
+        headers = {h['name']: h['value'] for h in req.get('headers', [])}
+        cookies = {c['name']: c['value'] for c in req.get('cookies', [])}
+        post_data = req.get('postData', {})
+        body = post_data.get('text') if 'text' in post_data else None
+        return {"headers": headers, "cookies": cookies, "body": body}
+
     def _process_entry(self, entry):
         req = entry['request']
         url = req['url']
@@ -43,32 +50,34 @@ class HarLoader:
         if ext in self.ignore_ext:
             return
 
-        for param in req.get('queryString', []):
-            self._add_vector(url, req['method'], "url_param", param['name'], param['value'])
+        request_context = self._build_request_context(req)
 
-  
+        for param in req.get('queryString', []):
+            self._add_vector(url, req['method'], "url_param", param['name'], param['value'], request_context)
+
         for cookie in req.get('cookies', []):
-            self._add_vector(url, req['method'], "cookie", cookie['name'], cookie['value'])
+            self._add_vector(url, req['method'], "cookie", cookie['name'], cookie['value'], request_context)
 
         for header in req.get('headers', []):
-            self._add_vector(url, req['method'], "header", header['name'], header['value'])
+            self._add_vector(url, req['method'], "header", header['name'], header['value'], request_context)
 
         post_data = req.get('postData', {})
 
         if 'params' in post_data:
             for p in post_data['params']:
-                self._add_vector(url, req['method'], "form_body", p['name'], p['value'])
+                self._add_vector(url, req['method'], "form_body", p['name'], p['value'], request_context)
 
         elif 'text' in post_data:
-            self._add_vector(url, req['method'], "raw_body", "payload", post_data['text'])
+            self._add_vector(url, req['method'], "raw_body", "payload", post_data['text'], request_context)
 
-    def _add_vector(self, url, method, location, name, value):
+    def _add_vector(self, url, method, location, name, value, request_context):
         self.vectors.append({
             "source": "har",
             "url": url,
             "method": method,
             "location": location,
             "name": name,
-            "value": value
+            "value": value,
+            "request_context": request_context
         })
     

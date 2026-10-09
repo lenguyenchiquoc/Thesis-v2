@@ -19,13 +19,6 @@ RUN echo "phar.readonly=0" >> "$(php -r 'echo php_ini_loaded_file();')"
 WORKDIR /app
 COPY . .
 
-# Playwright + Chromium - chi can cho "scan --url" (crawl 1 URL song bang
-# trinh duyet thuc, xem Scanner/browser_automated_scan.py), moi tinh nang
-# khac (scan --har / analyze / assess / report) khong dung toi. Nang (~250MB)
-# nhung cai san de "docker run" la du dung ngay, khong can lam gi them.
-RUN pip install --no-cache-dir playwright \
-    && playwright install --with-deps chromium
-
 # Fail fast ngay luc build neu java/php/ruby khong goi duoc, thay vi de nguoi
 # dung tu phat hien luc chay (dung dung cac lenh ma payloadMutation.py se goi).
 RUN java -version && php -version && ruby --version

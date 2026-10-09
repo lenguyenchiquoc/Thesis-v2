@@ -1,5 +1,4 @@
 import argparse
-import asyncio
 import io
 import platform
 import sys
@@ -22,27 +21,19 @@ from Replay.replay_request import ReplayRequest
 VERSION = "2025.1.0.0"
 
 def _apply_replay_confirmation(exploit_analysis: dict, replay_result: dict) -> dict:
+    # Never auto-confirms — replay heuristics are unreliable; always leave this to manual review.
     result = dict(exploit_analysis)
     severity = result.get("severity", "Low")
+    result["confirmation_status"] = "Suspected"
+    result["display_severity"] = f"Suspected-{severity}"
+    result["confidence_source"] = "static_signature"
 
     if replay_result.get("skipped"):
-        result["confirmation_status"] = "Suspected"
-        result["display_severity"] = f"Suspected-{severity}"
-        result["confidence_source"] = "static_signature"
         result["replay_note"] = replay_result.get("reason")
         return result
 
-    if replay_result.get("likely_vulnerable"):
-        result["confirmation_status"] = "Confirmed"
-        result["display_severity"] = f"Confirmed-{severity}"
-        result["confidence_source"] = "replay_confirmed"
-        result["confirmed_indicators"] = replay_result.get("indicators", [])
-    else:
-        result["confirmation_status"] = "Suspected"
-        result["display_severity"] = f"Suspected-{severity}"
-        result["confidence_source"] = "static_signature"
-        result["replay_note"] = "Replay completed but no confirming indicator observed"
-
+    result["observations"] = replay_result.get("indicators", [])
+    result["replay_note"] = "Not auto-confirmed — review baseline/mutated response manually"
     return result
 
 
@@ -59,7 +50,6 @@ def main():
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     scan_cmd = subparsers.add_parser("scan", help="Scan target")
-    scan_cmd.add_argument("--url", type=str, help="Scan website")
     scan_cmd.add_argument("--har", type=str, help="Input HAR file")
     scan_cmd.add_argument("-o", "--output", type=str, help="Export scan result file")
 
@@ -96,8 +86,8 @@ def handle_arg(args):
 
     if args.command == "scan":
 
-        if not args.url and not args.har:
-            print("[!] Error: scan requires --url or --har")
+        if not args.har:
+            print("[!] Error: scan requires --har")
             return
 
         total_vectors = []
@@ -107,13 +97,6 @@ def handle_arg(args):
             har_vectors = loader.parse()
             total_vectors.extend(har_vectors)
             print(f"[+] HAR collected: {len(har_vectors)} vectors")
-
-        if args.url:
-            from Scanner.browser_automated_scan import BrowserScanner
-            scanner = BrowserScanner(args.url)
-            browser_vectors = asyncio.run(scanner.start())
-            total_vectors.extend(browser_vectors)
-            print(f"[+] Browser collected: {len(browser_vectors)} vectors")
 
         print(f"[+] Total collected: {len(total_vectors)} vectors")
 
@@ -233,8 +216,7 @@ def handle_arg(args):
         if args.format != "json":
             print(f"[!] Format '{args.format}' not implemented yet — falling back to json")
 
-        confirmed = []
-        suspected = []
+        findings = []
 
         if args.input:
             with open(args.input, "r", encoding="utf-8") as f:
@@ -242,32 +224,28 @@ def handle_arg(args):
 
             for entry in assess_data.get("vectors", []):
                 exploit_analysis = entry.get("exploit_analysis") or {}
-                finding = {
+                replay = entry.get("replay") or {}
+                findings.append({
                     "exploit_type": exploit_analysis.get("exploit_type"),
                     "severity": exploit_analysis.get("display_severity"),
                     "score": exploit_analysis.get("score"),
                     "suggested_probe": exploit_analysis.get("suggested_probe"),
                     "notes": exploit_analysis.get("notes"),
                     "mutation": entry.get("mutation"),
-                }
-
-                if exploit_analysis.get("confirmation_status") == "Confirmed":
-                    finding["confirmed_indicators"] = exploit_analysis.get("confirmed_indicators", [])
-                    confirmed.append(finding)
-                else:
-                    finding["replay_note"] = exploit_analysis.get("replay_note")
-                    suspected.append(finding)
+                    "observations": exploit_analysis.get("observations", []),
+                    "replay_note": exploit_analysis.get("replay_note"),
+                    "baseline": replay.get("baseline"),
+                    "mutated": replay.get("mutated"),
+                })
 
         results = {
             "summary": {
-                "confirmed_count": len(confirmed),
-                "suspected_count": len(suspected),
+                "total_findings": len(findings),
             },
-            "confirmed_findings": confirmed,
-            "suspected_findings": suspected,
+            "findings": findings,
         }
 
-        print(f"[+] Confirmed: {len(confirmed)} | Suspected (requires manual verification): {len(suspected)}")
+        print(f"[+] Total findings: {len(findings)} — all require manual review, tool does not auto-confirm")
 
         save_output_file_type(
             vectors=results,

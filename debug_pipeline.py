@@ -7,7 +7,9 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
+from Scanner.har_loader import HarLoader
 from Input.input_loader import InputLoader
+from Output.save_output import save_output_file_type
 from Analyze.postfiltered import VectorFiltering
 from Analyze.cleanfilter import cleanfilter
 from Analyze.normalize import DataNormalizer
@@ -16,6 +18,7 @@ from Analyze.ExploitabilityAnalysis import ExploitAnalyze
 from Analyze.payloadMutation import PayloadMutation
 
 STEP_NAMES = {
+    1: "Scan (HarLoader)",
     2: "PostFilter (VectorFiltering)",
     3: "CleanFilter",
     4: "Normalize",
@@ -30,7 +33,8 @@ def main():
         prog="debug_pipeline",
         description="Run the analyze pipeline up to a chosen stage and show that stage's output.",
     )
-    parser.add_argument("-i", "--input", required=True, help="Input scan_output.json (Stage 1 output)")
+    parser.add_argument("-i", "--input", help="Input scan_output.json (use instead of --har to skip Stage 1)")
+    parser.add_argument("--har", help="Input HAR file for Stage 1 (scan)")
     parser.add_argument(
         "--step", type=int, required=True, choices=sorted(STEP_NAMES),
         help="Which stage's output to inspect: " + ", ".join(f"{k}={v}" for k, v in STEP_NAMES.items()),
@@ -38,10 +42,29 @@ def main():
     parser.add_argument("-o", "--output", help="Optional: save this stage's output to a JSON file")
     args = parser.parse_args()
 
+    if not args.input and not args.har:
+        parser.error("one of -i/--input or --har is required")
+    if args.step == 1 and not args.har:
+        parser.error("--step 1 requires --har")
+
     print(f"[*] Running pipeline up to Stage {args.step}: {STEP_NAMES[args.step]}")
 
-    reader = InputLoader(args.input)
-    file_read = reader.load()
+    if args.har:
+        total_vectors = []
+        har_vectors = HarLoader(args.har).parse()
+        total_vectors.extend(har_vectors)
+        print(f"[+] HAR collected: {len(har_vectors)} vectors")
+
+        print(f"[+] Stage 1 (Scan): {len(total_vectors)} vectors")
+        if args.step == 1:
+            if args.output:
+                save_output_file_type(total_vectors, args.output, phase="scan")
+            return
+
+        file_read = {"vectors": total_vectors}
+    else:
+        reader = InputLoader(args.input)
+        file_read = reader.load()
 
     vector_filtered_list = VectorFiltering(file_read).filter()
     print(f"[+] Stage 2 (PostFilter): {len(vector_filtered_list)} vectors kept")

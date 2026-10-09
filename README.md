@@ -70,7 +70,7 @@ cd Thesis
 ```
 `setup.ps1` is idempotent (safe to re-run) — it installs the `Ubuntu` WSL distro if missing, then `java`/`php`/`ruby`/`python3` inside it, and enables `phar.readonly=0` for phpggc. After that, `ethicalquoc.ps1 <args>` runs `main.py` inside that Ubuntu WSL environment for every command — arguments are passed straight through, e.g. `.\ethicalquoc.ps1 scan --har TestCase/comprehensive.har -o results/scan.json`.
 
-This gets **all 5 mutation paths working from one command** (`ysoserial`, `phpggc`, Ruby Marshal, `ysonet`, `scan --url` once you additionally `pip install playwright` inside the same Ubuntu WSL). The key trick: WSL2 has built-in Windows interop, so a Linux process running inside it can directly execute `tools/dotnet/ysonet.exe` (a real Windows binary) — unlike a Docker container, which is isolated from the Windows kernel and needs `mono` (confirmed by testing not to work for this tool's gadgets, see [Known limitations](#known-limitations)). Requires Windows 10 (2004+) or 11 with virtualization enabled; `setup.ps1` tells you the exact command to run if WSL itself isn't installed yet.
+This gets **all 4 mutation paths working from one command** (`ysoserial`, `phpggc`, Ruby Marshal, `ysonet`). The key trick: WSL2 has built-in Windows interop, so a Linux process running inside it can directly execute `tools/dotnet/ysonet.exe` (a real Windows binary) — unlike a Docker container, which is isolated from the Windows kernel and needs `mono` (confirmed by testing not to work for this tool's gadgets, see [Known limitations](#known-limitations)). Requires Windows 10 (2004+) or 11 with virtualization enabled; `setup.ps1` tells you the exact command to run if WSL itself isn't installed yet.
 
 ### Option B — Docker (cross-platform, but `.NET` mutation does not work)
 
@@ -80,7 +80,7 @@ cd Thesis
 docker build -t ethicalquoc .
 docker run --rm -v "$(pwd)/results:/app/results" ethicalquoc analyze -i results/scan_output.json
 ```
-The image bundles Python, Java (JRE), PHP CLI, Ruby, and Playwright/Chromium — every mutation path except `.NET`/`ysonet` works out of the box. Trade-off: ~2.4GB image (mostly Chromium + its headless dependencies). Use this on macOS/Linux, or on Windows if you'd rather not set up WSL2.
+The image bundles Python, Java (JRE), PHP CLI, and Ruby — every mutation path except `.NET`/`ysonet` works out of the box. Use this on macOS/Linux, or on Windows if you'd rather not set up WSL2.
 
 **`.NET` mutation (`ysonet`) does not work inside the Docker container.** `ysonet.exe` is a Windows .NET Framework binary; running it under Linux requires `mono`, and testing confirmed all 3 gadgets this project uses fail under `mono` — `ObjectDataProvider` because it depends on WPF (`PresentationFramework`), which mono never implemented, and `TypeConfuseDelegate`/`ActivitySurrogateSelector` fail with unrelated errors (mono is an independent reimplementation of .NET Framework, not a 1:1 port, and these gadgets rely on low-level reflection tricks mono doesn't replicate exactly).
 
@@ -90,7 +90,6 @@ Requires Python 3.10+. The core pipeline (`scan --har`, `analyze`, `assess`, `re
 
 | Feature | Requires |
 |---|---|
-| `scan --url` (live browser capture) | `pip install playwright` + `playwright install chromium` |
 | Java mutation (`ysoserial`) | `java` on PATH |
 | PHP mutation (`phpggc`) | `php` on PATH |
 | Ruby mutation (Marshal payloads) | `ruby` on PATH |
@@ -105,9 +104,6 @@ The tool is invoked through `main.py` with one of four subcommands, chained via 
 ```bash
 # 1. Collect HTTP vectors from a HAR file exported from your browser's DevTools
 python main.py scan --har capture.har -o results/scan_output.json
-
-# (alternative) live capture by driving a headless browser against a URL
-python main.py scan --url https://target.example.com -o results/scan_output.json
 
 # 2. Run the full analysis pipeline: filter -> normalize -> fingerprint -> exploit analysis -> mutate
 python main.py analyze -i results/scan_output.json -o results/analyze_output.json
@@ -159,7 +155,6 @@ Dockerfile, .dockerignore    cross-platform Docker build (Option B) — everythi
 
 Scanner/
   har_loader.py               parses HAR files into HTTP vectors
-  browser_automated_scan.py   live capture via Playwright
 
 Analyze/
   postfiltered.py             Stage 2 — location/header/heuristic filtering

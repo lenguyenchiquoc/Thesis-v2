@@ -18,42 +18,44 @@ class cleanfilter:
 
     def __init__(self, filter_output: list[ScanVector]):
         self.data = filter_output
-    def _clean(self, value:str, location: str | None = None, name: str | None = None) -> str:
+    def _clean(self, value:str, location: str | None = None, name: str | None = None) -> list[str]:
         if not isinstance(value,str) or not value.strip():
-            return value
+            return [value]
         cleaned = value.strip()
 
+        candidates = [cleaned]
         if '; ' in cleaned:
             segments = [s.strip() for s in cleaned.split('; ')]
             suspicious = [s for s in segments if signatures.looks_like_serialized(s)]
-            cleaned = suspicious[0] if suspicious else segments[0]
+            candidates = suspicious if suspicious else [segments[0]]
 
         is_prefixed_header = (
             isinstance(location, str) and location.lower() == "header"
             and isinstance(name, str) and name.lower() in (self.COOKIE_HEADER_NAMES | self.AUTH_HEADER_NAMES)
         )
-        if is_prefixed_header:
-            changed = True
-            while changed:
-                changed = False
-                for pattern in self.PREFIX_PATTERNS:
-                    stripped = re.sub(pattern, '', cleaned, flags=re.IGNORECASE).strip()
-                    if stripped != cleaned:
-                        cleaned = stripped
-                        changed = True
 
-        cleaned = cleaned.strip('= \t\n\r;,"')
-        return cleaned
-    
+        results = []
+        for candidate in candidates:
+            if is_prefixed_header:
+                changed = True
+                while changed:
+                    changed = False
+                    for pattern in self.PREFIX_PATTERNS:
+                        stripped = re.sub(pattern, '', candidate, flags=re.IGNORECASE).strip()
+                        if stripped != candidate:
+                            candidate = stripped
+                            changed = True
+            results.append(candidate.strip('= \t\n\r;,"'))
+
+        return results
+
     def _clean_all(self) -> list[CleanedVector]:
         cleaned_vector: list[CleanedVector] = []
         for vector in self.data:
             original_value = vector.get('value','')
-            clean_value = self._clean(original_value, vector.get('location'), vector.get('name'))
-
-            new_vector: CleanedVector = {**vector, "original_value": original_value, "cleaned_value": clean_value}
-
-            cleaned_vector.append(new_vector)
+            for clean_value in self._clean(original_value, vector.get('location'), vector.get('name')):
+                new_vector: CleanedVector = {**vector, "original_value": original_value, "cleaned_value": clean_value}
+                cleaned_vector.append(new_vector)
 
         return cleaned_vector
     

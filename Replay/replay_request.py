@@ -1,4 +1,5 @@
 import base64
+import difflib
 import gzip
 import time
 import urllib.error
@@ -6,7 +7,7 @@ import urllib.parse
 import urllib.request
 from typing import cast
 
-from Utility.schemas import HttpProbeSample, Mutation, ReplayResult, ReplaySkipped
+from Utility.schemas import HttpProbeSample, Mutation, RequestContext, ReplayResult, ReplaySkipped
 
 
 class ReplayRequest:
@@ -39,9 +40,11 @@ class ReplayRequest:
         if raw_payload is None:
             return self._skip_result(payload, "No usable payload value found")
 
+        request_context = cast("RequestContext | None", payload.get("request_context"))
+
         try:
-            baseline = self._send(url, method, location, name, value=None)
-            mutated = self._send(url, method, location, name, value=raw_payload)
+            baseline = self._send(url, method, location, name, value=None, request_context=request_context)
+            mutated = self._send(url, method, location, name, value=raw_payload, request_context=request_context)
         except (urllib.error.URLError, OSError, ValueError) as e:
             return self._skip_result(payload, f"Request failed: {e}")
 
@@ -100,10 +103,19 @@ class ReplayRequest:
                 current = urllib.parse.quote(current, safe="", encoding="latin-1")
         return current
 
-    def _send(self, url: str, method: str, location: str, name: str, value: str | None) -> HttpProbeSample:
-        headers = {"User-Agent": "EthicalQuoc/replay"}
-        cookies = {}
-        body = None
+    def _send(
+        self, url: str, method: str, location: str, name: str, value: str | None,
+        request_context: "RequestContext | None" = None,
+    ) -> HttpProbeSample:
+        request_context = request_context or {}
+        headers = {
+            k: v for k, v in (request_context.get("headers") or {}).items()
+            if k.lower() not in ("content-length", "host")
+        }
+        headers.setdefault("User-Agent", "EthicalQuoc/replay")
+        cookies = dict(request_context.get("cookies") or {})
+        ctx_body = request_context.get("body")
+        body = ctx_body.encode("latin-1") if isinstance(ctx_body, str) else None
         target_url = url
 
         if location == "cookie":
@@ -132,7 +144,8 @@ class ReplayRequest:
             if value is not None:
                 body = value.encode("latin-1")
 
-        if cookies:
+        is_testing_cookie_header = location == "header" and name.lower() == "cookie"
+        if cookies and not is_testing_cookie_header:
             headers["Cookie"] = "; ".join(f"{k}={v}" for k, v in cookies.items())
 
         req = urllib.request.Request(target_url, data=body, headers=headers, method=method)
@@ -158,6 +171,8 @@ class ReplayRequest:
                 "body_sample": raw[:2000].decode("utf-8", errors="replace"),
             }
 
+    CONTENT_DIFF_SIMILARITY_THRESHOLD = 0.8
+
     def _compare(self, baseline: HttpProbeSample, mutated: HttpProbeSample) -> list[str]:
         indicators = []
 
@@ -173,7 +188,8 @@ class ReplayRequest:
             )
 
         length_delta = abs(mutated["length"] - baseline["length"])
-        if baseline["length"] > 0 and length_delta / baseline["length"] > 0.5:
+        length_changed_significantly = baseline["length"] > 0 and length_delta / baseline["length"] > 0.5
+        if length_changed_significantly:
             indicators.append(
                 f"Response length changed significantly: baseline={baseline['length']} mutated={mutated['length']}"
             )
@@ -182,6 +198,19 @@ class ReplayRequest:
         error_hits = [kw for kw in self.ERROR_KEYWORDS if kw in mutated_lower]
         if error_hits:
             indicators.append(f"Error/exception disclosure in response: {error_hits}")
+
+        if (
+            mutated["status"] == baseline["status"]
+            and not length_changed_significantly
+            and not error_hits
+            and mutated["body_sample"] != baseline["body_sample"]
+        ):
+            similarity = difflib.SequenceMatcher(None, baseline["body_sample"], mutated["body_sample"]).ratio()
+            if similarity >= self.CONTENT_DIFF_SIMILARITY_THRESHOLD:
+                indicators.append(
+                    f"Response content differs in a small, localized way despite same status/length (similarity={similarity:.2f}) "
+                    f"(baseline={baseline['body_sample'][:200]!r} mutated={mutated['body_sample'][:200]!r})"
+                )
 
         return indicators
 

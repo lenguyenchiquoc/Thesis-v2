@@ -133,14 +133,15 @@ class PayloadMutation:
             "type":              ptype,
             "chain":             chain,
             "command":           command,
-            "payload":           b64,          
-            "payload_urlencoded": url_safe,   
+            "payload":           b64,
+            "payload_urlencoded": url_safe,
             "location":          self.vector.get("location"),
             "name":              self.vector.get("name"),
             "url":               self.vector.get("url"),
             "method":            self.vector.get("method"),
             "encoding":          "base64",
             "encoding_chain":    self.vector.get("encoding_chain") or [],
+            "request_context":   self.vector.get("request_context"),
         }
 
     def _mutate_java(self) -> Mutations:

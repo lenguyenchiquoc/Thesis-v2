@@ -1,5 +1,93 @@
 # Ghi chú tiến độ — EthicalQuoc
 
+**[THAY ĐỔI KIẾN TRÚC LỚN — theo yêu cầu trực tiếp] Bỏ hẳn việc tool tự động gán "Confirmed".** User chỉ ra đúng: cả 5 phép so sánh của `_compare()` (delay/length/status/error-keyword/content-similarity) đều **không đủ tin cậy** để tự động kết luận — delay phụ thuộc mạng/tải server, length threshold tuỳ tiện, error-keyword bỏ sót custom error page (false negative) hoặc trùng từ tình cờ (false positive), content-similarity không phân biệt được "server tự quyết định khác" (bằng chứng thật) với "server chỉ echo lại input" (vô nghĩa — xem case `ref_tag` ở mục dưới). User: *"tôi nghĩ là không nên tự động đưa ra flag hay không flag, tốt nhất nên là log response lại thôi. Để user tự đọc, chứ cứ confirm, suspected thì nó sẽ bị bias và false positive quá"*.
+
+**Thiết kế mới**: tool KHÔNG BAO GIỜ tự gán "Confirmed" nữa — mọi vector đều dừng ở "Suspected", kèm theo ĐẦY ĐỦ raw `baseline`/`mutated` response (status/length/thời gian/200 ký tự đầu body) + `observations` (quan sát tham khảo, không phải kết luận) để người dùng TỰ ĐỌC và TỰ QUYẾT ĐỊNH.
+
+**2 file sửa:**
+1. [main.py:_apply_replay_confirmation()](main.py#L24-L39) — bỏ hẳn nhánh `if likely_vulnerable: confirmation_status="Confirmed"`, luôn luôn `"Suspected"`; đổi `confirmed_indicators` → `observations` (đúng bản chất: gợi ý, không phải bằng chứng xác nhận).
+2. [main.py:report command](main.py#L220-L253) — phát hiện thêm: report CŨ **chưa từng lưu `baseline`/`mutated`** vào file report cuối cùng (chỉ có `confirmed_indicators`/`replay_note` dạng tóm tắt) — tức trước đây dù có fix `_compare()` giỏi cỡ nào, user đọc report cũng KHÔNG THẤY được raw response để tự verify. Fix: mọi finding giờ đều có `baseline`+`mutated` đầy đủ. Bỏ 2 bucket `confirmed_findings`/`suspected_findings`, gộp thành 1 danh sách `findings` duy nhất.
+3. [Utility/schemas.py](Utility/schemas.py#L62-L64) — đổi field `confirmed_indicators` → `observations` cho khớp.
+
+**`_compare()`/`replay_request.py` KHÔNG cần sửa gì thêm** — vẫn tính 5 quan sát như cũ, nhưng giờ chỉ là THÔNG TIN THAM KHẢO đính kèm, không còn quyết định status nữa — nên bug "ref_tag bị Confirmed nhầm" (đang debug dở ở mục trước) **tự động biến mất**, không cần vá `_compare()` cho chính xác tuyệt đối nữa.
+
+**Verify thật trên cả Java (139 vector) và PHP (11 vector)**:
+- `report` không còn in "Confirmed: N" nữa, chỉ còn `"[+] Total findings: N — all require manual review, tool does not auto-confirm"`.
+- Case `dashboard.php/session/flip_boolean` (leo thang đặc quyền THẬT, role user→admin): có `observations` ghi rõ bằng chứng, có đủ `baseline`/`mutated`, nhưng KHÔNG bị tự gắn "Confirmed" — người đọc tự thấy bằng chứng rõ ràng.
+- Case `profile.php/ref_tag` (mồi nhử, server chỉ echo): CŨNG có `observations` (vì content có đổi), nhưng CŨNG không tự gắn gì — đọc `baseline`/`mutated` sẽ tự nhận ra chuỗi `"administrator"` xuất hiện y nguyên là do chính mình gửi lên, không phải bằng chứng thật.
+- Cả 2 case giờ **đối xử bình đẳng, không bias** — đúng yêu cầu.
+- Unit test 64/64 pass (`Ran 64 tests in 183.911s` / `OK`), không test nào assert `confirmed_indicators`/`"Confirmed"` nên không cần sửa test nào.
+
+**[FIX] `_compare()` thêm khả năng nhận diện "nội dung response đổi" — nhưng THU HẸP PHẠM VI có chủ đích, không áp dụng chung.** Giải quyết đúng khoảng trống đã note ở mục trước (`receivedType` đổi `String`→`HashMap` nhưng không bị flag vì status/length/delay/keyword đều không đổi).
+
+**Lý do KHÔNG làm đại trà (tự phát hiện trước khi code)**: nếu áp "body khác nội dung → flag" cho MỌI location (kể cả `cookie`/`header`), sẽ false-positive tràn lan trên BẤT KỲ app thật nào có session — vì đổi giá trị cookie session thành rác luôn khiến app phản hồi khác (vd: "chưa đăng nhập" thay vì dashboard) HOÀN TOÀN BÌNH THƯỜNG, không liên quan gì deserialize. Quyết định: chỉ bật check mới cho `raw_body`/`body`/`form_body` (nơi giá trị CHÍNH LÀ payload bị xử lý trực tiếp, không phải credential/auth token mà đổi giá trị tự nhiên đổi hành vi app).
+
+**Sửa** ([Replay/replay_request.py:_compare()](Replay/replay_request.py#L173-L208)): thêm tham số `location`, thêm `CONTENT_DIFF_LOCATIONS = {"raw_body","body","form_body"}`, thêm check thứ 5 — chỉ trigger khi: location nằm trong tập trên, status KHÔNG đổi, length KHÔNG đổi đáng kể (>50%), không có error keyword, VÀ `body_sample` khác nhau — tránh trùng lặp tín hiệu với 4 check cũ.
+
+**Verify thật trên đúng bộ dữ liệu 139 entry đã có (không capture lại)**:
+- `/api/integration/receive`, `raw_body/payload`, `java_urldns`: **Suspected → Confirmed**, indicator mới hiện rõ bằng chứng `receivedType` đổi.
+- Toàn bộ 10 entry khác của CHÍNH endpoint này (`cookie/ref_tag`, `cookie/session`, `header/Cookie`) vẫn `Suspected, indicators: []` — xác nhận scope thu hẹp đúng, không bị flag lây.
+- So sánh TOÀN BỘ 139 entry cũ vs mới: **đúng 1 entry đổi status**, 138 entry còn lại y hệt — xác nhận không có false positive mới phát sinh ở bất kỳ đâu khác trong dữ liệu thật.
+- Unit test 64/64 pass (`Ran 64 tests in 122.676s` / `OK`).
+
+**[FIX TẬN GỐC] Thêm field `request_context` — Replay không còn mất Content-Type/cookie khác của request gốc.** Giải quyết đúng bug đã phát hiện ở mục trước (baseline cũng bị 415 vì thiếu Content-Type) VÀ bug cũ đã note trước đó (-35: cookie khác bị bỏ khi test 1 cookie) — cả 2 cùng 1 nguyên nhân gốc: `_send()` chỉ dựng request từ ĐÚNG 1 field đang test, bỏ hết phần còn lại của request gốc.
+
+**Thiết kế**: thêm 1 field `request_context` (`{"headers": {...}, "cookies": {...}, "body": "..."}`) đi kèm MỌI vector từ Stage 1 tới Stage 8, snapshot toàn bộ request gốc.
+
+**5 file đã sửa:**
+1. [Utility/schemas.py](Utility/schemas.py) — thêm `RequestContext` TypedDict; tách `ScanVector`/`MutationVector` thành Required+Extra (theo đúng pattern đã có sẵn ở `MutationPayload`/`ConfirmedExploitResult`) để `request_context` là optional; thêm vào `MutationPayloadExtra`.
+2. [Scanner/har_loader.py](Scanner/har_loader.py) — `_process_entry()` build `request_context` 1 lần/entry (`_build_request_context()`: gộp hết `headers`/`cookies` thành dict, lấy `postData.text` làm `body`), truyền vào `_add_vector()` để MỌI vector sinh từ cùng 1 request đều mang theo.
+3. [Analyze/payloadMutation.py:_make_payload()](Analyze/payloadMutation.py#L128-L145) — thêm `"request_context": self.vector.get("request_context")` — đây là ĐIỂM NGHẼN TRUNG TÂM, xác nhận cả 23 chỗ gọi (Java/PHP/Pickle/YAML/Node/Ruby/.NET/wrapper...) đều qua đúng hàm này nên chỉ sửa 1 chỗ là đủ cho mọi loại payload.
+4. [Replay/replay_request.py:_send()](Replay/replay_request.py#L105-L145) — thay vì bắt đầu từ `headers={"User-Agent":...}, cookies={}, body=None`, giờ seed từ `request_context`: copy toàn bộ header gốc (trừ `Content-Length`/`Host` — lý do dưới), toàn bộ cookie gốc, body gốc — rồi MỚI ghi đè đúng field đang test lên trên (logic cũ giữ nguyên, chỉ thêm bước seed trước nó).
+   - **Edge-case tự bắt được khi code**: nếu copy nguyên `Content-Length` gốc (vd `12` cho payload "hello" cũ) nhưng mutate body dài hơn, `urllib.request` KHÔNG tự tính lại (chỉ set `Content-Length` nếu header đó chưa có) → request sai lệch. Fix: loại `content-length` (và `host`, để urllib tự derive từ URL) khi seed header.
+   - **Edge-case thứ 2 tự bắt được**: khi ĐANG TEST chính `location=header,name=Cookie` (mutate cả chuỗi cookie thô), bước rebuild `headers["Cookie"]` từ `cookies` dict (vốn không phản ánh mutation) sẽ GHI ĐÈ mất giá trị vừa set — thêm guard `is_testing_cookie_header` để bỏ qua bước rebuild đó trong đúng trường hợp này.
+   - `postfiltered.py`'s `filter()` xác nhận append thẳng `vector` reference (dòng 69), và `cleanfilter.py`'s `{**vector, ...}` (fix trước) — cả 2 đều tự động giữ `request_context` không cần sửa gì thêm.
+
+**Verify thật — dựng lại HAR từ chính dữ liệu THẬT đã capture** (không bịa giá trị: lấy đúng `Content-Type`/`Cookie`/`raw_body` đã có sẵn trong `debug_step1.json` thật của `/api/integration/receive`), chạy `scan → analyze → assess` đầy đủ qua container `java-vuln-app` sống:
+- Xác nhận `request_context` có mặt trên MỌI vector sau `scan` (headers count=3 đúng).
+- **Baseline giờ là 200** (trước fix: 415 cho mọi test, kể cả baseline — đã chứng minh ở mục trên).
+- **Payload `java_urldns` mutate lên `raw_body`**: `mutated` trả về `{"receivedType":"java.util.HashMap",...}` thay vì `"java.lang.String"` như baseline — **bằng chứng deserialization THẬT xảy ra** (server đã `ObjectInputStream.readObject()` thành công object tấn công `HashMap`+`URL`, không phải `String` gốc nữa). Đây là lần đầu tiên trong suốt session pipeline THẬT (không phải tôi tự curl) chạm tới sink thật của CVE-2026-47864.
+- **Giới hạn mới phát hiện (chưa fix)**: dù có bằng chứng rõ (`receivedType` đổi + chậm hơn hẳn 0.64s so với 0.007-0.016s mọi test khác), `_compare()` vẫn báo `likely_vulnerable: false` — vì nó chỉ check status/length-50%/delay≥4s(`TIME_DELAY_THRESHOLD_SEC`)/error-keyword, không check nội dung field cụ thể đổi. Ghi nhận làm việc tiếp theo, chưa fix.
+- **Regression**: unit test 64/64 pass (`Ran 64 tests in 181.185s` / `OK`), không file test nào cover `_send()`'s cấu trúc header cũ nên không cần sửa test.
+
+**[BỎ TÍNH NĂNG — quyết định scope]** Xoá hẳn `scan --url` (live browser capture qua `BrowserScanner`/Playwright) khỏi tool. Lý do: qua thảo luận thực tế với `/api/integration/receive` (endpoint cần bấm nút mới lộ ra), xác nhận `BrowserScanner` ([browser_automated_scan.py](Scanner/browser_automated_scan.py) cũ, đã xoá) chỉ `page.goto()` + đợi — không tự click/crawl — nên chỉ bắt được đúng traffic tự fire khi load trang, vô dụng với bất kỳ app nào có flow tương tác (gần như mọi app thật). Giữ lại dễ gây hiểu lầm là "tool tự động quét toàn diện" trong khi thực chất rất hẹp. Quyết định: thà xoá, dùng `-i`/`--har` (HAR tự capture, pentester chủ động click/điều hướng trước) làm đường duy nhất cho Stage 1 — đơn giản hoá đúng năng lực thật của tool, không cần caveat dài dòng trong thesis.
+
+**Phạm vi đã xoá** — xác nhận bằng grep toàn repo, chỉ còn sót trong `note.md` (lịch sử, không sửa):
+- `Scanner/browser_automated_scan.py` — xoá file.
+- `main.py` — bỏ `import asyncio` (chỉ dùng cho `asyncio.run(scanner.start())`), bỏ `--url` argument, bỏ nhánh `if args.url:`.
+- `debug_pipeline.py` — bỏ `import asyncio`, bỏ `--url` argument, bỏ nhánh browser-scan, sửa `STEP_NAMES[1]` từ `"Scan (HarLoader/BrowserScanner)"` → `"Scan (HarLoader)"`.
+- `Dockerfile` — bỏ hẳn bước `pip install playwright && playwright install --with-deps chromium` (giảm size image, không còn cần Chromium headless).
+- `README.md` — bỏ dòng lệnh `scan --url` mẫu, bỏ dòng playwright trong bảng "Requires", sửa "5 mutation paths" → "4 mutation paths" (vì scan không tính là mutation path, dòng cũ đếm nhầm), bỏ dòng `browser_automated_scan.py` trong cây thư mục.
+
+**Verify thật**: `main.py scan --help`/`debug_pipeline.py --help` không còn `--url`; `main.py scan --har ...` vẫn chạy bình thường (không crash do thiếu import); **unit test 64/64 pass** (`Ran 64 tests in 127.715s` / `OK`), không file test nào từng cover `BrowserScanner` nên không cần sửa test nào.
+
+**[QUY TẮC MỚI — áp dụng mọi lần sau]** Mỗi khi tạo API mới trong `Web_vul_env` (java-app/php-app), API đó **BẮT BUỘC phải được gọi từ chính web** (có nút/form/JS thật trên 1 trang HTML gọi tới nó) — không được để endpoint chỉ gọi được bằng `curl` tay.
+
+**Lý do bị bắt lỗi**: `POST /api/integration/receive` (mô phỏng CVE-2026-47864, xem note cũ -33) được tạo xong, verify hoạt động đúng qua `curl`, nhưng **không hề gắn vào bất kỳ trang HTML nào** — user chỉ ra đúng: "web tạo ra API thì phải có API đó được gọi hay được dùng trên web, tạo ra 1 API chỉ để curl mới gọi được thì làm cái quái gì". Hậu quả thực tế: `BrowserScanner`/`HarLoader` chỉ ghi lại request THẬT SỰ xảy ra (xem [browser_automated_scan.py:14-26](../Thesis/Scanner/browser_automated_scan.py#L14-L26) — chỉ `page.goto()` + đợi, không tự click/crawl gì khác) → endpoint không gắn UI thì **Stage 1 (Scan) không bao giờ sinh vector cho nó**, toàn bộ pipeline phía sau vô dụng với nó. Tool `EthicalQuoc` chỉ có thể test cái NÓ QUAN SÁT ĐƯỢC qua traffic, không tự phát hiện endpoint ẩn (không có giai đoạn recon/fuzzing riêng).
+
+**Fix áp dụng ngay cho `/api/integration/receive`** — thêm card UI "Partner integration sync" vào [dashboard.html](../Web vul env/java-app/src/main/resources/static/dashboard.html) (java-app), đúng pattern PHP đã làm cho SSRF/LFI (input + button + `<pre>` output): input mặc định giá trị base64 `rO0ABXQABWhlbGxv` (= bytes `ac ed 00 05 74 00 05 68 65 6c 6c 6f`, serialize chuẩn của `"hello"`, đã verify thật ở note -33), nút "Send" chạy JS decode base64 → `Uint8Array` → `fetch()` với đúng header `Content-Type: application/x-java-serialized-object` tới `/api/integration/receive`.
+
+**Verify thật qua Docker rebuild**: `docker build` lại image, chạy container mới — `curl .../dashboard.html` xác nhận có cả 3 marker (`syncBtn`, `syncPayload`, `api/integration/receive`); mô phỏng đúng request mà nút này gửi → `{"receivedType":"java.lang.String","success":true}` (giống kết quả tay trước đó); regression check `api/login` + `api/dashboard` không bị ảnh hưởng.
+
+**Giới hạn còn lại cần nhớ**: `BrowserScanner` chỉ tự chạy khi LOAD trang, **không tự click nút** — nên muốn `/api/integration/receive` xuất hiện trong HAR thật, phải TỰ TAY bấm nút "Send" trong lúc DevTools đang ghi (giống cách capture `debug_step1.json`), không thể chỉ chạy `--url` tự động.
+
+**[FIXED — bug thật, không phải do session này gây ra] `Analyze/cleanfilter.py` mất dữ liệu khi 1 header có NHIỀU cookie đều "trông giống serialized"**. Phát hiện khi soi tay `debug_step3.json` thật: vector `location=header,name=Cookie` của `dashboard.html` (chuỗi `Cookie:` gộp cả `ref_tag=...` và `session=...`) chỉ giữ lại ĐÚNG giá trị `ref_tag`, mất hẳn `session` (payload Java serialization thật).
+
+Root cause ([cleanfilter.py:26-29](Analyze/cleanfilter.py#L26-L29) bản cũ):
+```python
+if '; ' in cleaned:
+    segments = [s.strip() for s in cleaned.split('; ')]
+    suspicious = [s for s in segments if signatures.looks_like_serialized(s)]
+    cleaned = suspicious[0] if suspicious else segments[0]   # chỉ lấy CÁI ĐẦU TIÊN
+```
+Cả `ref_tag=O:3:"Tag":1:{...}` (khớp `PHP_STRONG`) và `session=rO0AB...` (khớp `"rO0AB" in value`) đều pass `looks_like_serialized()` ([signatures.py:172-173](Utility/signatures.py#L172-L173), [signatures.py:177](Utility/signatures.py#L177)) — nhưng code chỉ giữ `suspicious[0]`, `ref_tag` luôn thắng vì đứng trước `session` trong chuỗi header, **âm thầm bỏ `session`, không cảnh báo gì**.
+
+**Fix**: đổi `_clean()` từ trả về 1 `str` sang trả về `list[str]` (giữ TẤT CẢ segment trông giống serialized, không chỉ cái đầu), `_clean_all()` flatmap thành nhiều vector tương ứng — xác nhận không ai khác gọi `_clean()` trực tiếp (chỉ `_clean_all()` dùng nó) nên đổi type trả về an toàn.
+
+**Verify thật**: chạy lại `-i debug_step1.json --step 3` → 27 vector vào, **34 ra** (tăng đúng 7 — mỗi request có cả `ref_tag`+`session` trong header sinh thêm 1 vector); `dashboard.html`'s `header/Cookie` giờ tách đúng 2 vector (`ref_tag` và `session` riêng, verify bằng script Python đọc trực tiếp file); full pipeline `--step 7` chạy hết không lỗi (27→34 vector xuyên suốt); **unit test 64/64 pass** (`Ran 64 tests in 192.908s` / `OK`), không file test nào assert hành vi cũ nên không cần sửa test.
+
+**[THỬ RỒI REVERT — không giữ lại, chỉ ghi để nhớ đã thử]** Từng thêm `--from-step {2,3}` vào `debug_pipeline.py` để nối tiếp output Stage 2/3 đã lưu làm input cho stage sau (tránh chạy lại từ đầu) — fix đúng, có test pass đầy đủ (kể cả tự bắt lại 1 bug `UnboundLocalError` do chính fix gây ra rồi sửa tiếp). Nhưng user mất niềm tin vì `debug_pipeline.py` bị vá đi vá lại nhiều lần trong 1 session mà vẫn gặp lỗi mới liên tục ("tôi thực sự hoài nghi... đến lúc tôi test thì 1 đống lỗi") → yêu cầu **undo toàn bộ phần `--from-step`**, chỉ giữ lại phần scan Stage 1 (đã verify ở milestone trước). Đã revert sạch bằng 3 lần Edit ngược, confirm bằng cách chạy lại đúng lệnh gốc gây lỗi của user → crash lại y hệt traceback cũ (xác nhận gỡ sạch, không còn sót). **Không tự làm lại fix này nữa trừ khi user yêu cầu lại.**
+
 **Schema hoá pipeline I/O bằng `typing.TypedDict`** — thêm `Utility/schemas.py` (thuần stdlib, không thêm dependency): khai báo type cho input/output của TẤT CẢ stage (`ScanVector`, `CleanedVector`, `NormalizedCandidates`, `FingerprintResult`, `ExploitResult`, `MutationVector`, `Mutation`=`MutationPayload|MutationError`, `OracleProbeResult`, `ReplayResult`=`ReplaySkipped|ReplaySuccess`, `HttpProbeSample`, `AnalyzeEntry`, `AssessEntry`). Gắn type hint thật vào 7 file: `cleanfilter.py`, `normalize.py`, `finderprint.py`, `ExploitabilityAnalysis.py`, `payloadMutation.py`, `oracle_probe.py`, `replay_request.py`. Cài `mypy` (dev-tool, không phải runtime dependency) để verify: `python -m mypy --explicit-package-bases <7 file> --ignore-missing-imports`.
 
 **2 bug thật phát hiện qua mypy (không phải chỉ lỗi khai báo type):**
@@ -211,6 +299,178 @@ python debug_pipeline.py -i results/scan.json --step 7   # + PayloadMutation
   - **Vì sao khó fix bằng ML thật**: dữ liệu thật duy nhất (`result1.json`) chỉ có 11 vector, cùng 1 lab, cùng 1 loại exploit — không đủ để train weight có ý nghĩa (overfit ngay). `comprehensive.har` là dữ liệu tự dựng (đã note "không phải thực tế") — nếu dùng nó để train thì weight học được chỉ phản ánh cách tự nghĩ ra payload, không phản ánh tấn công thật (bias vòng lặp). Đây là lý do thực tế, không phải bỏ qua/lười.
   - **Hướng xử lý đề xuất cho luận văn**: (1) nêu rõ đây là giới hạn phương pháp luận trong Threats to Validity — bài toán này giống signature-based detection (YARA/Suricata) hơn là ML kinh điển, ngành vẫn ưu tiên rule-based vì cần giải thích được lý do flag; (2) có thể thêm 1 mục Future Work nhỏ: dùng `generate_comprehensive_har.py` sinh thêm dữ liệu synthetic có label, thử fit logistic regression trên các feature hiện có (magic bytes có/không, số colon/quote, gadget keyword có/không...) để so sánh với weight tay — chỉ cần đề xuất hướng, chưa cần chạy thật.
 - [ ] **Contribution Statement** — chưa có đoạn tóm tắt rõ ràng đóng góp chính, để hội đồng dễ so khớp với RQ
+- [ ] **Trả lời câu "tool còn ý nghĩa gì khi thực tế web dùng JSON cho lẹ, mấy ai dùng serialization kiểu này"** — user tự đặt câu hỏi này khi học tới `AuthApiController.java`, ĐÂY CHẮC CHẮN LÀ câu hội đồng sẽ hỏi lúc bảo vệ, cần note kỹ để trả lời tự tin:
+  - **Đồng ý 1 phần**: web MỚI/API hiện đại (microservice, SPA) hầu hết dùng JSON/JWT — tool KHÔNG tìm được gì trên các web đó, đây là giới hạn THẬT, không nên giấu.
+  - **Nhưng tool không nhắm vào "web mới"** — nhắm vào 2 nhóm cụ thể vẫn tồn tại thật:
+    1. **Hệ thống enterprise legacy** (ngân hàng/chính phủ/doanh nghiệp lớn) — viết từ 15-20 năm trước, lúc JSON chưa phổ biến trong Java, KHÔNG thể viết lại toàn bộ chỉ vì công nghệ mới tiện hơn (rủi ro/chi phí quá lớn) — vẫn chạy thật tới hôm nay.
+    2. **Middleware/hạ tầng mà serialization là BẢN CHẤT giao thức, không phải lựa chọn dev** — VD Java RMI (JRMP), Apache ActiveMQ (OpenWire) — đổi sang JSON phải thiết kế lại cả giao thức, không đơn giản như đổi code 1 app.
+  - **Bằng chứng KHÔNG PHẢI lý thuyết, mới hẳn (2023)**: CVE-2023-46604 (ActiveMQ, đã note ở mục trên) bị **ransomware khai thác THẬT năm 2023** — chứng minh lớp lỗ hổng này KHÔNG "đã chết", vẫn bị tấn công thật ngoài đời gần đây.
+  - **Khung trả lời chuẩn cho Scope/Limitations**: mọi security tool đều có SCOPE riêng (tool quét SQLi không tìm ra XSS, không ai trách "vô nghĩa") — tool này scope đúng vào "hệ thống Java/.NET/PHP legacy còn dùng native serialization cho session/RPC", không claim quét được MỌI web — đây là câu trả lời TRUNG THỰC, định nghĩa scope rõ ràng, không phải chữa cháy.
+- [ ] **Scope — hạ tầng + giai đoạn tool nhắm tới** (user hỏi "thesis nhắm vào cơ sở hạ tầng nào của web, giai đoạn nào" — đã trả lời, note lại để viết vào phần Scope của thesis):
+  - **Hạ tầng**: Application layer (Layer 7) của web app, qua HTTP/HTTPS — dựa đúng cách tool hoạt động (`har_loader.py` đọc HAR = log HTTP, `browser_automated_scan.py` dùng Playwright vẫn là HTTP, `replay_request.py` gửi bằng `urllib.request`). KHÔNG bao gồm hạ tầng phi-HTTP (message broker như ActiveMQ, RMI/JMX) — đây là layer khác, dùng protocol riêng (OpenWire/JRMP), tool này không chạm tới.
+  - **Giai đoạn (SDLC)**: tool thuộc nhóm **DAST** (black-box, không đọc source code — khác SAST như Semgrep/CodeQL quét `unserialize()` trong code, khác IAST cần agent runtime) — vận hành ở giai đoạn kiểm thử ĐỘNG trên app ĐÃ CHẠY (post-deployment), không phải lúc viết/review code.
+  - **Giai đoạn (pentest methodology)**: 4 stage của tool map đúng 4 giai đoạn pentest cổ điển, thu nhỏ cho đúng 1 lớp lỗ hổng: `scan`=Reconnaissance, `analyze`=Vulnerability identification, `assess`=Exploitation/Verification, `report`=Reporting.
+  - **Số liệu hỗ trợ cho phần Motivation/Background** (đã verify qua OWASP + WebSearch, không suy đoán):
+    - OWASP Top 10 2017 (A8) risk rating chính thức: **Exploitability: 1 (Difficult)**, **Prevalence: 2 (Common)**, **Detectability: 2 (Average)** — nguồn: [OWASP/Top10 GitHub A8:2017](https://github.com/OWASP/Top10/blob/master/2017/en/0xa8-insecure-deserialization.md).
+    - Contrast Security "2021 Application Security Observability Report": chỉ ~2% app có lỗ hổng deserialization NGHIÊM TRỌNG được xác nhận — nhưng OWASP tự ghi nhận số thấp này "CÓ THỂ do thiếu công cụ hiệu quả để phát hiện" — **đây là câu trích dẫn trực tiếp hỗ trợ lý do thesis có giá trị** (tool nhắm đúng vào gap "thiếu tool phát hiện" này).
+    - Ví dụ CVE thật ở layer KHÁC (ngoài phạm vi thesis, dùng để làm rõ ranh giới Scope): CVE-2023-46604 (Apache ActiveMQ, CVSS 9.8, bị ransomware HelloKitty khai thác thật — nguồn: [Huntress](https://www.huntress.com/threat-library/vulnerabilities/cve-2023-46604)), CVE-2020-13946 (Apache Cassandra RMI/JMX).
+
+-37. **[FIXED — bug thật, user tự bắt được ngay lần đầu dùng]** `debug_pipeline.py --step 1 -o <file>` lưu ra **list trần** (`_emit()` dùng chung cho mọi stage, chỉ `json.dump()` thẳng) — nhưng `-i` (Stage 2+) qua `InputLoader.load()` lại bắt buộc format BỌC `{"metadata":...,"summary":...,"vectors":[...]}` ([input_loader.py:5-6](Input/input_loader.py#L5-L6)). Dùng đúng file Stage 1 vừa lưu làm `-i` cho Stage 2 → crash `AttributeError: 'list' object has no attribute 'keys'` — lỗi thật, bắt được NGAY từ lần đầu dùng feature mới thêm ở mục -36.
+
+  **Fix** ([debug_pipeline.py](debug_pipeline.py)): Stage 1 khi lưu (`-o`) đổi từ `_emit()` (list trần) sang gọi lại ĐÚNG `save_output_file_type()` (đã có sẵn, `main.py scan` cũng dùng y hệt) — đảm bảo file Stage 1 xuất ra có CÙNG schema với `main.py scan` thật, dùng lại được cho cả `-i` của debug_pipeline VÀ `main.py analyze` thật, không tạo thêm 1 format rời rạc riêng.
+
+  **Verify thật đúng case gây lỗi**: Stage 1 lưu file → dùng làm `-i` cho Stage 2 → chạy trót lọt (5 vector, không crash) — khớp đúng lỗi user gặp, giờ đã hết. Kiểm tra file lưu ra có đủ 3 key `metadata`/`summary`/`vectors`. 64/64 unit test vẫn pass.
+
+-36. **[MỚI]** `debug_pipeline.py` thêm **Stage 1 (Scan)** — theo yêu cầu "thêm vô debug pipeline cho cả bước scan luôn đi, ghi thêm vô nó thành stage 1". Trước đây CHỈ nhận `-i` (scan_output.json đã có sẵn) — giờ thêm `--har`/`--url`, tái dùng ĐÚNG logic `HarLoader`/`BrowserScanner` từ `main.py` (kể cả lazy-import `BrowserScanner` để tránh phá vỡ khi chưa cài playwright — nhất quán với fix đã làm ở `main.py` trước đó).
+
+  **Cách dùng mới**: `--step 1 --har <file>` → chỉ chạy scan, xem ngay vector thô. `--step N --har <file>` (N=2-7) → tự động chain Stage 1 scan XONG rồi chạy tiếp tới N trong CÙNG 1 lệnh, không cần 2 bước tách rời (gọi `scan` rồi `debug_pipeline` như trước). `-i` cũ vẫn dùng được y hệt (tương thích ngược hoàn toàn).
+
+  **1 chi tiết kỹ thuật cần xử lý**: `VectorFiltering.__init__()` ([postfiltered.py:49-50](Analyze/postfiltered.py#L49-L50)) đọc cứng `self.data["vectors"]` — khi chain thẳng từ scan (không qua `InputLoader`/file), phải tự bọc `{"vectors": total_vectors}` trước khi đưa vào `VectorFiltering`, không đưa list trần.
+
+  **Verify thật đủ 4 case**: `--step 1 --har` (chỉ scan, 15 vector) → `--step 3 --har` (chain 1→2→3, 15→5→5, khớp đúng số liệu đã có từ milestone -35) → `-i` cũ (`--step 2`, vẫn ra 5 vector y hệt) → thiếu cả `-i` lẫn `--har`/`--url` (báo lỗi rõ ràng, exit code 2 đúng chuẩn argparse) → `--step 1` mà chỉ có `-i` không có `--har`/`--url` (báo lỗi riêng, rõ ràng). 64/64 unit test vẫn pass.
+
+-35. **[MILESTONE — lần đầu chạy FULL pipeline thật trên môi trường TỰ DỰNG]** Theo yêu cầu "chạy web này, thao tác trên đó rồi tải file har của web rồi dùng tool chạy thử" — lần đầu tiên trong cả project, tool chạy `scan→analyze→assess→report` trên traffic THẬT từ `Web_vul_env` (không phải PortSwigger đã hết hạn, không phải `comprehensive.har` synthetic).
+
+  **Cách làm**: chạy container `php-vuln-app` thật (port 8082) → dùng `curl` thao tác login/dashboard/profile/settings/notifications THẬT (không giả lập) → tự viết script Python dựng file HAR hợp lệ (`php-app-session.har`, 6 entry) từ ĐÚNG request/response/cookie thật vừa capture (không bịa số liệu) → chạy qua WSL2 (`ethicalquoc` pipeline, có đủ PHP thật cho `phpggc` nếu cần).
+
+  **Kết quả — ĐÚNG HOÀN TOÀN, không sai 1 case nào**:
+  - `session` cookie (lỗ hổng thật, admin-flip) trên `dashboard.php` VÀ `profile.php` → baseline `401` (chưa auth) → mutated `200` (admin=true được chấp nhận) → **Confirmed** đúng — status code đổi 401→200 là tín hiệu rõ ràng server đã deserialize thành công.
+  - `ref_tag` (field DECOY, không bao giờ `unserialize()`) × 4 case (2 endpoint × 2 mutation) → **Suspected**, KHÔNG bị Confirm nhầm — đúng kỳ vọng false-positive test đã thiết kế từ mục -31.
+  - `session` test nhầm trên `settings.php` (endpoint không hề đọc cookie `session`) → baseline/mutated giống hệt nhau → **Suspected** đúng — true negative.
+  - `report` cuối: **Confirmed: 2 | Suspected: 9** — khớp chính xác phân tích tay.
+
+  **1 giới hạn THẬT phát hiện qua lần chạy này** (không phải bug sai kết quả, nhưng đáng ghi nhận): case `ref_tag` ra `401` ở CẢ baseline VÀ mutated — không phải vì "an toàn" theo đúng nghĩa đã thiết kế (ref_tag không bị deserialize), mà vì `ReplayRequest._send()` (`location=cookie`) **CHỈ gửi ĐÚNG 1 cookie đang test**, làm MẤT cookie `session` (xác thực) đã có trong request gốc — nên mọi request test `ref_tag` bị chặn ở bước auth TRƯỚC KHI chạm tới code echo `ref_tag` — kết luận "Suspected" vẫn ĐÚNG, nhưng LÝ DO đạt được kết luận đó chưa "sạch" (không thực sự test được hành vi deserialize của `ref_tag`, chỉ test được "thiếu session thì bị chặn"). Muốn kết luận "sạch" hơn, `_send()` cần gửi KÈM cookie khác đã biết từ request gốc, không chỉ đúng 1 cookie đang test — để dành, không fix ngay (không sai kết quả hiện tại, chỉ chưa tối ưu).
+
+  File HAR + toàn bộ output (`scan_out.json`/`analyze_out.json`/`assess_out.json`/`report_out.json`) lưu tại `Web_vul_env/` làm bằng chứng — đây là **bộ số liệu ĐỊNH LƯỢNG THẬT ĐẦU TIÊN** từ môi trường tự dựng, có thể dùng trực tiếp cho phần "Dữ liệu định lượng" của thesis (đã note thiếu ở mục học thuật).
+
+-34. **[MỚI — cả 2 app, đơn giản]** Theo yêu cầu "thêm phần cơ bản như lúc đăng nhập bằng role admin thì hiện xin chào admin, còn nếu bình thường thì không" — thêm dòng `"Hello, Admin!"` chỉ hiện khi `role === 'admin'`, dùng ĐÚNG field `role` đã có sẵn trong response `/api/dashboard` — KHÔNG sửa backend gì cả, chỉ thêm markup + 1 dòng JS (`document.getElementById('adminGreeting').style.display = 'block'`) trong `dashboard.html` cả Java và PHP.
+
+  **Verify thật qua Docker**: HTML có đúng markup `adminGreeting` (cả 2 app); login thường → `role:"user"`; cookie admin-flip (tự tay sửa byte `role`/`admin` từ `"user"`→`"admin"`) → `role:"admin"` đúng cho cả 2 app — JS sẽ hiện "Hello, Admin!" khi gặp giá trị này.
+
+-33. **[MỚI — repo `Web_vul_env`, java-app]** Mô phỏng **CVE-2026-47864** (Spring Integration — `SerializingHttpMessageConverter` deserialize trực tiếp body qua `Content-Type: application/x-java-serialized-object`, không lọc class, KHÔNG CẦN đăng nhập, công bố 27/8/2026) — theo yêu cầu "thêm nó vào web test env của tôi được không, mô phỏng CVE-2026-47864". Đây là CVE RẤT GẦN (lúc note là ~6 tuần trước), đúng framework Java PHỔ BIẾN (Spring, không phải legacy 20 năm), dùng để phản bác trực tiếp lo ngại "tool không còn ý nghĩa trong tương lai" đã bàn ở mục học thuật phía trên.
+
+  **Khác CVE Magento (CVE-2026-103831) đã note trước** — CVE này là loại **"trực tiếp 1-request"** (không cần điều kiện tiên quyết như ghi cache trước), khớp ĐÚNG mô hình `location=raw_body` tool đã có sẵn.
+
+  **Endpoint mới**: `POST /api/integration/receive` ([MessageIntegrationController.java](../Web vul env/java-app/src/main/java/com/webvulenv/javaapp/controller/MessageIntegrationController.java)) — đọc `Content-Type`, nếu đúng `application/x-java-serialized-object` thì đọc RAW body qua `StreamUtils.copyToByteArray()` (dùng tiện ích CÓ SẴN của Spring, không thêm dependency, tránh lỗi Java 8 không có `InputStream.readAllBytes()` của Java 9+) rồi `ObjectInputStream.readObject()` TRỰC TIẾP — không qua `SessionCookieFilter` (chỉ guard `/api/dashboard`/`/api/profile`), nên không cần cookie/login — đúng khớp "lack of authentication required" của CVE thật.
+
+  **Verify thật đầy đủ cả 3 case qua Docker**:
+  1. `Content-Type` sai → **415**, báo lỗi rõ, không chạm tới deserialize.
+  2. `Content-Type` đúng + byte rác → **500**, lộ đúng `"failed to deserialize message body via ObjectInputStream: java.io.StreamCorruptedException..."` — khớp `ERROR_KEYWORDS`.
+  3. `Content-Type` đúng + **byte Java serialize THẬT** (tự tay dựng hex `ac ed 00 05 74 00 05 68 65 6c 6c 6f` = serialize chuẩn của `String "hello"`, không qua tool nào, dựa theo định dạng byte cố định đã biết của Java serialization cho kiểu String) → **200**, `{"receivedType":"java.lang.String","success":true}` — xác nhận deserialize THẬT hoạt động đúng, không chỉ test case lỗi.
+  - Re-verify endpoint cũ (`/login`, `/api/dashboard`) không bị ảnh hưởng gì.
+
+-32. **[FIXED — nhất quán kiến trúc]** User chỉ ra đúng: Java hardcode `NOTIFICATIONS` thẳng trong `PortalApiController.java`, PHP đọc từ `data/notifications.json` — KHÔNG nhất quán, khó debug/maintain sau này ("ưu tiên clean code, chứ code bừa rồi không nhất quán thì làm gì dễ debug"). Fix: tạo `java-app/src/main/resources/notifications.json` (y hệt nội dung PHP) + `NotificationService.java` mới (đọc file qua Jackson, CÙNG pattern với `UserService.java` đã có — Controller → Service → data file, không rẽ ra cách riêng). `PortalApiController` inject `NotificationService` qua constructor, bỏ hẳn list hardcode + helper `notif()`.
+
+  **Verify thật** (lần này ĐỔI LOGIC thật, không như xoá comment trước — phải test): `docker build` → `BUILD SUCCESS`; `GET /api/notifications` → đúng 3 notification từ file JSON (không còn từ code); login+dashboard vẫn hoạt động đúng, không bị ảnh hưởng.
+
+-31. **[NÂNG CẤP + DỌN DẸP — repo `Web_vul_env`]** Theo yêu cầu "làm cho môi trường test trông giống thật hơn đi, build thêm nhiều api, chức năng" — thêm loạt feature/API mới cho CẢ 2 app (profile/settings/notifications) + 2 field "noise" (benign, không deserialize — test false-positive) + 2 endpoint wrapper mới cho PHP (SSRF/LFI) đã bàn ở câu hỏi coverage trước đó. Sau đó theo yêu cầu "delete tất cả comment trong code đi" — xoá sạch comment ở TOÀN BỘ project (7 file Java, 11 file PHP, 2 file HTML/JS), chỉ xoá `//`/`/** */`/`<!-- -->`, không đổi logic — không rebuild/test lại (comment không ảnh hưởng runtime, user tự chỉ ra việc test là dư thừa).
+
+  **Feature mới (cả 2 app)**:
+  - `GET /api/profile` (Java)/`profile.php` (PHP) — trả username/email/joined + 2 field noise.
+  - `POST /api/settings` — set cookie `prefs` (JSON benign, theme/lang) — KHÔNG BAO GIỜ deserialize.
+  - `GET /api/notifications` — list tĩnh, không tham số, không lỗ hổng — tăng độ "giống app thật".
+  - FE: thêm `profile.html`, cập nhật `dashboard.html` (nav Profile, khối notification, settings theme) — JS tự set cookie `ref_tag` (mô phỏng tracking referral thật) lúc load trang.
+
+  **2 field "noise" — test false-positive** (đã bàn ở câu hỏi "có gì make noise để test không"):
+  1. `prefs` — JSON thường, không phải object injection, chỉ server echo lại.
+  2. `ref_tag` — CỐ TÌNH có shape giống serialize (`O:3:"Tag":1:{...}`) nhưng KHÔNG BAO GIỜ bị `unserialize()`/`ObjectInputStream` — chỉ echo literal. Detector đúng phải báo tối đa "Suspected", KHÔNG được "Confirmed".
+
+  **2 endpoint wrapper mới (chỉ PHP, vì tool chỉ có `_mutate_wrapper_*` cho PHP)**:
+  - `GET /api/preview.php?url=...` — SSRF thật (`file_get_contents($url)` không allowlist).
+  - `GET /api/document.php?file=...` — LFI thật (`file_get_contents($file)` không containment check) — test được `file://`, `php://filter`, path traversal.
+
+  **3 bug thật tự bắt được lúc verify** (trước khi xoá comment):
+  1. Dockerfile PHP thiếu `COPY data ./data` (đã fix ở mục -28, nhắc lại context).
+  2. `document.php` lỗi "No such file" dùng path `documents/welcome.txt` — nguyên nhân: **PHP built-in server set CWD = thư mục của SCRIPT đang chạy** (`public/api/`), KHÔNG PHẢI docroot — fix: đổi default value FE + comment hint thành `../documents/welcome.txt` (đã verify đúng qua `curl`, bao gồm cả `/etc/passwd` traversal và `php://filter` source disclosure thật).
+  3. `preview.php` test tự fetch chính nó (`http://localhost:8082/...`) bị treo — nguyên nhân: PHP built-in server **đơn luồng**, tự gọi mình = deadlock (request ngoài chờ fetch xong, fetch cần server rảnh để nhận request mới) — không phải bug app, chỉ là chọn URL test sai; verify lại bằng URL ngoài thật (`https://example.com`) thành công.
+
+  **Verify đầy đủ qua Docker** (trước khi xoá comment): login/profile/settings/notifications đều đúng cho cả 2 app; `ref_tag` echo lại đúng y nguyên giá trị decoy (không bị xử lý gì); lỗ hổng gốc (admin flip, cookie rác → lộ lỗi) vẫn hoạt động 100% sau mọi thay đổi.
+
+-30. **[MỚI — repo `Web_vul_env`]** Thêm "ý tưởng 2" đã bàn trước (terminal web gắn thật vào máy) — dùng **ttyd** (tool OSS, xterm.js + PTY thật qua WebSocket, `apt install ttyd` có sẵn trong Ubuntu repo, không cần build gì) — chạy TRONG WSL2 Ubuntu (đúng nơi có đủ Java/PHP/Ruby/.NET thật của EthicalQuoc), root tại thư mục `Thesis` qua `--cwd /mnt/d/Thesis/Thesis`.
+
+  **2 chi tiết thật phải tự xử lý lúc cài**:
+  1. `apt install ttyd` tự enable kèm 1 **systemd service** chiếm sẵn port 7681 ở mode READ-ONLY (`--writable` không set theo mặc định — chỉ XEM, không gõ lệnh được) — phải tắt service đó (`systemctl stop/disable ttyd`) rồi tự chạy lại bằng tay với `--writable` mới gõ lệnh được.
+  2. WSL2 tự forward `localhost:7681` ra Windows host — verify thật bằng `curl http://localhost:7681/` từ PowerShell/Git Bash, ra 200, không cần cấu hình port-forward thủ công gì thêm.
+
+  **Tích hợp vào control panel + `start-all.bat`**: thêm nút "Open live terminal (WSL2)" riêng (không gộp vào switch Java/PHP, vì terminal không phải "backend để chọn" mà là tiện ích phụ) trỏ `http://localhost:7681`; `start-all.bat` thêm bước `wsl -d Ubuntu -- bash -c "pkill ttyd; ... nohup ttyd -p 7681 --writable --cwd /mnt/d/Thesis/Thesis bash & disown"` — tự kill instance cũ (tránh lỗi bind port trùng) rồi chạy lại mỗi lần script khởi động.
+
+  **Verify thật đầy đủ (chạy lại toàn bộ `start-all.bat` từ đầu)**: Docker build cả 2 image (cache đúng) → 2 container start → ttyd start trong WSL2 → `curl` xác nhận **cả 3 đều 200** (`localhost:8081`/`8082`/`7681`) → control panel tự mở, có thêm nút terminal mới.
+
+-29. **[MỚI — repo `Web_vul_env`]** `control-panel/index.html` (trang switch Java/PHP, đã bàn ý tưởng trước — chọn hướng đơn giản: chỉ là link đổi port, không orchestration) + `start-all.bat` (file chạy 1 lần dựng toàn bộ: check/khởi động Docker Desktop nếu chưa chạy, build 2 image, chạy 2 container, mở control panel) — theo yêu cầu "tạo file bat chạy 1 lần tất cả server".
+
+  **1 bug thật tự phát hiện lúc verify** ([start-all.bat](../Web vul env/start-all.bat)): dòng `timeout /t 5 /nobreak >nul` trong vòng chờ Docker sẵn sàng bị lỗi `"Input redirection is not supported, exiting the process immediately"` khi script chạy trong môi trường không có console input thật (non-interactive) — `timeout.exe` cần console handle thật. Fix: đổi sang `ping -n 6 127.0.0.1 >nul` (trick cổ điển sleep ~5s không cần console input).
+
+  **Verify thật 2 lần** (lần 1 bắt lỗi timeout, lần 2 sau fix sạch): `start-all.bat` chạy xong → Docker build cả 2 image (cache lại đúng, không rebuild lại từ đầu lần 2) → cả 2 container start → `curl` xác nhận `Java: 200`/`PHP: 200` → control panel tự mở.
+
+-28. **[ĐỔI KIẾN TRÚC — cả 2 app]** Theo làm rõ "ý tôi nói mà architecture của web ấy... FE giao tiếp qua BE thông qua API, có authen, mô hình MVC" — đổi hẳn từ server-render (Thymeleaf/PHP template) sang **REST API (JSON) + FE tĩnh gọi `fetch()`**. Dữ liệu user chuyển từ hardcode trong code sang **`users.json`** (user đề xuất: "thay vì mysql thì lưu qua json cho nhẹ nhàng") — vai trò như DB nhẹ, đọc read-only lúc login.
+
+  **Kiến trúc mới (cả 2 app)**:
+  ```
+  BE (JSON REST API):
+    POST /api/login     -> đọc users.json, check credential, set cookie session=Base64(serialize(...)), tra JSON
+    GET  /api/dashboard -> đọc cookie, unserialize/ObjectInputStream (VAN LA SINK LO HONG CU), tra JSON
+    POST/GET /api/logout -> xoá cookie
+  FE (file tĩnh, KHÔNG qua server template nữa):
+    login.html/dashboard.html -> JS fetch() gọi API, render DOM bằng tay
+  ```
+  Java: thêm `UserService`+`UserRecord` (đọc `users.json` qua Jackson, đã có sẵn trong `spring-boot-starter-web`), `AuthApiController` (`@RestController`) thay `AuthController` (Thymeleaf) đã xoá hẳn + bỏ dependency `spring-boot-starter-thymeleaf` khỏi `pom.xml`. `SessionCookieFilter` đổi guard từ `/dashboard` sang `/api/dashboard`, trả JSON lỗi thay vì redirect/HTML.
+  PHP: thêm `data/users.json`, 3 file `public/api/{login,logout,dashboard}.php` (JSON in/out) thay hẳn `login.php`/`dashboard.php`/`logout.php` cũ.
+
+  **Lợi ích phụ**: giải quyết luôn câu hỏi trước "sao DevTools không thấy API" — giờ Network tab thấy đúng request `fetch()` tới `/api/*`, request/response JSON rõ ràng.
+
+  **1 bug thật tự phát hiện lúc build+test** ([php-app/Dockerfile](../Web vul env/php-app/Dockerfile)): `COPY src ./src` + `COPY public ./public` nhưng **THIẾU `COPY data ./data`** — `api/login.php` không tìm thấy `users.json` trong container, PHP tự in `Warning: file_get_contents(...): failed to open stream` lẫn vào response JSON (không phải lỗi cố ý, là bug thật của chính lúc viết Dockerfile). Verify tay bắt được qua `curl` test login — thấy HTML warning lẫn trong response. Fix: thêm dòng `COPY data ./data`, rebuild, verify lại sạch — không còn warning.
+
+  **Verify đầy đủ sau khi đổi kiến trúc** (cả 2 app, qua Docker thật):
+  - Login API sai pass → `401 {"error":"Invalid username or password."}`.
+  - Login API đúng pass (`wiener`/`peter`) → `200`, `Set-Cookie: session=...` (vẫn đúng base64 serialize thật), JSON `{"success":true,...}`.
+  - Dashboard API với cookie thật → JSON đúng `{"username":"wiener","role":"user"}`.
+  - **Lỗ hổng vẫn nguyên**: PHP admin flip (`b:1`) → JSON `{"role":"admin"}` đúng; cookie rác cả 2 app → JSON lộ đúng lỗi deserialize, status 500 — khớp `ERROR_KEYWORDS`.
+  - FE tĩnh (`login.html`/`dashboard.html`) load được 200, không qua server template nào.
+
+  **Endpoint test EthicalQuoc đổi theo** (vẫn `location=cookie`, `name=session`): Java `url=http://localhost:8081/api/dashboard`; PHP `url=http://localhost:8082/api/dashboard.php`.
+
+-27. **[NÂNG CẤP — cả 2 app]** Theo phản hồi "mình test thì ít nhiều cái web cũng phải giống thật xíu chứ nhờ" — thêm cho cả Java/PHP: (1) kiểm tra đăng nhập THẬT (tài khoản test cứng `wiener`/`peter` — lấy đúng cặp username/password PortSwigger hay dùng — sai thì bị từ chối, không phải gõ gì cũng vào được như bản cũ); (2) `logout` xoá cookie; (3) UI polish (brand "ACME PORTAL", nav bar, vài khối thống kê giả trên dashboard).
+
+  **Verify đầy đủ sau khi sửa (không chỉ đổi UI mà quên test lại cơ chế lỗ hổng)**:
+  - Sai password → bị chặn, hiện "Invalid username or password" (cả 2 app).
+  - Đúng password (`wiener`/`peter`) → cookie serialize thật vẫn sinh đúng, dashboard hiện "Welcome back, wiener" đúng.
+  - `logout` → cookie bị xoá (`Max-Age=0`/`expires` quá khứ), redirect về login.
+  - **Cơ chế lỗ hổng KHÔNG bị ảnh hưởng**: PHP admin flip (`b:1`) vẫn hiện badge ADMIN đúng; cookie rác vẫn lộ đúng lỗi `unserialize()`/`StreamCorruptedException` ở cả 2 app, status 500 — xác nhận sửa UI không vô tình che/đổi hành vi deserialize.
+
+-26. **[MỚI — repo `Web_vul_env`]** Dựng xong app PHP thứ 2, theo yêu cầu "thêm cái php cho tôi" — cùng pattern BE+FE như app Java (mục -25).
+
+  **Stack**: PHP 7.4 (built-in dev server, không framework) + `monolog/monolog:^1.4` qua Composer (resolve ra `1.27.1`) — **không dùng logging thật**, chỉ cần có mặt trong `vendor/` để gadget `Monolog/RCE1` của `phpggc` có class thật để gọi vào lúc `unserialize()`.
+
+  **Điểm nhất quán đặc biệt**: class `User {username, admin}` ([src/User.php](../Web vul env/php-app/src/User.php)) chọn ĐÚNG shape giống `result1.json` (data thật PortSwigger đã dùng xuyên suốt phiên: `O:4:"User":2:{s:8:"username";...;s:5:"admin";b:0;}`) — nên mutation `flip_boolean` của tool áp dụng được NGUYÊN VẸN, không cần đổi gì.
+
+  **Verify THẬT qua Docker** (cùng máy, Docker Desktop lại tắt, tự khởi động lại):
+  - `docker build` → thành công, Monolog resolve `1.27.1`.
+  - `GET /login.php` → 200. `GET /dashboard.php` không cookie → 302 (baseline).
+  - `POST /login.php` (username=wiener) → `Set-Cookie: session=Tzo0OiJVc2VyIjoyOnt...` — decode base64 ra ĐÚNG `O:4:"User":2:{s:8:"username";s:6:"wiener";s:5:"admin";b:0;}` — khớp 100% shape thật.
+  - **Test leo quyền thật**: tự tạo cookie `admin;b:1` (mô phỏng đúng mutation `flip_boolean`) → dashboard hiện badge **ADMIN** — xác nhận lỗ hổng privilege escalation qua deserialize hoạt động đúng.
+  - Cookie rác (malformed) → **500**, lộ đúng `"unserialize(): Error at offset 0 of 9 bytes"` — khớp `ERROR_KEYWORDS` (`"unserialize()"`).
+
+  **Endpoint dùng để test EthicalQuoc**: `location=cookie`, `name=session`, `url=http://localhost:8082/dashboard.php`, `method=GET`.
+
+  **Chưa commit** — cùng trạng thái untracked như app Java, user tự quyết định khi push.
+
+-25. **[MỚI — repo `Web_vul_env`, không phải Thesis-v2]** Dựng xong app Java đầu tiên cho môi trường test, theo yêu cầu "dựng cho tôi 1 web test java cơ bản trước đi, có BE,FE chuẩn chỉnh" — đổi thứ tự ưu tiên so với đề xuất ban đầu ở mục -22 (Java lên trước, không phải pickle/YAML).
+
+  **Stack**: Spring Boot 2.7.18 + Thymeleaf (BE+FE monolith, server-render) + Java 8 + `commons-collections:3.2.1` pin cứng. Chọn Java 8 vì gadget `CommonsCollections` kinh điển kém ổn định trên Java 9+ (module system đổi), chọn commons-collections 3.2.1 vì đúng version CC1/CC4/CC6 cần có trên classpath mới có đường gọi reflection hợp lệ.
+
+  **Cấu trúc** (`Web_vul_env/java-app/`): `AuthController` (login form FE + `POST /login` set cookie `session=Base64(Java-serialize(UserSession))`), `SessionCookieFilter` (chặn mọi request `/dashboard`, đọc cookie, gọi `ObjectInputStream.readObject()` TRỰC TIẾP — không allowlist, không HMAC — đúng sink mà `_mutate_java()`/ysoserial nhắm tới), `dashboard`/`login` Thymeleaf template.
+
+  **Verify THẬT qua Docker** (Docker Desktop lúc đầu chưa chạy, tự khởi động lại rồi build):
+  - `docker build` → `BUILD SUCCESS`.
+  - `GET /login` → 200 (form FE load được).
+  - `GET /dashboard` KHÔNG cookie (baseline) → **302** redirect `/login`.
+  - `POST /login` (username=wiener) → `Set-Cookie: session=rO0AB...` — xác nhận **`rO0A` = base64 của magic byte Java serialization thật** (`ac ed 00 05`), không phải giả.
+  - `GET /dashboard` VỚI cookie thật → 200, hiển thị đúng "Welcome, wiener / Role: user".
+  - `GET /dashboard` với cookie RÁC (giả lập payload malformed) → **500**, body lộ đúng `"failed to deserialize session via ObjectInputStream: java.io.StreamCorruptedException..."` — khớp `ERROR_KEYWORDS` của `replay_request.py` (`"objectinputstream"`), đúng thiết kế để Stage 8 confirm được.
+
+  **Endpoint dùng để test EthicalQuoc**: `location=cookie`, `name=session`, `url=http://localhost:8081/dashboard`, `method=GET`.
+
+  **Chưa commit** — file đang untracked trong `Web_vul_env` (theo rule chỉ commit khi được yêu cầu), user tự quyết định khi nào push.
 
 -24. **[REMOVED]** Bỏ hẳn `oracle_probe.py` theo quyết định của user sau khi cùng phân tích kỹ (Q&A): oracle chỉ hỗ trợ PHP (kỹ thuật "length corruption" đặc thù riêng PHP serialize — không port được sang Java/binary, Ruby/Pickle thì CÓ THỂ port nhưng chưa làm, YAML/Node/.NET cần kỹ thuật khác hẳn), VÀ kết quả của nó **không hề điều khiển gì cả** trong `main.py` (chỉ tính xong rồi đính kèm vào output, không skip mutation nào) — chi phí (thêm 2 request HTTP/vector) không bù được lợi ích hẹp (1/7 format, không gate logic).
 

@@ -1,13 +1,27 @@
 from typing import TypedDict
 
 
-class ScanVector(TypedDict):
+class RequestContext(TypedDict, total=False):
+    headers: dict[str, str]
+    cookies: dict[str, str]
+    body: str | None
+
+
+class ScanVectorRequired(TypedDict):
     source: str
     url: str
     method: str
     location: str
     name: str
     value: str
+
+
+class ScanVectorExtra(TypedDict, total=False):
+    request_context: RequestContext
+
+
+class ScanVector(ScanVectorRequired, ScanVectorExtra):
+    pass
 
 
 class CleanedVectorRequired(TypedDict):
@@ -47,14 +61,14 @@ class ExploitResult(TypedDict):
 
 class ConfirmedExploitResultExtra(TypedDict, total=False):
     replay_note: str
-    confirmed_indicators: list[str]
+    observations: list[str]
 
 
 class ConfirmedExploitResult(ExploitResult, ConfirmedExploitResultExtra):
     pass
 
 
-class MutationVector(TypedDict):
+class MutationVectorRequired(TypedDict):
     source: str
     url: str
     method: str
@@ -64,6 +78,14 @@ class MutationVector(TypedDict):
     original_value: str
     cleaned_value: str
     encoding_chain: list[str]
+
+
+class MutationVectorExtra(TypedDict, total=False):
+    request_context: RequestContext
+
+
+class MutationVector(MutationVectorRequired, MutationVectorExtra):
+    pass
 
 
 class MutationPayloadCore(TypedDict):
@@ -83,6 +105,7 @@ class MutationPayloadCore(TypedDict):
 class MutationPayloadExtra(TypedDict, total=False):
     payload_raw: str
     note: str
+    request_context: RequestContext
 
 
 class MutationPayload(MutationPayloadCore, MutationPayloadExtra):

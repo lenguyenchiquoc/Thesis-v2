@@ -1,5 +1,78 @@
 # Ghi chú tiến độ — EthicalQuoc
 
+**[ĐÃ FIX] Bug trùng vector `header`/`Cookie` (xem mục `[BUG TÌM RA...]` dưới) — chọn hướng (C) mới, KHÔNG phải (A)/(B) đã bàn trước đó: skip có điều kiện ngay từ Stage 1, không relabel ở `cleanfilter.py`.**
+
+Trong lúc viết plan chi tiết cho hướng (A), user hỏi thẳng: *"tại sao mình không sửa ở bước scan luôn nhờ, mình không đọc cái location = cookies"* — đúng là đơn giản hơn nhiều: nếu không đọc/không tạo vector `header/Cookie` ngay từ đầu thì không có gì để relabel/dedupe ở các bước sau. Đã kiểm tra spec HAR 1.2 (WebFetch bản spec gốc trên GitHub) trước khi chốt: field `cookies` là field bắt buộc phải tồn tại (có thể là mảng rỗng `[]`), nhưng spec KHÔNG đảm bảo tool chụp HAR luôn điền nó đầy đủ mỗi khi có header `Cookie` thô — Chrome DevTools làm tốt (đã xác nhận thật trên `D:\Download\localhost.har`), nhưng HAR từ tool khác (mitmproxy, Burp export...) thì không chắc. Vì vậy chọn **skip có điều kiện**, không skip vô điều kiện.
+
+**Sửa** ([Scanner/har_loader.py](Scanner/har_loader.py) `_process_entry()`):
+- Thêm `has_parsed_cookies = bool(req.get('cookies'))` ngay sau `req = entry['request']`.
+- Vòng lặp header: thêm điều kiện bỏ qua header `Cookie` khi `has_parsed_cookies` là `True`:
+  ```python
+  for header in req.get('headers', []):
+      if has_parsed_cookies and header['name'].lower() == "cookie":
+          continue
+      self._add_vector(url, req['method'], "header", header['name'], header['value'], request_context)
+  ```
+- Không đụng `Analyze/cleanfilter.py` hay `Replay/replay_request.py` — vector trùng không còn được tạo từ gốc nên không có gì để sửa ở các bước sau.
+
+**Verify thật trên `D:\Download\localhost.har`:**
+- Script đếm trực tiếp từ HAR: đúng **14 entry** có cả header `Cookie` VÀ `cookies[]` không rỗng.
+- `debug_pipeline.py --step 1`: tổng vector giảm từ **303 → 289** (giảm đúng 14), **0 vector `header`/`Cookie`** còn lại.
+- `debug_pipeline.py --step 3`: **29 → 29** (Stage 2 == Stage 3) — xác nhận cơ chế fan-out tách composite Cookie header ở `cleanfilter.py` không còn bị kích hoạt nữa (không còn gì để tách).
+- Stage 8 (replay thật qua container `java-vuln-app`/`php-vuln-app` sống, user tự khởi động Docker): **56/56 kết quả đều `location: "cookie"`, 0 còn `header`/`Cookie`**, 0 bị `skipped`. Số lượng không phải 139 như bản cũ — lý do: terminal chạy script (git-bash native Windows) không có `java` trong PATH, nên 14 mutation cần `ysoserial` fail ngay từ Stage 7 ([Analyze/payloadMutation.py:_run_ysoserial()](Analyze/payloadMutation.py#L103-L126), lỗi `WinError 2`), field `session` không sinh được mutation nào lần này — hạn chế môi trường chạy, không liên quan tới fix. Mẫu kiểm tra 1 entry `likely_vulnerable: true` (`cookie/ref_tag`, `/api/profile`): baseline `"referral_tag":"O:3:\"Tag\":1:{s:4:\"name\";s:7:\"organic\";}"` → mutated `"referral_tag":"O:3:\"Tag\":1:{s:4:\"name\";s:13:\"administrator\";}"`, status cả 2 đều `200` — server echo đúng giá trị PHP-serialized đã gửi, **không còn entry 401 "Identity Spoofing" giả nào** như trước khi fix.
+- Unit test hiện có (`TestCase/`, 64 test) chạy lại: **64/64 pass**, không có test nào đụng tới `har_loader.py` nên không bị ảnh hưởng.
+
+**[XÁC NHẬN] OOB callback thật đã bắt được trên Interactsh — bằng chứng độc lập thứ 2 cho lỗ hổng deserialization ở `session` cookie.** Sau khi set `oob_domain` thật (xem mục dưới) và chạy lại pipeline + gửi payload `java_urldns`, trang Interactsh ghi nhận 1 DNS interaction:
+```
+QUESTION: qtpticomwslyihdnrpkoz6bcpv3aosizk.oast.fun.  IN  AAAA
+From IP: 141.101.110.88 (thuộc dải Cloudflare 141.101.64.0/18 — xác nhận qua cloudflare.com/ips),
+lúc 2026-10-11 03:43
+```
+Domain khớp tuyệt đối với domain cấu hình, query type `AAAA` khớp hành vi `InetAddress`/`URL.hashCode()` của Java khi resolve hostname. IP nguồn là Cloudflare chứ không phải IP container — **bình thường**, không phải noise: do DNS resolver trung gian (hệ thống dùng Cloudflare 1.1.1.1) không forward EDNS Client Subnet ra ngoài theo mặc định, nên authoritative server (Interactsh) chỉ thấy IP resolver, không thấy IP gốc của máy chạy Java. → Kết hợp với bằng chứng `ClassCastException` trong response HTTP (đã note ở các mục trước), đây là 2 nguồn bằng chứng độc lập cùng xác nhận: `session` cookie tại `/api/dashboard` thật sự bị deserialize không kiểm soát.
+
+**Phát hiện thêm (chưa code hoá vào tool) — con đường khai thác thực tế có thể ĐƠN GIẢN HƠN gadget chain RCE:** decode cookie `session` hợp lệ thật (lấy từ `request_context` trong chính file này) ra:
+```
+class: com.webvulenv.javaapp.model.UserSession
+field: role (String) = "user", username (String) = "wiener"
+```
+Java serialization không có cơ chế ký/integrity-check mặc định (khác `next-auth.session-token` — JWT mã hóa riêng). Vì chính thông báo lỗi `ClassCastException` đã tự tiết lộ đầy đủ tên class + tên field + kiểu field, attacker có đủ thông tin để tự dựng 1 object `UserSession` giả với `role="admin"`, serialize đúng định dạng (không cần gadget chain phức tạp) → nếu server chấp nhận, bypass authentication hoàn toàn. **Chưa thử nghiệm thật — chỉ là phân tích lý thuyết dựa trên cấu trúc đã decode được**, cần test riêng (ngoài phạm vi mutation tool hiện có — tool hiện chỉ tạo `java_urldns` probe cho field `session`, chưa có mutation kiểu "forge object giả theo đúng class/field đã biết").
+
+**[BUG TÌM RA KHI REVIEW STAGE 8 — CHƯA FIX, CẦN QUYẾT ĐỊNH HƯỚNG] Vector `location: "header", name: "Cookie"` bị lệch nhãn, ghi đè sạch toàn bộ cookie thật khi replay → false "Identity Spoofing" + ~50% dữ liệu Stage 8 là trùng lặp vô ích.**
+
+**Gốc rễ (trace từ Stage 1):**
+1. [Scanner/har_loader.py](Scanner/har_loader.py) `_process_entry()` lặp qua **2 mảng HAR độc lập** cho cùng 1 request: `req['cookies']` (Chrome tự parse sẵn, mỗi cookie 1 entry `location="cookie"`) VÀ `req['headers']` (dòng `Cookie:` thô dạng composite string, 1 entry `location="header", name="Cookie"`) — xác nhận thật trên `D:\Download\localhost.har`, request `/api/dashboard`: cả 2 mảng đều chứa đúng 4 cookie (`next-auth.session-token`, `ref_tag`, `prefs`, `session`), chỉ khác định dạng (đã-parse vs string thô nối `"; "`).
+2. [Analyze/cleanfilter.py](Analyze/cleanfilter.py) `_clean()` (fan-out fix trước đó trong session) tách composite `Cookie:` string, tìm ra segment "giống serialized" (vd `ref_tag=O%3A3%3A...`), strip prefix, chỉ giữ giá trị trần — ĐÚNG để lấy giá trị test, nhưng **KHÔNG đổi lại `location`/`name` của vector** → vector vẫn mang nhãn `location: "header", name: "Cookie"` dù giá trị bên trong giờ chỉ còn nội dung của riêng `ref_tag`/`session`.
+3. [Replay/replay_request.py:_send()](Replay/replay_request.py#L106-L149) xử lý theo nhãn (đúng logic, sai vì input nhãn sai từ bước 2):
+   - `location == "cookie"`: sửa trong dict `cookies` riêng (dòng 121-123) → cuối hàm (dòng 147-149) flatten dict `cookies` (đủ 4 key, chỉ 1 đổi) vào `headers["Cookie"]` → **ĐÚNG**, giữ nguyên các cookie khác.
+   - `location == "header", name == "Cookie"`: sửa THẲNG `headers["Cookie"] = value` (dòng 124-126), bỏ qua dict `cookies` hoàn toàn; guard `is_testing_cookie_header` (dòng 147) cố tình CHẶN bước flatten ở trên chạy → `headers["Cookie"]` cuối cùng **chỉ còn đúng 1 chuỗi payload trần**, mất sạch `next-auth.session-token`/`prefs`/các cookie khác — dù dict `cookies` vẫn còn đủ 4 giá trị gốc trong bộ nhớ, chỉ đơn giản KHÔNG được đọc tới.
+   - `location in ("body","form_body")` (dòng 138-142) mắc **lỗi cùng loại**: `body = f"{name}={encoded_value}".encode(...)` ghi đè TOÀN BỘ body, mất các field form khác nếu có — chưa quantify impact thực tế trên dataset hiện có (ít gặp hơn vì ít vector `form_body` trong data test), nhưng về nguyên lý là cùng 1 class bug với `header/Cookie`.
+
+**Hệ quả đã quantify trên `debug_step8.json` (139 entries, đếm bằng script Python thật qua WSL):**
+- `location="header", name="Cookie"`: **69 entries**
+- `location="cookie"` (ref_tag: 56, session: 13): **69 entries**
+- → **69/139 (≈50%) là bản sao trùng lặp** của đúng 69 entry kia — cùng field gốc, cùng payload, chỉ khác nhãn.
+- Case cụ thể `/api/dashboard`, `header/Cookie`, payload `ref_tag="administrator"`: `baseline=200 {"role":"user",...}` → `mutated=401 {"error":"Not authenticated"}`, gắn `exploit_type: "Identity Spoofing"`, `likely_vulnerable: true` — **SAI về diễn giải**: 401 xảy ra với BẤT KỲ payload nào ở vị trí này (vì mất session token thật), không chứng minh được gì về "giả mạo danh tính". Vector `cookie/ref_tag` song song (cùng payload) cho `200`, không đổi gì — đúng hành vi thật (server không xử lý `ref_tag` ở endpoint này).
+
+**2 hướng fix đã bàn với user, CHƯA chốt:**
+- **(A) — tôi khuyến nghị:** Khi `cleanfilter.py` tách được 1 segment từ composite `Cookie:` header, **relabel vector** thành `location: "cookie", name: <tên cookie thật, vd "ref_tag">` thay vì giữ `"header"/"Cookie"` → vector này sẽ trùng hoàn toàn với vector gốc từ mảng `cookies[]` → khử trùng (dedupe) ở `VectorFiltering`/`cleanfilter` → giảm ~50% dataset, loại bỏ false signal, tận dụng lại đúng cơ chế `cookies[name]=value` đã chạy đúng. Rủi ro: cần sửa return type của `_clean()` (hiện `list[str]`) để mang theo cả tên field gốc, không chỉ giá trị — động vào function đã sửa 1 lần trong session này, cần test lại kỹ cả Java lẫn PHP dataset.
+- **(B) — thay thế:** Giữ `header/Cookie` làm vector riêng (test "kiểm soát toàn bộ literal header string", có ý nghĩa riêng cho CRLF injection/header smuggling — KHÁC mục đích với test 1 field cụ thể) nhưng sửa `_send()` để khi `is_testing_cookie_header`, **merge `value` vào đúng vị trí segment trong chuỗi composite gốc** (thay thế tại chỗ) thay vì ghi đè toàn bộ — giữ các cookie khác nguyên vẹn trong CÙNG header string. Phức tạp hơn: cần thread thêm "segment này thuộc tên field gốc nào" từ `cleanfilter` xuyên suốt `normalize`→`fingerprint`→`payloadMutation`→`replay` (hiện không có field nào lưu thông tin này).
+
+**[KẾ HOẠCH]** Tối nay (2026-10-11) sẽ cùng user phân tích toàn bộ output Stage 8 (`debug_step8.json`, 139 replay results) xem có hợp lý không — review tổng thể. **Đã làm xong phần phát hiện bug trên** (trùng lặp 50% + false Identity Spoofing); còn lại: xem các entry khác trong 139 kết quả có vấn đề tương tự/khác không, và chốt hướng fix (A) hay (B).
+
+**[CONFIG] Set `oob_domain` thật trong `config.json`** — user lấy domain Interactsh thật (`qtpticomwslyihdnrpkoz6bcpv3aosizk.oast.fun`) từ interactsh-web, điền vào [config.json](config.json#L8) (trước là `""`).
+
+**Tác động**: [Analyze/payloadMutation.py:_mutate_java_urldns()](Analyze/payloadMutation.py#L178-L200) đọc giá trị này qua `get_oob_domain()` ([tool_config.py:46-53](tool_config.py#L46-L53)) — từ lần chạy pipeline (scan→...→mutate) tiếp theo, field `command`/`canary` trong payload `java_urldns` sẽ dùng domain thật này thay cho placeholder `canary.REPLACE_WITH_YOUR_INTERACTSH_DOMAIN.com`, cho phép xác nhận deserialize qua DNS/HTTP interaction log của Interactsh (bằng chứng ngoài băng, độc lập với response HTTP) — chưa verify lại bằng 1 lần chạy pipeline + replay thật để xác nhận domain thật có thực sự xuất hiện trong payload mới và có interaction log ghi nhận hay không.
+
+**[MỚI] `debug_pipeline.py` thêm Stage 8 (Replay)** — theo yêu cầu "trong debug pipline bạn thêm stage 8 là replay cho tôi". Trước đây `debug_pipeline.py` dừng ở Stage 7 (PayloadMutation), muốn xem kết quả Replay phải chạy riêng `main.py assess` trên file đã lưu.
+
+**Sửa** ([debug_pipeline.py](debug_pipeline.py)): thêm `8: "Replay (ReplayRequest/Assess)"` vào `STEP_NAMES`; tách khối `if args.step <= 7: ... return` ra khỏi vòng lặp Stage 4-7; thêm khối Stage 8 — tái dùng ĐÚNG `_apply_replay_confirmation()` từ `main.py` (import trực tiếp, không viết lại logic riêng — tránh lặp/trôi code giữa `main.py` và `debug_pipeline.py`) để Stage 8 ở đây cho ra **y hệt** hành vi `main.py assess` thật (không auto-Confirmed, luôn "Suspected" kèm `observations` + `baseline`/`mutated` đầy đủ).
+
+**Verify thật** — chạy `debug_pipeline.py --har localhost.har --step 8` xuyên suốt cả 8 stage trong 1 lệnh, lên container `java-vuln-app` sống:
+- Ra đúng **139 replay results** — khớp số liệu y hệt `main.py scan→analyze→assess` chạy riêng lẻ trước đó.
+- **139/139 đều `confirmation_status: "Suspected"`**, 0 entry thiếu `baseline`/`mutated` — xác nhận đúng thiết kế không-tự-confirm.
+- Case `/api/integration/receive`, `raw_body`: vẫn hiện đúng `observations` (bằng chứng HashMap) mà không bị gắn nhãn tự động — khớp hệt kết quả đã verify qua `main.py assess`.
+- Unit test 64/64 pass (`Ran 64 tests in 135.596s` / `OK`).
+
 **[THAY ĐỔI KIẾN TRÚC LỚN — theo yêu cầu trực tiếp] Bỏ hẳn việc tool tự động gán "Confirmed".** User chỉ ra đúng: cả 5 phép so sánh của `_compare()` (delay/length/status/error-keyword/content-similarity) đều **không đủ tin cậy** để tự động kết luận — delay phụ thuộc mạng/tải server, length threshold tuỳ tiện, error-keyword bỏ sót custom error page (false negative) hoặc trùng từ tình cờ (false positive), content-similarity không phân biệt được "server tự quyết định khác" (bằng chứng thật) với "server chỉ echo lại input" (vô nghĩa — xem case `ref_tag` ở mục dưới). User: *"tôi nghĩ là không nên tự động đưa ra flag hay không flag, tốt nhất nên là log response lại thôi. Để user tự đọc, chứ cứ confirm, suspected thì nó sẽ bị bias và false positive quá"*.
 
 **Thiết kế mới**: tool KHÔNG BAO GIỜ tự gán "Confirmed" nữa — mọi vector đều dừng ở "Suspected", kèm theo ĐẦY ĐỦ raw `baseline`/`mutated` response (status/length/thời gian/200 ký tự đầu body) + `observations` (quan sát tham khảo, không phải kết luận) để người dùng TỰ ĐỌC và TỰ QUYẾT ĐỊNH.

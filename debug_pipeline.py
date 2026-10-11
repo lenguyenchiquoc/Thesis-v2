@@ -25,6 +25,7 @@ STEP_NAMES = {
     5: "Fingerprint",
     6: "ExploitabilityAnalysis",
     7: "PayloadMutation",
+    8: "Replay (ReplayRequest/Assess)",
 }
 
 
@@ -113,8 +114,28 @@ def main():
 
         results.append(entry)
 
-    print(f"[+] Stage {args.step} ({STEP_NAMES[args.step]}): {len(results)} vectors")
-    _emit(results, args.output)
+    if args.step <= 7:
+        print(f"[+] Stage {args.step} ({STEP_NAMES[args.step]}): {len(results)} vectors")
+        _emit(results, args.output)
+        return
+
+    from Replay.replay_request import ReplayRequest
+    from main import _apply_replay_confirmation
+
+    replayer = ReplayRequest()
+    assess_results = []
+    for entry in results:
+        for mutation in entry.get("mutations", []):
+            replay_result = replayer.replay(mutation)
+            exploit_analysis = _apply_replay_confirmation(entry.get("exploit_analysis") or {}, replay_result)
+            assess_results.append({
+                "exploit_analysis": exploit_analysis,
+                "mutation": mutation,
+                "replay": replay_result,
+            })
+
+    print(f"[+] Stage 8 (Replay): {len(assess_results)} replay results")
+    _emit(assess_results, args.output)
 
 
 def _emit(data, output_path):

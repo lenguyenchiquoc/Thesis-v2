@@ -44,6 +44,7 @@ class HarLoader:
     def _process_entry(self, entry):
         req = entry['request']
         url = req['url']
+        has_parsed_cookies = bool(req.get('cookies'))
 
         path = urlparse(url).path
         ext = path.split('.')[-1].lower()
@@ -59,6 +60,8 @@ class HarLoader:
             self._add_vector(url, req['method'], "cookie", cookie['name'], cookie['value'], request_context)
 
         for header in req.get('headers', []):
+            if has_parsed_cookies and header['name'].lower() == "cookie":
+                continue
             self._add_vector(url, req['method'], "header", header['name'], header['value'], request_context)
 
         post_data = req.get('postData', {})

@@ -15,7 +15,6 @@ from Analyze.cleanfilter import cleanfilter
 from Analyze.normalize import DataNormalizer
 from Analyze.finderprint import Fingerprint
 from Analyze.ExploitabilityAnalysis import ExploitAnalyze
-from Analyze.payloadMutation import PayloadMutation
 
 STEP_NAMES = {
     1: "Scan (HarLoader)",
@@ -79,48 +78,51 @@ def main():
         _emit(cleaned_vectors, args.output)
         return
 
-    results = []
-    for vector in cleaned_vectors:
-        value = vector["cleaned_value"]
-        normalizer = DataNormalizer(value)
-        value_normalize = normalizer.normalize()
+    if args.step < 7:
+        results = []
+        for vector in cleaned_vectors:
+            value = vector["cleaned_value"]
+            normalizer = DataNormalizer(value)
+            value_normalize = normalizer.normalize()
 
-        entry = {
-            "vector": {
-                "url": vector.get("url"),
-                "method": vector.get("method"),
-                "location": vector.get("location"),
-                "name": vector.get("name"),
-                "original_value": vector.get("original_value"),
-                "cleaned_value": vector.get("cleaned_value"),
-            },
-            "normalized": value_normalize,
-        }
+            entry = {
+                "vector": {
+                    "url": vector.get("url"),
+                    "method": vector.get("method"),
+                    "location": vector.get("location"),
+                    "name": vector.get("name"),
+                    "original_value": vector.get("original_value"),
+                    "cleaned_value": vector.get("cleaned_value"),
+                },
+                "normalized": value_normalize,
+            }
 
-        if args.step >= 5:
-            fingerprint = Fingerprint(value_normalize).fingerprint_serial()
-            entry["fingerprint"] = fingerprint
+            if args.step >= 5:
+                fingerprint = Fingerprint(value_normalize).fingerprint_serial()
+                entry["fingerprint"] = fingerprint
 
-        if args.step >= 6:
-            exploit_result = ExploitAnalyze(fingerprint).analyze()
-            entry["exploit_analysis"] = exploit_result
+            if args.step >= 6:
+                entry["exploit_analysis"] = ExploitAnalyze(fingerprint).analyze()
 
-        if args.step >= 7:
-            candidate = value_normalize[0] if value_normalize else value
-            mutation_vector = dict(vector)
-            mutation_vector["value"] = candidate
-            mutation_vector["encoding_chain"] = normalizer.get_encoding_chain(candidate)
-            entry["mutations"] = PayloadMutation(exploit_result, mutation_vector).mutate()
+            results.append(entry)
 
-        results.append(entry)
-
-    if args.step <= 7:
         print(f"[+] Stage {args.step} ({STEP_NAMES[args.step]}): {len(results)} vectors")
         _emit(results, args.output)
         return
 
+    # Step >= 7 needs the exact same normalize->fingerprint->exploit->mutate result
+    # main.py's "analyze" command produces — reuse it instead of recomputing, so the
+    # two entry points can never drift apart the way they did before.
+    from main import _analyze_one, _apply_replay_confirmation
+
+    results = [_analyze_one(vector) for vector in cleaned_vectors]
+
+    if args.step == 7:
+        print(f"[+] Stage 7 ({STEP_NAMES[7]}): {len(results)} vectors")
+        _emit(results, args.output)
+        return
+
     from Replay.replay_request import ReplayRequest
-    from main import _apply_replay_confirmation
 
     replayer = ReplayRequest()
     assess_results = []

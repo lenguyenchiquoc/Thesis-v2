@@ -37,6 +37,35 @@ def _apply_replay_confirmation(exploit_analysis: dict, replay_result: dict) -> d
     return result
 
 
+def _analyze_one(vector: dict) -> dict:
+    value = vector["cleaned_value"]
+    normalizer = DataNormalizer(value)
+    value_normalize = normalizer.normalize()
+
+    fingerprint = Fingerprint(value_normalize).fingerprint_serial()
+    exploit_result = ExploitAnalyze(fingerprint).analyze()
+
+    candidate = value_normalize[0] if value_normalize else value
+    mutation_vector = dict(vector)
+    mutation_vector["value"] = candidate
+    mutation_vector["encoding_chain"] = normalizer.get_encoding_chain(candidate)
+    mutations = PayloadMutation(exploit_result, mutation_vector).mutate()
+
+    return {
+        "vector": {
+            "url": vector.get("url"),
+            "method": vector.get("method"),
+            "location": vector.get("location"),
+            "name": vector.get("name"),
+            "original_value": vector.get("original_value"),
+        },
+        "normalized": value_normalize,
+        "fingerprint": fingerprint,
+        "exploit_analysis": exploit_result,
+        "mutations": mutations,
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog="ethicalQuoc",
@@ -134,35 +163,12 @@ def handle_arg(args):
             clean_filter.clean_and_output()
 
             for i in clean_filter._clean_all():
-                value = i["cleaned_value"]
-                normalizer = DataNormalizer(value)
-                value_normalize = normalizer.normalize()
-                print(f"Normalize is: {value_normalize}")
-                for candidate in value_normalize:
-                    fingerprint = Fingerprint([candidate]).fingerprint_serial()
-                    print(json.dumps(fingerprint, indent=4, ensure_ascii=False))
-                    ExploitAnalyze_rs = ExploitAnalyze(fingerprint).analyze()
-                    print(json.dumps(ExploitAnalyze_rs, indent=4, ensure_ascii=False))
-
-                    mutation_vector = dict(i)
-                    mutation_vector["value"] = candidate
-                    mutation_vector["encoding_chain"] = normalizer.get_encoding_chain(candidate)
-                    mutations = PayloadMutation(ExploitAnalyze_rs, mutation_vector).mutate()
-                    print(mutations)
-
-                    results.append({
-                        "vector": {
-                            "url": i.get("url"),
-                            "method": i.get("method"),
-                            "location": i.get("location"),
-                            "name": i.get("name"),
-                            "original_value": i.get("original_value"),
-                        },
-                        "normalized": [candidate],
-                        "fingerprint": fingerprint,
-                        "exploit_analysis": ExploitAnalyze_rs,
-                        "mutations": mutations,
-                    })
+                entry = _analyze_one(i)
+                print(f"Normalize is: {entry['normalized']}")
+                print(json.dumps(entry["fingerprint"], indent=4, ensure_ascii=False))
+                print(json.dumps(entry["exploit_analysis"], indent=4, ensure_ascii=False))
+                print(entry["mutations"])
+                results.append(entry)
 
         save_output_file_type(
             vectors=results,

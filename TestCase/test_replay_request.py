@@ -42,13 +42,38 @@ class TestLikelyVulnerableWeighting(unittest.TestCase):
 
     def test_weak_content_echo_alone_is_not_strong_signal(self):
         # Dung dung case thuc te: /api/profile echo lai ref_tag, khong
-        # unserialize - status/length giu nguyen, chi noi dung thay doi nhe.
+        # unserialize - status/length giu nguyen, chi noi dung thay doi nhe,
+        # va gia tri thay doi do CHINH LA gia tri da inject (echo thuan).
         baseline = sample(body_sample='{"referral_tag":"organic","username":"wiener"}')
         mutated = sample(body_sample='{"referral_tag":"admin","username":"wiener"}')
-        indicators, strong = self.r._compare(baseline, mutated)
+        indicators, strong = self.r._compare(baseline, mutated, injected_value="admin")
         self.assertEqual(len(indicators), 1)
         self.assertIn("content differs in a small", indicators[0])
-        self.assertFalse(strong, "Chi co content-diff yeu thi KHONG duoc tinh la likely_vulnerable")
+        self.assertFalse(strong, "Echo thuan cua chinh gia tri da inject thi KHONG duoc tinh la likely_vulnerable")
+
+    def test_derived_value_not_matching_injected_payload_is_strong_signal(self):
+        # Regression quan trong: phat hien khi review PHP - session cookie
+        # (PortSwigger-style privilege escalation that bang flip_boolean) cho
+        # ra dung 1 indicator weak giong het ref_tag ("role":"user"->"admin",
+        # status/length khong doi) - nhung day la processing THAT (server tu
+        # tinh role tu du lieu da bi tamper), khong phai echo, vi chuoi
+        # "admin" trong response KHONG nam trong payload da inject (payload la
+        # ca 1 object PHP serialize, khong phai chuoi "admin" don le).
+        baseline = sample(body_sample='{"username":"wiener","role":"user"}')
+        mutated = sample(body_sample='{"username":"wiener","role":"admin"}')
+        injected = 'O:4:"User":2:{s:8:"username";s:6:"wiener";s:5:"admin";b:1;}'
+        indicators, strong = self.r._compare(baseline, mutated, injected)
+        self.assertTrue(strong, "Gia tri 'role':'admin' khong phai echo cua payload da gui -> phai la strong signal")
+
+    def test_reflection_check_handles_json_escaped_quotes(self):
+        # Gia tri inject (PHP serialize) co dau nhay kep "..." - khi server
+        # echo lai trong 1 chuoi JSON, cac dau nhay do bi JSON tu escape thanh
+        # \" - _is_mere_reflection phai van nhan ra day la echo thuan.
+        injected = 'O:3:"Tag":1:{s:4:"name";s:5:"admin";}'
+        baseline = sample(body_sample='{"referral_tag":"O:3:\\"Tag\\":1:{s:4:\\"name\\";s:7:\\"organic\\";}"}')
+        mutated = sample(body_sample='{"referral_tag":"O:3:\\"Tag\\":1:{s:4:\\"name\\";s:5:\\"admin\\";}"}')
+        indicators, strong = self.r._compare(baseline, mutated, injected)
+        self.assertFalse(strong, "Echo thuan van la echo du body JSON co escape dau nhay kep")
 
     def test_status_code_change_is_strong_signal(self):
         baseline = sample(status=200)

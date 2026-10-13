@@ -40,6 +40,7 @@ class ReplayRequest:
         if raw_payload is None:
             return self._skip_result(payload, "No usable payload value found")
 
+        comparison_value = self._decode_raw_value(payload)
         request_context = cast("RequestContext | None", payload.get("request_context"))
 
         try:
@@ -48,7 +49,7 @@ class ReplayRequest:
         except (urllib.error.URLError, OSError, ValueError) as e:
             return self._skip_result(payload, f"Request failed: {e}")
 
-        indicators, strong_signal = self._compare(baseline, mutated)
+        indicators, strong_signal = self._compare(baseline, mutated, comparison_value)
 
         return {
             "url": url,
@@ -68,26 +69,26 @@ class ReplayRequest:
     REWRAPPABLE_OPS = {"url", "base64", "base64_gzip", "hex"}
 
     def _select_payload_value(self, payload: Mutation) -> str | None:
-        encoding = cast("str | None", payload.get("encoding"))
-        b64_payload = cast("str | None", payload.get("payload"))
-        payload_raw = cast("str | None", payload.get("payload_raw"))
-        encoding_chain = cast("list[str] | None", payload.get("encoding_chain")) or []
-
-        raw_value: str | None
-        if encoding == "base64" and b64_payload:
-            try:
-                raw_value = base64.b64decode(b64_payload).decode("latin-1")
-            except Exception:
-                raw_value = payload_raw or b64_payload
-        else:
-            raw_value = payload_raw or b64_payload
-
+        raw_value = self._decode_raw_value(payload)
         if raw_value is None:
             return None
 
+        encoding_chain = cast("list[str] | None", payload.get("encoding_chain")) or []
         if encoding_chain and all(op in self.REWRAPPABLE_OPS for op in encoding_chain):
             return self._reapply_encoding_chain(raw_value, encoding_chain)
         return raw_value
+
+    def _decode_raw_value(self, payload: Mutation) -> str | None:
+        encoding = cast("str | None", payload.get("encoding"))
+        b64_payload = cast("str | None", payload.get("payload"))
+        payload_raw = cast("str | None", payload.get("payload_raw"))
+
+        if encoding == "base64" and b64_payload:
+            try:
+                return base64.b64decode(b64_payload).decode("latin-1")
+            except Exception:
+                return payload_raw or b64_payload
+        return payload_raw or b64_payload
 
     def _reapply_encoding_chain(self, value: str, chain: list[str]) -> str:
         current = value
@@ -173,7 +174,16 @@ class ReplayRequest:
 
     CONTENT_DIFF_SIMILARITY_THRESHOLD = 0.8
 
-    def _compare(self, baseline: HttpProbeSample, mutated: HttpProbeSample) -> tuple[list[str], bool]:
+    def _is_mere_reflection(self, mutated_body: str, injected_value: str | None) -> bool:
+        if not injected_value:
+            return False
+        if injected_value in mutated_body:
+            return True
+        return injected_value in mutated_body.replace('\\"', '"')
+
+    def _compare(
+        self, baseline: HttpProbeSample, mutated: HttpProbeSample, injected_value: str | None = None
+    ) -> tuple[list[str], bool]:
         indicators = []
         strong_signal = False
 
@@ -216,6 +226,8 @@ class ReplayRequest:
                     f"Response content differs in a small, localized way despite same status/length (similarity={similarity:.2f}) "
                     f"(baseline={baseline['body_sample'][:200]!r} mutated={mutated['body_sample'][:200]!r})"
                 )
+                if not self._is_mere_reflection(mutated["body_sample"], injected_value):
+                    strong_signal = True
 
         return indicators, strong_signal
 

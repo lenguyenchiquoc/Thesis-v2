@@ -15,6 +15,7 @@ import base64
 import sys
 import os
 import unittest
+from unittest.mock import patch
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -195,6 +196,54 @@ class TestYamlMutationRespectsJavaVsPython(unittest.TestCase):
         results = mutate("!!java.lang.Runtime [...]", "yaml_exec", "YAML Java Class")
         payload = decoded_payloads(results)[0]
         self.assertIn("javax.script.ScriptEngineManager", payload)
+
+
+class TestJavaRceEscalation(unittest.TestCase):
+    """_mutate_java_rce_escalation(): khi khong tim thay keyword gadget cu the
+    nao ("Unknown Gadget"), tool phai TU DONG thu them cac gadget chain pho
+    bien (khong chi dung lai o URLDNS probe) - nhung dung lenh goi ra OOB
+    domain (khong dung id/whoami/hostname, vi server khong echo stdout ve nen
+    tool khong doc duoc ket qua qua response HTTP)."""
+
+    def _pm(self):
+        return PayloadMutation(
+            {"suggested_probe": "urldns_probe", "exploit_type": "Java Deserialization — Unknown Gadget"},
+            {"value": "x", "location": "cookie", "name": "session", "url": "http://x/", "method": "GET"},
+        )
+
+    @patch("Analyze.payloadMutation.get_oob_domain", return_value="")
+    def test_no_oob_domain_configured_returns_nothing(self, _mock):
+        pm = self._pm()
+        self.assertEqual(pm._mutate_java_rce_escalation(), [])
+
+    @patch("Analyze.payloadMutation.get_oob_domain", return_value="test123.oast.fun")
+    def test_missing_ysoserial_jar_returns_nothing(self, _mock):
+        pm = self._pm()
+        pm.YSOSERIAL_PATH = "tools/java/this-file-does-not-exist.jar"
+        self.assertEqual(pm._mutate_java_rce_escalation(), [])
+
+    @patch("Analyze.payloadMutation.get_oob_domain", return_value="test123.oast.fun")
+    def test_commands_use_oob_domain_not_benign_test_commands(self, _mock):
+        pm = self._pm()
+        commands = [c.format(domain="test123.oast.fun") for c in pm.RCE_ESCALATION_OOB_COMMANDS]
+        for cmd in commands:
+            self.assertIn("test123.oast.fun", cmd)
+        for benign in ("id", "whoami", "hostname"):
+            self.assertNotEqual(commands, benign, "Escalation phai dung lenh OOB, khong dung lenh cau tra loi qua stdout")
+
+    @patch("Analyze.payloadMutation.get_oob_domain", return_value="")
+    def test_mutate_dispatch_calls_both_urldns_and_escalation(self, _mock):
+        # Ep ca 2 nhanh ve chung 1 duong (jar khong ton tai) de test khong
+        # phu thuoc may dang chay co "java" tren PATH hay khong - diem can
+        # kiem tra o day la dispatch co goi CA HAI ham, khong chi urldns don
+        # le (truoc fix chi co 1 dong "return self._mutate_java_urldns()").
+        pm = self._pm()
+        pm.YSOSERIAL_PATH = "tools/java/this-file-does-not-exist.jar"
+        with patch.object(pm, "_mutate_java_urldns", wraps=pm._mutate_java_urldns) as spy_urldns, \
+             patch.object(pm, "_mutate_java_rce_escalation", wraps=pm._mutate_java_rce_escalation) as spy_escalate:
+            pm.mutate()
+            spy_urldns.assert_called_once()
+            spy_escalate.assert_called_once()
 
 
 if __name__ == "__main__":

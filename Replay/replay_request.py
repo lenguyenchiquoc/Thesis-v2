@@ -48,7 +48,7 @@ class ReplayRequest:
         except (urllib.error.URLError, OSError, ValueError) as e:
             return self._skip_result(payload, f"Request failed: {e}")
 
-        indicators = self._compare(baseline, mutated)
+        indicators, strong_signal = self._compare(baseline, mutated)
 
         return {
             "url": url,
@@ -59,7 +59,7 @@ class ReplayRequest:
             "baseline": baseline,
             "mutated": mutated,
             "indicators": indicators,
-            "likely_vulnerable": len(indicators) > 0,
+            "likely_vulnerable": strong_signal,
         }
 
     def replay_all(self, payloads: list[Mutation]) -> list[ReplayResult]:
@@ -173,19 +173,22 @@ class ReplayRequest:
 
     CONTENT_DIFF_SIMILARITY_THRESHOLD = 0.8
 
-    def _compare(self, baseline: HttpProbeSample, mutated: HttpProbeSample) -> list[str]:
+    def _compare(self, baseline: HttpProbeSample, mutated: HttpProbeSample) -> tuple[list[str], bool]:
         indicators = []
+        strong_signal = False
 
         delay_delta = mutated["elapsed_sec"] - baseline["elapsed_sec"]
         if delay_delta >= self.TIME_DELAY_THRESHOLD_SEC:
             indicators.append(
                 f"Time-based: mutated response {delay_delta:.2f}s slower than baseline"
             )
+            strong_signal = True
 
         if mutated["status"] != baseline["status"]:
             indicators.append(
                 f"Status code changed: baseline={baseline['status']} mutated={mutated['status']}"
             )
+            strong_signal = True
 
         length_delta = abs(mutated["length"] - baseline["length"])
         length_changed_significantly = baseline["length"] > 0 and length_delta / baseline["length"] > 0.5
@@ -193,11 +196,13 @@ class ReplayRequest:
             indicators.append(
                 f"Response length changed significantly: baseline={baseline['length']} mutated={mutated['length']}"
             )
+            strong_signal = True
 
         mutated_lower = mutated["body_sample"].lower()
         error_hits = [kw for kw in self.ERROR_KEYWORDS if kw in mutated_lower]
         if error_hits:
             indicators.append(f"Error/exception disclosure in response: {error_hits}")
+            strong_signal = True
 
         if (
             mutated["status"] == baseline["status"]
@@ -212,7 +217,7 @@ class ReplayRequest:
                     f"(baseline={baseline['body_sample'][:200]!r} mutated={mutated['body_sample'][:200]!r})"
                 )
 
-        return indicators
+        return indicators, strong_signal
 
     def _skip_result(self, payload: Mutation, reason: str) -> ReplaySkipped:
         return {

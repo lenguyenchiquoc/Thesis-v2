@@ -27,6 +27,9 @@ class Fingerprint:
 
     NODEJS_PATTERNS = signatures.NODEJS_PATTERNS
 
+    JACKSON_PATTERNS = signatures.JACKSON_PATTERNS
+    JACKSON_DANGEROUS_CLASSES = signatures.JACKSON_DANGEROUS_CLASSES
+
     RUBY_PATTERNS = signatures.RUBY_PATTERNS
     RUBY_MAGIC_BYTES = signatures.RUBY_MAGIC_BYTES
 
@@ -144,6 +147,15 @@ class Fingerprint:
         if gadget_hits:
             subtype = subtype or "Java Gadget Chain"
             score  += len(gadget_hits) * 2
+
+        jackson_hits = [p for p in self.JACKSON_PATTERNS if re.search(p, raw)]
+        if jackson_hits:
+            # The wrapper defines the transport (Jackson JSON), so it overrides a
+            # gadget-keyword subtype — those gadgets can't be delivered via ysoserial here.
+            subtype = "Jackson Polymorphic Typing"
+            score  += 5
+            if any(cls in lower for cls in self.JACKSON_DANGEROUS_CLASSES):
+                score += 4
 
         return {"score": score, "risk_level": "High", "subtype": subtype}
 

@@ -98,6 +98,22 @@ NODEJS_PATTERNS = [
     r'_\$\$ND_FUNC\$\$_function',
 ]
 
+JACKSON_PATTERNS = [
+    r'\[\s*"(?:[a-z][\w$]*\.)+[A-Z][\w$]*"\s*,',
+    r'"@class"\s*:\s*"(?:[a-z][\w$]*\.)+[A-Z][\w$]*"',
+    r'"@type"\s*:\s*"(?:[a-z][\w$]*\.)+[A-Z][\w$]*"',
+]
+JACKSON_DANGEROUS_CLASSES = [
+    "jdbcrowsetimpl",
+    "templatesimpl",
+    "propertypathfactorybean",
+    "simplejndibeanfactory",
+    "wrapperconnectionpooldatasource",
+    "jndirefforwardingdatasource",
+    "c3p0",
+    "defaultbeanfactorypointcutadvisor",
+]
+
 RUBY_PATTERNS = [
     r'\\x04\\x08',
     r'BAhv',
@@ -197,6 +213,9 @@ def looks_like_serialized(value: str) -> bool:
     if is_nodejs_prototype_pollution(decoded_lower):
         return True
     if any(re.search(p, value, re.IGNORECASE) or re.search(p, decoded_value, re.IGNORECASE) for p in NODEJS_PATTERNS):
+        return True
+
+    if any(re.search(p, value) or re.search(p, decoded_value) for p in JACKSON_PATTERNS):
         return True
 
     if value.startswith(("{", "[")) and len(value) > 100:

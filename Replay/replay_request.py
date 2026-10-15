@@ -1,6 +1,7 @@
 import base64
 import difflib
 import gzip
+import re
 import time
 import urllib.error
 import urllib.parse
@@ -202,6 +203,20 @@ class ReplayRequest:
 
     CONTENT_DIFF_SIMILARITY_THRESHOLD = 0.8
 
+    # Fields that change between two otherwise-identical responses just because the
+    # requests were sent at different moments. Stripped before deciding a content
+    # difference is meaningful, so e.g. a Spring 404 error page whose only change is
+    # its "timestamp" is not mistaken for a payload-induced difference.
+    VOLATILE_PATTERNS = [
+        re.compile(r"\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:[.,]\d+)?(?:Z|[+-]\d{2}:?\d{2})?"),
+        re.compile(r"\b\d{13}\b"),
+    ]
+
+    def _strip_volatile(self, text: str) -> str:
+        for pattern in self.VOLATILE_PATTERNS:
+            text = pattern.sub("<volatile>", text)
+        return text
+
     def _is_mere_reflection(self, mutated_body: str, injected_value: str | None) -> bool:
         if not injected_value:
             return False
@@ -215,6 +230,17 @@ class ReplayRequest:
         indicators = []
         strong_signal = False
 
+        mutated_lower = mutated["body_sample"].lower()
+        error_hits = [kw for kw in self.ERROR_KEYWORDS if kw in mutated_lower]
+
+        # A 4xx response that leaks no exception/stack trace is the app cleanly
+        # rejecting malformed or unauthorised input — expected defensive behaviour,
+        # not evidence of a reachable sink. Its status/length changes are therefore
+        # recorded but NOT treated as strong signals. A 5xx, or any response that
+        # discloses an exception, is never "clean" (the input was processed far
+        # enough to break something, or internals leaked).
+        clean_rejection = (400 <= mutated["status"] < 500) and not error_hits
+
         delay_delta = mutated["elapsed_sec"] - baseline["elapsed_sec"]
         if delay_delta >= self.TIME_DELAY_THRESHOLD_SEC:
             indicators.append(
@@ -223,21 +249,23 @@ class ReplayRequest:
             strong_signal = True
 
         if mutated["status"] != baseline["status"]:
+            suffix = " (clean client rejection — weak)" if clean_rejection else ""
             indicators.append(
-                f"Status code changed: baseline={baseline['status']} mutated={mutated['status']}"
+                f"Status code changed: baseline={baseline['status']} mutated={mutated['status']}{suffix}"
             )
-            strong_signal = True
+            if not clean_rejection:
+                strong_signal = True
 
         length_delta = abs(mutated["length"] - baseline["length"])
         length_changed_significantly = baseline["length"] > 0 and length_delta / baseline["length"] > 0.5
         if length_changed_significantly:
+            suffix = " (clean client rejection — weak)" if clean_rejection else ""
             indicators.append(
-                f"Response length changed significantly: baseline={baseline['length']} mutated={mutated['length']}"
+                f"Response length changed significantly: baseline={baseline['length']} mutated={mutated['length']}{suffix}"
             )
-            strong_signal = True
+            if not clean_rejection:
+                strong_signal = True
 
-        mutated_lower = mutated["body_sample"].lower()
-        error_hits = [kw for kw in self.ERROR_KEYWORDS if kw in mutated_lower]
         if error_hits:
             indicators.append(f"Error/exception disclosure in response: {error_hits}")
             strong_signal = True
@@ -247,6 +275,7 @@ class ReplayRequest:
             and not length_changed_significantly
             and not error_hits
             and mutated["body_sample"] != baseline["body_sample"]
+            and self._strip_volatile(mutated["body_sample"]) != self._strip_volatile(baseline["body_sample"])
         ):
             similarity = difflib.SequenceMatcher(None, baseline["body_sample"], mutated["body_sample"]).ratio()
             if similarity >= self.CONTENT_DIFF_SIMILARITY_THRESHOLD:

@@ -1,5 +1,62 @@
 # Ghi chú tiến độ — EthicalQuoc
 
+**[NEGATIVE-CONTROL TEST + 2 CẢI TIẾN replay oracle] Dựng app vá (java-app-secure) để kiểm tra tool có phân biệt vuln vs đã-vá không — phát hiện giới hạn, sửa, verify.**
+
+**1. Thêm case Jackson kiểu KHÁC vào java-app (vuln)**: endpoint `POST /api/theme/import`
+([ThemeImportController.java](../Web%20vul%20env/java-app/src/main/java/com/webvulenv/javaapp/controller/ThemeImportController.java))
+dùng `@class` PROPERTY form + `@JsonTypeInfo(use=Id.CLASS)` KHÔNG validator (polymorphic typing không giới
+hạn) — khác hẳn webhook (WRAPPER_ARRAY + allowlist PTV + bypass generic CVE-2026-54512). UI: card "Theme
+appearance" trong dashboard.html. Tool detect đúng qua pattern `@class` (verify live: benign→200, gadget
+`@class`→InvalidDefinition do blacklist nội bộ).
+
+**2. Dựng java-app-secure (port 8083)** = bản copy java-app, vá đúng chuẩn (user chọn: trả lỗi generic,
+KHÔNG lộ exception):
+- OIS (SessionCookieFilter + MessageIntegrationController): look-ahead allow-list qua `resolveClass()` —
+  gadget bị từ chối TRƯỚC khi chain chạy; mọi lỗi → 401 "Not authenticated" / 400 "Unsupported message
+  format" (generic, không stacktrace).
+- Jackson (webhook + theme): bỏ polymorphic, bind `channel`→`List<Object>`, `background`→`Map` — payload
+  gadget thành TRƠ; lỗi → 400 "Invalid ..." sạch.
+
+**3. Kết quả thí nghiệm (chạy tool thật trên HAR capture từ cả 2 app)** — phát hiện 1 giới hạn + 1
+false-positive THẬT:
+- webhook secure → gadget trơ 200→200 → tool KHÔNG flag (phân biệt sạch, lv=0 vs vuln lv=12). ✓
+- NHƯNG theme secure (400 "Invalid theme") + OIS secure (401) → tool VẪN flag lv>0, chỉ vì **status đổi**
+  (`_compare` coi MỌI status-change là tín hiệu mạnh). Boolean không phân biệt được "app từ chối an toàn
+  (4xx sạch)" với "app bị khai thác (500 + exception)". Chỉ indicator error-disclosure phân biệt (vuln lộ
+  exception, secure lộ 0).
+- **FALSE-POSITIVE thật**: `/favicon.ico` 404→404 bị flag lv=True — vì heuristic content-diff bị đánh lừa
+  bởi trường `timestamp` động trong trang lỗi Spring (`.094` vs `.100`), không liên quan payload.
+
+**4. HAI CẢI TIẾN đã làm trong [replay_request.py](Replay/replay_request.py) `_compare()`:**
+- **Xếp hạng tín hiệu**: `clean_rejection = (400<=status<500) and not error_hits`. Khi là clean 4xx (từ
+  chối sạch, KHÔNG lộ exception) → status/length-change CHỈ ghi làm indicator, KHÔNG set strong_signal.
+  5xx hoặc bất kỳ response nào lộ exception thì KHÔNG bao giờ "clean" → vẫn strong. (webhook vuln trả 400
+  nhưng lộ `InvalidTypeIdException` → chứa "exception" → không clean → vẫn strong ✓).
+- **Chuẩn hóa volatile trước content-diff**: `_strip_volatile()` thay ISO-8601 timestamp + epoch-millis
+  bằng placeholder; content-diff chỉ tính khi bản đã chuẩn hóa KHÁC nhau → diệt FP favicon.
+
+**5. Verify (re-score chính dữ liệu đã capture với `_compare` mới — cải tiến thuần post-capture nên
+không cần bắn mạng lại):**
+
+| Endpoint | VULN lv (cũ→mới) | SECURE lv (cũ→mới) |
+|---|---|---|
+| session dashboard/profile | 6→6, 1→1 (giữ: 500+exception) | 12→**0**, 2→**0** (401 sạch) |
+| integration | 6→6 | 12→**0** (400 sạch) |
+| theme jackson | 6→6 (400+InvalidDefinition) | 6→**0** (400 "Invalid theme" sạch) |
+| webhook jackson | 12→12 | 0→0 |
+| favicon | — | 6→**0**, 1→**0** (timestamp FP diệt) |
+
+→ **VULN giữ nguyên 100% (0 mất detection), SECURE tất cả về 0, FP favicon biến mất.** Tool giờ phân biệt
+vuln/đã-vá sạch ngay ở boolean `likely_vulnerable`. Test: thêm 4 test (`test_clean_4xx_rejection_*`,
+`test_4xx_that_leaks_exception_is_still_strong`, `test_timestamp_only_diff_is_not_flagged`). Suite:
+**116/116 pass**.
+
+**Giá trị thesis**: đây là negative-control hoàn chỉnh — chứng minh tool (a) không false-negative trên app
+lỗ hổng, (b) không false-positive trên app đã vá, (c) phương pháp luận "dựng cặp vuln/secure giống hệt để
+đo khả năng phân biệt" + đã lộ & sửa 2 giới hạn cụ thể của replay oracle.
+
+---
+
 **[DEEP TEST END-TO-END — localhost.har thật, đối chiếu phân tích thủ công từ source vs output tool. SAU fix provenance.]**
 
 Chạy trọn `scan→analyze→assess→report` trong **WSL (có Java → ysoserial sinh payload thật)**, target là container `java-vuln-app`

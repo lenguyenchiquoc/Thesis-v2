@@ -108,6 +108,48 @@ class TestLikelyVulnerableWeighting(unittest.TestCase):
         self.assertTrue(any("Time-based" in i for i in indicators))
         self.assertTrue(strong)
 
+    def test_clean_4xx_rejection_without_exception_is_weak(self):
+        # java-app-secure: mot session cookie bi tamper -> SessionCookieFilter tu
+        # choi sach bang 401 "Not authenticated" (KHONG lo exception). Day la hanh
+        # vi phong thu dung, khong phai lo hong -> status doi nhung KHONG strong.
+        baseline = sample(status=200, length=120, body_sample='{"username":"wiener","role":"user"}')
+        mutated = sample(status=401, length=28, body_sample='{"error":"Not authenticated"}')
+        indicators, strong = self.r._compare(baseline, mutated)
+        self.assertTrue(any("Status code changed" in i for i in indicators))
+        self.assertFalse(strong, "4xx sach (khong lo exception) la tu choi phong thu, khong phai strong signal")
+
+    def test_clean_4xx_rejection_secure_theme_is_weak(self):
+        # java-app-secure theme: payload gadget khong khop kieu Map -> 400
+        # "Invalid theme" sach. Status + length doi nhung khong lo exception.
+        baseline = sample(status=200, length=101, body_sample='{"success":true,"name":"custom","backgroundType":"x"}')
+        mutated = sample(status=400, length=25, body_sample='{"error":"Invalid theme"}')
+        indicators, strong = self.r._compare(baseline, mutated)
+        self.assertFalse(strong)
+
+    def test_4xx_that_leaks_exception_is_still_strong(self):
+        # Doi lap: webhook VULN tra 400 NHUNG lo InvalidTypeIdException ->
+        # error disclosure -> van phai strong (khong bi downgrade thanh clean).
+        baseline = sample(status=200, length=100, body_sample='{"success":true}')
+        mutated = sample(
+            status=400, length=400,
+            body_sample='{"error":"...com.fasterxml.jackson.databind.exc.InvalidTypeIdException: denied resolution"}',
+        )
+        indicators, strong = self.r._compare(baseline, mutated)
+        self.assertTrue(any("Error/exception disclosure" in i for i in indicators))
+        self.assertTrue(strong, "4xx co lo exception/stacktrace thi van la strong")
+
+    def test_timestamp_only_diff_is_not_flagged(self):
+        # False-positive that tren /favicon.ico: 2 response 404 giong het nhau
+        # tru truong "timestamp" cua trang loi Spring -> KHONG duoc coi la
+        # content diff co y nghia.
+        baseline = sample(status=404, length=100,
+                          body_sample='{"timestamp":"2026-10-15T08:05:58.094+00:00","status":404,"error":"Not Found","path":"/favicon.ico"}')
+        mutated = sample(status=404, length=100,
+                         body_sample='{"timestamp":"2026-10-15T08:05:58.100+00:00","status":404,"error":"Not Found","path":"/favicon.ico"}')
+        indicators, strong = self.r._compare(baseline, mutated)
+        self.assertEqual(indicators, [], "Khac biet duy nhat la timestamp -> khong co indicator nao")
+        self.assertFalse(strong)
+
     def test_strong_and_weak_indicators_can_coexist(self):
         # Neu CA error disclosure VA content-diff deu xay ra (hiem, nhung co
         # the), strong_signal phai la True vi co it nhat 1 bang chung manh -

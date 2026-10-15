@@ -6,15 +6,20 @@ import urllib.parse
 from collections import deque
 
 from Utility import signatures
+from Utility import transforms
 from Utility.schemas import NormalizedCandidates
 
 
 class DataNormalizer:
+    MAX_JSON_NODES = 200
+
     def __init__(self, value:str, max_depth = 12, max_candidate = 40):
         self.data = value.strip()
+        lead, trail = transforms.trim_of(value) if value.strip() else (0, 0)
+        self._root_steps = [] if (lead, trail) == (0, 0) else [transforms.slice_step(lead, len(value) - trail)]
         self.max_depth = max_depth
         self.max_candidate = max_candidate
-        self._parent_of: dict[str, tuple[str, str]] = {}
+        self._parent_of: dict[str, tuple[dict, str]] = {}
 
     def normalize(self) -> NormalizedCandidates:
         seen = set()
@@ -84,30 +89,39 @@ class DataNormalizer:
             return False
         return signatures.looks_like_serialized(value)
 
-    def _extract_claim_strings(self, obj, depth: int = 0) -> list[str]:
-        if depth > 5:
-            return []
-        if isinstance(obj, str):
-            return [obj.strip()] if obj.strip() else []
-        if isinstance(obj, dict):
-            found = []
-            for v in obj.values():
-                found.extend(self._extract_claim_strings(v, depth + 1))
-            return found
-        if isinstance(obj, list):
-            found = []
-            for v in obj:
-                found.extend(self._extract_claim_strings(v, depth + 1))
-            return found
-        return []
+    def _extract_json_nodes(self, obj, path: list | None = None, depth: int = 0, out: list | None = None) -> list:
+        # Every non-root node with its JSON path: leaf strings AND sub-objects /
+        # sub-arrays. A polymorphic wrapper nested under a key (e.g. Jackson's
+        # ["pkg.Class",{...}] at ["channel"]) must be its own candidate, with a
+        # path that lets replay put a mutation back in exactly that place.
+        path = path or []
+        out = [] if out is None else out
+        if depth > 5 or len(out) >= self.MAX_JSON_NODES:
+            return out
+        children = obj.items() if isinstance(obj, dict) else enumerate(obj) if isinstance(obj, list) else []
+        for key, child in children:
+            child_path = path + [key]
+            if isinstance(child, str):
+                out.append((child_path, child))
+            elif isinstance(child, (dict, list)):
+                out.append((child_path, child))
+                self._extract_json_nodes(child, child_path, depth + 1, out)
+        return out
 
-    def _generate_decodes(self, value: str) -> list[tuple[str, str]]:
-        results: list[tuple[str, str]] = []
+    @staticmethod
+    def _trimmed(step: dict, raw: str) -> tuple[dict, str]:
+        trim = transforms.trim_of(raw)
+        if trim != [0, 0]:
+            step["trim"] = trim
+        return step, raw.strip()
+
+    def _generate_decodes(self, value: str) -> list[tuple[dict, str]]:
+        results: list[tuple[dict, str]] = []
         is_jwt_shaped = bool(re.match(r'^[A-Za-z0-9_-]{16,}\.[A-Za-z0-9_-]{16,}\.[A-Za-z0-9_-]*$', value))
         try:
             ud = urllib.parse.unquote(value, encoding='latin-1')
             if ud != value and ud.strip():
-                results.append(("url", ud.strip()))
+                results.append(self._trimmed(transforms.url_step(value), ud))
         except:
             pass
         if not is_jwt_shaped:
@@ -120,62 +134,69 @@ class DataNormalizer:
                     if decoded_bytes.startswith(b'\x1f\x8b'):
                         try:
                             decompressed = gzip.decompress(decoded_bytes)
-                            txt = decompressed.decode('latin-1').strip()
-                            if txt:
-                                results.append(("base64_gzip", txt))
+                            txt = decompressed.decode('latin-1')
+                            if txt.strip():
+                                results.append(self._trimmed(transforms.base64_step(value, gz=True), txt))
                         except:
                             pass
                     else:
                         try:
-                            txt = decoded_bytes.decode('latin-1').strip()
-                            if txt and len(txt) >= 10:
-                                results.append(("base64", txt))
+                            txt = decoded_bytes.decode('latin-1')
+                            if txt.strip() and len(txt.strip()) >= 10:
+                                results.append(self._trimmed(transforms.base64_step(value), txt))
                         except:
                             pass
             except:
                 pass
         if re.fullmatch(r'^[0-9a-fA-F]+$', value) and len(value) % 2 == 0 and len(value) >= 16:
             try:
-                hex_bytes = bytes.fromhex(value)
-                txt = hex_bytes.decode('latin-1').strip()
-                if txt:
-                    results.append(("hex", txt))
+                txt = bytes.fromhex(value).decode('latin-1')
+                if txt.strip():
+                    results.append(self._trimmed(transforms.hex_step(value), txt))
             except:
                 pass
         if is_jwt_shaped:
-            for seg in value.split('.'):
+            for index, seg in enumerate(value.split('.')):
                 if not seg:
                     continue
                 try:
                     padded = seg + '=' * (-len(seg) % 4)
-                    decoded_bytes = base64.urlsafe_b64decode(padded)
-                    txt = decoded_bytes.decode('latin-1').strip()
-                    if txt:
-                        results.append(("jwt_segment", txt))
+                    txt = base64.urlsafe_b64decode(padded).decode('latin-1')
+                    if txt.strip():
+                        results.append(self._trimmed(transforms.jwt_step(index), txt))
                 except:
                     pass
         try:
             claims = json.loads(value)
             if isinstance(claims, (dict, list)):
-                for claim_str in self._extract_claim_strings(claims):
-                    results.append(("json_claim", claim_str))
+                base_step = transforms.json_step(value, [])
+                for path, node in self._extract_json_nodes(claims):
+                    step = {**base_step, "path": path}
+                    if isinstance(node, str):
+                        if node.strip():
+                            results.append(self._trimmed(step, node))
+                    else:
+                        results.append((step, json.dumps(node, separators=(",", ":"), ensure_ascii=False)))
         except:
             pass
-        return results
+        return [(transforms.mark_if_lossy(step, value, child), child) for step, child in results]
 
-    REWRAPPABLE_OPS = {"url", "base64", "base64_gzip", "hex"}
-
-    def get_encoding_chain(self, candidate: str) -> list[str]:
-        chain: list[str] = []
+    def get_transform_chain(self, candidate: str) -> list[dict]:
+        """Reversible steps from the normalizer's input value down to `candidate`
+        (see Utility/transforms.py). Empty when candidate is the input itself."""
+        chain: list[dict] = []
         current = candidate
         visited: set[str] = set()
         while current in self._parent_of and current not in visited:
             visited.add(current)
-            op_label, parent = self._parent_of[current]
-            chain.append(op_label)
+            step, parent = self._parent_of[current]
+            chain.append(step)
             current = parent
         chain.reverse()
-        return chain
+        return list(self._root_steps) + chain
+
+    def get_encoding_chain(self, candidate: str) -> list[str]:
+        return [step["op"] for step in self.get_transform_chain(candidate) if step["op"] != "slice"]
 
     def _serialized_score(self, value: str) -> float:
         score = 0.0

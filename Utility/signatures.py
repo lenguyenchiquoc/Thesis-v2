@@ -102,6 +102,13 @@ JACKSON_PATTERNS = [
     r'\[\s*"(?:[a-z][\w$]*\.)+[A-Z][\w$]*"\s*,',
     r'"@class"\s*:\s*"(?:[a-z][\w$]*\.)+[A-Z][\w$]*"',
     r'"@type"\s*:\s*"(?:[a-z][\w$]*\.)+[A-Z][\w$]*"',
+    # CVE-2026-54512/54513 (GHSA-j3rv-43j4-c7qm): PolymorphicTypeValidator chi kiem tra
+    # ten container truoc dau "<", bo qua generic type parameter - class bi cam duoc
+    # nhung vao trong container duoc cho phep, vd "java.util.ArrayList<com.evil.Evil>".
+    # Pattern sau bat ca WRAPPER_ARRAY lan @class/@type mang generic nhu vay.
+    r'\[\s*"(?:[a-z][\w$]*\.)+[A-Z][\w$]*<[^"]*>"\s*,',
+    r'"@class"\s*:\s*"(?:[a-z][\w$]*\.)+[A-Z][\w$]*<[^"]*>"',
+    r'"@type"\s*:\s*"(?:[a-z][\w$]*\.)+[A-Z][\w$]*<[^"]*>"',
 ]
 JACKSON_DANGEROUS_CLASSES = [
     "jdbcrowsetimpl",

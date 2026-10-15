@@ -1,5 +1,206 @@
 # Ghi chú tiến độ — EthicalQuoc
 
+**[DEEP TEST END-TO-END — localhost.har thật, đối chiếu phân tích thủ công từ source vs output tool. SAU fix provenance.]**
+
+Chạy trọn `scan→analyze→assess→report` trong **WSL (có Java → ysoserial sinh payload thật)**, target là container `java-vuln-app`
+thật đang chạy. 4 stage exit 0, 0 traceback. HAR chỉ có traffic Java app 8081 (15 entry, 8 endpoint).
+
+Phân tích ground-truth ĐỘC LẬP từ source trước, rồi so:
+- `session` cookie: [SessionCookieFilter.java:29](../Web%20vul%20env/java-app/src/main/java/com/webvulenv/javaapp/filter/SessionCookieFilter.java#L29)
+  `ObjectInputStream.readObject()` CHỈ chạy khi URI = `/api/dashboard` hoặc `/api/profile`. commons-collections 3.2.1 (pom) +
+  JDK 1.8.0_504 (container) → gadget CC có đường reflection. → **Tool (black-box, không đọc source) bắn gadget session vào CẢ 8
+  endpoint, tự phát hiện ĐÚNG 2 endpoint dashboard+profile đổi 200→500**, các endpoint khác 200→200 likely=0. Khớp chính xác điều
+  kiện filter mà không biết filter tồn tại. Body lỗi: `ClassCastException: java.util.HashMap cannot be cast to UserSession` =
+  bằng chứng gadget được readObject() deserialize TRỌN VẸN (chain chạy xong) rồi mới fail ở cast → đúng sink nguy hiểm.
+- raw_body `/api/integration/receive` (`MessageIntegrationController` readObject trực tiếp): likely=6+1, 200→500 InvalidClassException. ✓
+- raw_body `/api/webhook/config` (Jackson CVE-2026-54512): likely=18, 200→400; plain gadget→`InvalidTypeId` (PTV app chặn),
+  `ArrayList<gadget>`→`InvalidDefinition` (ĐÃ vượt PTV, blacklist nội bộ Jackson chặn), c3p0→`Cannot locate class`. ✓ (trước fix:
+  cả 18 đều MismatchedInputException do body sai hình dạng — fix provenance đã sửa).
+- `ref_tag` (decoy, chỉ urlDecode+echo): likely=0 mọi nơi, 200→200. ✓
+
+Kết quả: **0 false negative** (cả 3 sink thật đều bị flag), decoy xử lý đúng, fix provenance chạy đúng trên cả 3 loại slot
+(base64 cookie / url-encoded cookie / JSON lồng), **0 skip** trên HAR này (candidate top đều round-trip sạch). 1 điểm ghi nhận
+(không phải bug): webhook plain-gadget 3/18 trả 400 "denied" = PTV app chặn AN TOÀN, nhưng tool vẫn likely_vulnerable=True theo
+heuristic "status đổi + lộ exception" — nhất quán với triết lý luôn `Suspected`/không auto-`Confirmed`, để người review (400 kèm
+stacktrace lộ tên thư viện + hành vi blacklist cũng đáng xem). Suite unit: 112/112 pass.
+
+---
+
+**[FIX KIẾN TRÚC — TỔNG QUÁT] Replay dựng lại request SAI khi candidate nằm lồng trong 1 giá trị lớn hơn — cả họ bug (Cookie header, form_body, JSON body lồng, base64url) sửa 1 lần bằng cơ chế "provenance": ghi lại MỌI bước biến đổi kèm cách đảo ngược, replay luôn THAY VÀO bản gốc thay vì dựng lại từ đầu.**
+
+**Phát hiện**: user hỏi vì sao chạy tool không thấy Jackson gọi OOB. Đọc `debug_step8.json` thật: 18 payload `jackson_oob`
+đều nhận `MismatchedInputException: Cannot deserialize ... WebhookConfigRequest from Array value` — tức request
+gửi đi SAI HÌNH DẠNG, chưa từng chạm logic PTV/CVE. Nguyên nhân: [har_loader.py:74](Scanner/har_loader.py#L74)
+capture cả body JSON thành 1 vector `raw_body/payload`; candidate thật là node `["channel"]` bên trong; nhưng replay
+không biết đường đi đó nên `_send()` ghi đè **toàn bộ body** bằng mỗi gadget (mất key `label`, mất key `channel`).
+
+**Gốc rễ chung (cùng họ với bug Cookie/header — plan cũ đã cảnh báo "body/form_body cũng ghi đè toàn bộ, chưa
+thấy xảy ra thực tế")**: từ ô HTTP tới candidate, giá trị đi qua nhiều bước (cleanfilter: tách `'; '`, cắt prefix;
+normalize: url/base64/hex/gzip/jwt/json) nhưng tool chỉ nhớ một phần, chỉ nhớ TÊN không nhớ NGỮ CẢNH. Gặp bước
+không đảo ngược được → âm thầm gửi mảnh nhỏ vào chỗ cả cụm. Verify thật thêm 1 bug ngầm cùng họ: cookie base64url
+`...fT8_Pw` bị rewrap thành `...fT8/Pw==` (sai alphabet + thêm padding).
+
+**Fix (1 cơ chế chung, không vá từng case):**
+- [Utility/transforms.py](Utility/transforms.py) (mới): mỗi bước là 1 `Step` dict có đủ ngữ cảnh để chạy xuôi và
+  đảo ngược — `slice` (start/end), `url` (ký tự gốc để nguyên + hoa/thường hex), `base64`/`base64_gzip` (alphabet
+  urlsafe? padding?), `hex` (hoa/thường), `jwt_segment` (index), `json` (đường dẫn key + kiểu separator), + `trim`
+  khi decode có strip. `rebuild(slot, chain, new_leaf)`: đi xuôi để lấy mọi giá trị cha GỐC, rồi đi ngược thay giá trị
+  mới vào từng cha gốc → anh em (cookie khác, key JSON khác, chữ ký JWT...) + format gốc được giữ tự động.
+- **Lưới an toàn**: `mark_if_lossy()` kiểm tra ngay lúc ghi nhận: đảo ngược bước trên chính output của nó phải ra lại
+  cha (giống từng byte, hoặc tương đương với url-hex-case/gzip/json-whitespace). Không được → đánh dấu `lossy`;
+  op lạ hoặc bước lossy → `TransformError` → replay **SKIP kèm lý do rõ ràng** ("Cannot faithfully rebuild the request
+  slot"), KHÔNG BAO GIỜ gửi request khác đi. Case mới trong tương lai sẽ "lỗi to", không "lỗi sai".
+- [cleanfilter.py](Analyze/cleanfilter.py): tính offset chính xác → ghi bước `slice`; KHÔNG còn cắt `=` ở cuối (đó là
+  padding base64, cắt đi làm giá trị replay khác giá trị đã capture).
+- [normalize.py](Analyze/normalize.py): mỗi decode trả `Step`; JSON tách cả **node con** (object/array) với path, không
+  chỉ chuỗi lá → wrapper Jackson tại `["channel"]` thành candidate riêng. `get_transform_chain()` mới.
+- [main.py](main.py) `_analyze_one`: nối `clean_steps + normalize steps` = `transform_chain`, kèm `slot_value`; đi theo
+  mutation ([payloadMutation.py](Analyze/payloadMutation.py) `_make_payload`).
+- [replay_request.py](Replay/replay_request.py): dùng `rebuild()`; `_send()` cho query/form_body chỉ thay đúng 1 cặp
+  `name=value` (`_replace_pair`), các cặp khác giữ nguyên byte; multipart → báo lỗi rõ ràng thay vì làm hỏng body.
+  Mutation cũ không có `transform_chain` vẫn chạy đường legacy.
+
+**Verify:**
+- Bất biến round-trip trên **4 file HAR** (localhost.har thật, integration_real, php-app-session, comprehensive):
+  194 candidate → **0 failure** (186 giống từng byte, 1 tương đương, 7 lossy bị từ chối đúng thiết kế).
+- Test mới [test_transforms.py](TestCase/test_transforms.py) (16 test: round-trip từng op, base64url giữ alphabet,
+  Jackson lồng giữ `label`, Cookie header chỉ thay đúng segment, lossy bị từ chối, form_body giữ param khác, bất biến
+  trên comprehensive.har). Suite: **112/112 pass**.
+- **Live**: chạy lại `debug_pipeline.py --har localhost.har --step 8` vào `java-vuln-app` thật. Body gửi đi giờ là
+  `{"label":"email alerts","channel":[<gadget>]}`. Server trả: 3 gadget thường → `InvalidTypeIdException` (PTV app
+  chặn); `ArrayList<JdbcRowSetImpl>`/`ArrayList<PropertyPathFactoryBean>` → `InvalidDefinitionException` (ĐÃ VƯỢT PTV
+  app, bị blacklist nội bộ Jackson chặn); `ArrayList<c3p0...>` → `Cannot locate class` (đã vượt PTV, c3p0 không có trên
+  classpath). Khớp 100% kết quả test tay bằng curl. Trước fix: cả 18 đều `MismatchedInputException`.
+
+**Còn tồn đọng (không sửa trong lần này, chỉ ghi nhận)**: trong comprehensive.har có 2 vector mà candidate đứng đầu đến
+từ bước base64 lossy (base64 trên text không phải base64 → ra rác): `raw_body` JSON `$type`, và header
+`Content-Disposition: form-data; ...; filename="Tzo0..."` (cleanfilter chỉ cắt prefix `key=` cho Cookie/Authorization,
+nên `filename="` còn dính vào). Trước fix tool gửi rác thay cả body/header; giờ replay skip có lý do. Cải thiện thật cần
+sửa ranking/cleanfilter (ưu tiên candidate không lossy, cắt `key="..."` cho mọi header dạng `; `) — đụng phần DETECTION,
+để quyết định riêng.
+
+---
+
+**[THỰC HIỆN XONG PLAN CVE-2026-54512] Đọc sâu patch commit, thêm endpoint Jackson thật vào `java-app`, thêm payload generic-bypass, verify LIVE trên container thật (không phải suy đoán).**
+
+**1. Đọc sâu patch thật** (`mbechler`... à không, `FasterXML/jackson-databind` commit `434d6c511`, issue #5988) qua
+`.patch` diff trực tiếp từ GitHub — xác nhận chính xác: fix thêm `_validateTypeParameter()` đệ quy trong
+`DatabindContext._resolveAndValidateGeneric()`, validate từng `containedType(i)` + `getContentType()` (array)
+qua CHÍNH PTV đã cấu hình, trừ `Object.class`. Đọc luôn file test thật
+`BasicPTVGenericParameterBypassTest.java` đính kèm trong patch — xác nhận PoC dùng
+`.polymorphicTypeValidator(ptv)` (KHÔNG dùng `.activateDefaultTyping()`) + field
+`@JsonTypeInfo(use = Id.CLASS, include = As.WRAPPER_ARRAY)` riêng lẻ trên 1 field `Object` — tức đây là
+**cấu hình "an toàn theo khuyến nghị" (có PTV allow-list cụ thể) vẫn bị bypass**, không phải code cẩu thả
+bật default typing toàn cục — thực tế và thuyết phục hơn hẳn cho thesis.
+
+**2. Thêm endpoint thật vào `java-app`** (file mới, không sửa code cũ):
+- [`model/webhook/NotificationChannel.java`](../Web%20vul%20env/java-app/src/main/java/com/webvulenv/javaapp/model/webhook/NotificationChannel.java) — abstract base, [`EmailChannel.java`](../Web%20vul%20env/java-app/src/main/java/com/webvulenv/javaapp/model/webhook/EmailChannel.java) — case lành.
+- [`model/WebhookConfigRequest.java`](../Web%20vul%20env/java-app/src/main/java/com/webvulenv/javaapp/model/WebhookConfigRequest.java) — `public Object channel` với đúng annotation PoC.
+- [`controller/WebhookConfigController.java`](../Web%20vul%20env/java-app/src/main/java/com/webvulenv/javaapp/controller/WebhookConfigController.java) — `POST /api/webhook/config`, `ObjectMapper` riêng (không đụng mapper toàn cục Spring Boot) với PTV allow `java.util.ArrayList`/`HashMap`/`com.webvulenv.javaapp.model.webhook.` — y hệt `mapperWithArrayListAndSafePayload()` trong test thật.
+- UI trigger thật: card "Notification channel" trong `dashboard.html` (textarea + nút "Save channel config"), theo đúng rule [feedback-new-api-must-be-used-in-web].
+- **Build Docker thật: `BUILD SUCCESS`**, 13 source file compile sạch (không có lỗi cú pháp/import).
+
+**3. Thêm payload generic-bypass vào `payloadMutation.py`**: `JACKSON_OOB_GADGETS_GENERIC_BYPASS` — bọc
+3 gadget cũ (`JdbcRowSetImpl`/`PropertyPathFactoryBean`/`JndiRefForwardingDataSource`) thành dạng
+`["java.util.ArrayList<pkg.Class>",[{...}]]` (thân gadget giữ nguyên, chỉ bọc trong mảng 1 phần tử —
+đúng cấu trúc test thật). `_mutate_jackson_oob()` giờ sinh **6** payload (3 cũ + 3 generic-bypass).
+Round-trip verify: cả 6 payload tự sinh được `Fingerprint` của chính tool nhận lại đúng
+`"Jackson Polymorphic Typing"`. Test mới `test_mutate_generates_generic_bypass_variant_alongside_plain_gadgets`.
+Suite: **96/96 pass**.
+
+**4. VERIFY LIVE trên container thật (`docker build` + `docker run`, port 18081, đã xoá sau khi xong)** —
+đây là phát hiện quan trọng nhất, KHÔNG nằm trong plan ban đầu:
+
+| Payload gửi tới `/api/webhook/config` | Kết quả thật |
+|---|---|
+| `["com.webvulenv.javaapp.model.webhook.EmailChannel",{"address":"..."}]` (case lành) | `{"success":true,...}` ✓ |
+| `["com.sun.rowset.JdbcRowSetImpl",{...}]` (gadget thường, không allow-list) | `InvalidTypeIdException: ... denied resolution` (chặn bởi PTV app) |
+| `["java.util.ArrayList<com.sun.rowset.JdbcRowSetImpl>",[{...}]]` (generic-bypass) | `InvalidDefinitionException: ... prevented for security reasons` — **LỖI KHÁC**, không phải do PTV app nữa |
+| `["org.springframework...PropertyPathFactoryBean",{...}]` (gadget thường) | `InvalidTypeIdException: ... denied resolution` |
+| `["java.util.ArrayList<org.springframework...PropertyPathFactoryBean>",[{...}]]` (generic-bypass) | `InvalidDefinitionException: ... prevented for security reasons` |
+| `["java.util.Date",12345]` (class KHÔNG nằm trong allow-list app, KHÔNG phải gadget nguy hiểm) | `InvalidTypeIdException: ... denied resolution` (chặn bởi PTV app, như mong đợi) |
+| `["java.util.ArrayList<java.util.Date>",[12345]]` (generic-bypass, cùng class) | **`{"success":true,"channelType":"java.util.ArrayList",...}`** — **BYPASS THÀNH CÔNG HOÀN TOÀN** |
+
+**Phát hiện/diễn giải quan trọng**: CVE-2026-54512 bypass **có thật và xảy ra đúng như advisory mô tả** ở
+tầng PTV tự cấu hình của app (chứng minh sạch bằng `java.util.Date` — không phải gadget nguy hiểm, không
+allow-list, nhưng vẫn lọt qua và materialize thành công khi bọc generic). NHƯNG với 2 gadget JNDI quen
+thuộc (`JdbcRowSetImpl`, `PropertyPathFactoryBean`), sau khi bypass PTV app xong, chúng **còn bị chặn bởi
+1 tầng khác, độc lập**: `SubTypeValidator.DEFAULT_NO_DESER_CLASS_NAMES` — blacklist CỨNG, NỘI BỘ của chính
+jackson-databind (đã đọc source ở mục nghiên cứu trước đó), áp dụng bất kể PTV app cấu hình allow gì.
+Bằng chứng: loại lỗi đổi từ `InvalidTypeIdException` (PTV app từ chối) sang `InvalidDefinitionException`
+(tầng blacklist nội bộ Jackson từ chối, SAU KHI PTV app đã chấp nhận) — 2 exception khác nhau = 2 tầng
+chặn khác nhau, chứng minh được bypass CÓ xảy ra dù không tới được JNDI lookup cuối cùng trên version
+jackson-databind 2.13.5 cụ thể này.
+
+**Ý nghĩa cho thesis/report**: payload generic-bypass của tool (`JACKSON_OOB_GADGETS_GENERIC_BYPASS`) sẽ
+KHÔNG tạo được callback LDAP thật trên target chạy jackson-databind có blacklist nội bộ đầy đủ (>= khoảng
+2.8.10, bao gồm 2.13.5 của `java-app` demo) — vì 2 gadget JNDI quen thuộc đã bị chặn kép. Payload này vẫn
+có giá trị thật với: (a) target dùng version jackson-databind CŨ hơn (trước khi 2 class này được thêm vào
+blacklist cứng, khoảng < 2.8.9), hoặc (b) 1 gadget JNDI khác chưa nằm trong `DEFAULT_NO_DESER_CLASS_NAMES`
+(chưa tìm, ngoài phạm vi hiện tại). Đã KHÔNG sửa code `java-app` để né blacklist nội bộ của Jackson (vd
+đổi sang version cũ hơn) — giữ nguyên bản 2.13.5 thật vì đây chính là phát hiện trung thực, có giá trị học
+thuật hơn (chứng minh rõ 2 tầng phòng thủ độc lập) so với việc "làm cho chạy bằng mọi giá".
+
+---
+
+**[CÂN NHẮC NHƯNG CỐ TÌNH LOẠI — CVE-2026-68497, quyết định rõ ràng kèm lý do, để trả lời được khi bị hỏi phản biện]**
+
+Tra thật qua NVD API (`services.nvd.nist.gov`, không suy đoán): `jackson-databind` bind thẳng 1 JSON
+string vào `javax.xml.datatype.Duration`/`XMLGregorianCalendar` qua `DatatypeFactory.newDuration()`/
+`newXMLGregorianCalendar()` (`CoreXMLDeserializers.Std._deserialize`) — 2 hàm JDK này dựng số bằng
+`BigInteger(String)`/`BigDecimal(String)`, độ phức tạp **bậc 2** theo số chữ số. Vì số nằm trong JSON
+STRING token (không phải JSON number token), guard `StreamReadConstraints.maxNumberLength` của
+jackson-core **không áp dụng được** — gửi 1 request vài MB (chuỗi `"P999...9Y"` vài triệu chữ số) tốn
+hàng chục giây-vài phút CPU đơn luồng. CVSS 3.1 **7.5 HIGH** (`AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H`),
+CWE-400. Published 2026-09-11, fix tại `GHSA-q4xh-88c3-wmh7` (jackson-databind commit `a99b7e74c`).
+**Không cần polymorphic typing/cấu hình đặc biệt** — `ObjectMapper` trơn cũng dính, vì 2 deserializer
+này đăng ký mặc định.
+
+Verify: payload thử `{"duration":"P999...9Y"}` qua `Fingerprint` → `Unknown` — signature hiện tại
+không nhận diện được (đúng, vì không có wrapper `["class",{...}]`/`@class` nào cả, chỉ là field JSON
+thường).
+
+**QUYẾT ĐỊNH (đã hỏi trực tiếp user, không tự ý)**: **KHÔNG thêm vào tool.** Lý do: đây là
+**Denial-of-Service (CWE-400)**, khác hẳn mục tiêu "object injection/RCE" (CWE-502) mà toàn bộ pipeline
+(PHP unserialize, Java ObjectInputStream, Jackson polymorphic typing, Pickle, YAML, .NET, Node/Ruby
+Marshal) đang nhắm tới. Dù cùng đi qua cơ chế Jackson deserialization, đây là loại tác động khác hẳn,
+không khớp phạm vi "insecure deserialization → khai thác" của thesis. Giữ nguyên scope, không mở rộng
+sang DoS/resource-exhaustion.
+
+---
+
+**[FIX QUAN TRỌNG — phát hiện khi user hỏi về CVE mới] `JACKSON_PATTERNS` bị CVE-2026-54512/54513 (GHSA-j3rv-43j4-c7qm, CVSS 8.1, công bố NVD 23/06/2026) bypass hoàn toàn — ĐÃ SỬA.**
+
+**Lỗ hổng (đọc advisory thật qua WebFetch GitHub, không suy đoán)**: `PolymorphicTypeValidator` của
+jackson-databind khi gặp type ID có generic (`<...>`) chỉ kiểm tra **tên container trước dấu `<`**, bỏ
+qua hoàn toàn type parameter bên trong. Attacker nhét 1 class bị cấm làm generic argument của 1
+container ĐƯỢC CHO PHÉP — vd `"java.util.ArrayList<com.evil.EvilGadget>"` (ArrayList được allow, nhưng
+`EvilGadget` lẽ ra bị chặn thì lại lọt qua vì validator không nhìn vào bên trong `<...>`). Ảnh hưởng
+`jackson-databind` **2.10.0 đến 2.18.7**, 2.19.0-2.21.3, 3.0.0-3.1.3 — **bao gồm đúng bản 2.13.5** mà
+`java-app` đang dùng (qua Spring Boot 2.7.18 BOM, đã verify ở plan dưới) — **KHÔNG CẦN pin version cũ
+hơn nữa, 2.13.5 hiện tại đã dính CVE này ngay từ đầu.**
+
+**Gap thật trong tool (verify bằng code, không đoán)**: payload PoC của advisory
+`["java.util.ArrayList<com.evil.EvilGadget>",[{"cmd":"id"}]]` chạy qua `Fingerprint` → kết quả
+`type: "Unknown", subtype: null, risk_level: "Low"` — **signature cũ hoàn toàn bỏ lỡ**. Nguyên nhân:
+regex `JACKSON_PATTERNS` cũ (`[A-Z][\w$]*"` — lớp ký tự `\w$` không chứa `<`) khớp xong tên class
+`ArrayList` thì kỳ vọng dấu `"` ngay sau, nhưng gặp `<` trước → regex fail toàn bộ match.
+
+**Fix**: thêm 3 pattern mới vào [signatures.py](Utility/signatures.py) `JACKSON_PATTERNS`, cho phép
+`<[^"]*>"` sau tên class (bắt mọi biến thể generic mà advisory liệt kê: list element, map key, map
+value, nested list, array element — vì tất cả chỉ khác nhau ở nội dung bên trong `<...>`, không cần
+pattern riêng cho từng loại).
+
+Verify thật — cả 6 biến thể advisory liệt kê (+ 1 kết hợp với gadget thật `JdbcRowSetImpl` thay vì
+`EvilGadget` placeholder) đều route đúng `subtype: "Jackson Polymorphic Typing"` sau fix. Test mới:
+`TestCVE2026_54512_GenericTypeBypass` (7 test, kèm 1 test no-regression cho pattern cũ không có `<`).
+Suite: **95/95 pass**.
+
+**Nguồn tham khảo**: GHSA-j3rv-43j4-c7qm (https://github.com/advisories/GHSA-j3rv-43j4-c7qm), fix thật ở
+jackson-databind issue #5988 (commit `434d6c511`) — fix validate đệ quy qua PTV, trừ `Object`/`Enum`.
+
+---
+
 **[THÊM] Gadget thứ 3 cho `JACKSON_OOB_GADGETS`: `com.mchange.v2.c3p0.JndiRefForwardingDataSource` (c3p0).**
 
 Verify từ source thật `mbechler/marshalsec` `Jackson.java` `makeRefDataSource()`: field phẳng, đơn
@@ -18,41 +219,39 @@ payload OOB-confirmation cho Jackson (trước là 2). Verify: `json.loads()` c�
 
 ---
 
-**[PLAN — NGÀY MAI] Tạo test case thật cho Jackson, test thử với CVE cụ thể trên `java-app`.**
+**[PLAN — NGÀY MAI, ĐÃ CẬP NHẬT] Tạo test case thật cho Jackson, test thử với CVE cụ thể trên `java-app`.**
 
-**Phát hiện quan trọng cần biết TRƯỚC khi làm (đã verify, không đoán)**: `java-app/pom.xml` không tự pin
-Jackson, nên version thật đến từ Spring Boot `2.7.18` BOM → `jackson-bom.version = 2.13.5` (verify bằng
-cách tải thẳng `spring-boot-dependencies-2.7.18.pom` từ Maven Central). Đọc source thật
-`SubTypeValidator.java` tag `jackson-databind-2.13.5`: **cả 3 gadget đã thêm vào `JACKSON_OOB_GADGETS`
-đều bị chặn nội bộ** — `com.sun.rowset.JdbcRowSetImpl` (chặn theo tên, comment `[databind#1680]`),
-`org.springframework.beans.factory.config.PropertyPathFactoryBean` (chặn theo tên, `[databind#1737]`),
-`com.mchange.v2.c3p0.JndiRefForwardingDataSource` (chặn theo rule `prefix com.mchange.v2.c3p0. + suffix
-"DataSource"`, dòng 282-291). Nghĩa là: dù endpoint Java có bật `enableDefaultTyping()` thật, cả 3 payload
-hiện tại vẫn sẽ bị Jackson tự ném `InvalidTypeIdException`, KHÔNG có JNDI lookup nào xảy ra — test live sẽ
-cho kết quả âm tính giả nếu không xử lý bước này trước.
+**Đổi hướng so với bản plan gốc (xem mục [FIX QUAN TRỌNG] CVE-2026-54512 ở đầu file)**: KHÔNG CẦN pin
+`jackson-databind` về version cũ nữa. `java-app` đang dùng 2.13.5 (qua Spring Boot 2.7.18 BOM, đã verify
+từ `spring-boot-dependencies-2.7.18.pom`) — version này **nằm ngay trong khoảng bị ảnh hưởng của
+CVE-2026-54512** (2.10.0-2.18.7). Tức là chỉ cần endpoint có bật `PolymorphicTypeValidator` dạng allow-
+list (vd allow `java.util.ArrayList`) + generic type ID, gadget bị chặn tên (`JdbcRowSetImpl`,
+`PropertyPathFactoryBean`...) vẫn lọt qua được bằng cách nhúng vào generic argument — **thực tế hơn
+nhiều** so với phương án cũ (pin version cổ 2017), vì đây là lỗ hổng 2026 còn rất mới trên chính version
+hiện có, không cần giả lập app cổ.
 
 **Việc cần làm ngày mai, theo thứ tự:**
 
-1. **Quyết định hướng xử lý version** (phải làm trước, quyết định mọi bước sau):
-   - Phương án A (khuyến nghị, nhất quán với tiền lệ đã có): pin `jackson-databind` về 1 version CŨ HƠN
-     mốc blacklist thêm 3 class trên — tức **trước** `[databind#1680]`/`[databind#1737]` (khoảng
-     jackson-databind 2.7.x-2.8.8, giai đoạn ngay sau CVE-2017-7525/bug #1599 công bố nhưng trước khi
-     patch). Pin tường minh trong `pom.xml` của `java-app`, ghi rõ comment "intentionally vulnerable for
-     test case" — giống hệt cách `commons-collections:3.2.1` đã pin cho ysoserial trước đó (xem
-     [Keep parallel code consistent]). Cần tra đúng version đầu tiên add từng block để chọn mốc chính xác
-     (không đoán).
-   - Phương án B (khó hơn, để dự phòng nếu A có vướng mắc dependency): giữ nguyên 2.13.5, tìm gadget KHÔNG
-     nằm trong blacklist của version này — rủi ro cao hơn vì phải tự nghiên cứu/verify 1 gadget mới, không
-     có sẵn trong 7 gadget `marshalsec.Jackson` đã liệt kê (toàn bộ 7 cái tới nay đều dính 1 trong các rule
-     chặn ở trên, cần double-check riêng 2 cái còn lại `WrapperConnectionPoolDataSource`/`TemplatesImpl`
-     trước khi chọn hướng này).
+1. **Đọc kỹ GHSA-j3rv-43j4-c7qm + jackson-databind issue #5988** (chưa đọc sâu, mới chỉ đọc tóm tắt qua
+   WebFetch) để hiểu chính xác: `BasicPolymorphicTypeValidator` dùng allow-list kiểu gì trong PoC gốc,
+   và điều kiện chính xác để `_resolveAndValidateGeneric()` bị kích hoạt (có bắt buộc
+   `include = As.WRAPPER_ARRAY` + `use = Id.CLASS` như PoC hay cách khác cũng được).
 
-2. **Thêm endpoint Jackson thật vào `java-app`** (sau khi đã chốt version ở bước 1):
-   - Tạo 1 tính năng hợp lý (vd "import cấu hình thông báo"/"webhook config") dùng `ObjectMapper` với
-     `enableDefaultTyping()`/`activateDefaultTyping()` đọc JSON body từ request — đúng mẫu lỗ hổng CVE-2017-
-     7525 gốc.
+2. **Thêm endpoint Jackson thật vào `java-app`**, dùng ĐÚNG cấu hình PoC advisory: `ObjectMapper` với
+   `@JsonTypeInfo(use = Id.CLASS, include = As.WRAPPER_ARRAY)` trên 1 field kiểu `Object`, PTV allow-list
+   kiểu "chỉ cho `java.util.ArrayList`" (trông có vẻ an toàn — đây chính là điểm hay của CVE này: allow-
+   list tưởng chặt nhưng vẫn bypass được). Field giá trị đọc trực tiếp từ JSON body request. Không cần
+   dùng gadget JdbcRowSetImpl/PropertyPathFactoryBean bị chặn tên — thử trước với gadget đã bị
+   `SubTypeValidator` chặn tên tường minh để chứng minh đúng bypass CVE này (không phải lỗ hổng cấu hình
+   allow-list lỏng lẻo thông thường).
    - **BẮT BUỘC thêm UI trigger thật** cho endpoint này (theo [feedback-new-api-must-be-used-in-web]) —
      không chỉ làm endpoint test bằng curl.
+
+3. **Thêm payload generation cho CVE-2026-54512 vào `payloadMutation.py`** (việc chưa làm — hiện
+   `_mutate_jackson_oob()` chỉ sinh payload wrapper THƯỜNG, chưa có biến thể generic-bypass): thêm 1 bộ
+   gadget mới dạng `"java.util.ArrayList<{gadget_class}>"` bọc quanh `JdbcRowSetImpl`/
+   `PropertyPathFactoryBean`/`JndiRefForwardingDataSource` đã có — tái dùng field/cấu trúc property cũ,
+   chỉ đổi type ID string bên ngoài. Verify lại bằng `json.loads()` như các gadget trước.
 
 3. **Test end-to-end với EthicalQuoc**:
    - Capture HAR qua UI mới → `scan` → `analyze` → `assess` — xác nhận pipeline tự nhận ra

@@ -8,6 +8,7 @@ import urllib.request
 from typing import cast
 
 from Utility.schemas import HttpProbeSample, Mutation, RequestContext, ReplayResult, ReplaySkipped
+from Utility.transforms import TransformError, rebuild
 
 
 class ReplayRequest:
@@ -36,7 +37,11 @@ class ReplayRequest:
         if not url or not location or not name:
             return self._skip_result(payload, "Missing url/location/name — cannot reconstruct request")
 
-        raw_payload = self._select_payload_value(payload)
+        try:
+            raw_payload = self._select_payload_value(payload)
+        except TransformError as e:
+            # Fail loudly rather than send the fragment in place of the whole slot.
+            return self._skip_result(payload, f"Cannot faithfully rebuild the request slot: {e}")
         if raw_payload is None:
             return self._skip_result(payload, "No usable payload value found")
 
@@ -73,6 +78,14 @@ class ReplayRequest:
         if raw_value is None:
             return None
 
+        transform_chain = cast("list[dict] | None", payload.get("transform_chain"))
+        if transform_chain is not None:
+            slot_value = cast("str | None", payload.get("slot_value"))
+            if slot_value is None:
+                raise TransformError("mutation carries a transform_chain but no slot_value")
+            return rebuild(slot_value, transform_chain, raw_value)
+
+        # Legacy mutations (built without provenance): only pure encoding chains.
         encoding_chain = cast("list[str] | None", payload.get("encoding_chain")) or []
         if encoding_chain and all(op in self.REWRAPPABLE_OPS for op in encoding_chain):
             return self._reapply_encoding_chain(raw_value, encoding_chain)
@@ -126,21 +139,23 @@ class ReplayRequest:
             if value is not None:
                 headers[name] = value
         elif location in ("query", "url_param"):
-            parsed = urllib.parse.urlsplit(url)
-            qs = [(k, v) for k, v in urllib.parse.parse_qsl(parsed.query, keep_blank_values=True) if k != name]
-            new_query = urllib.parse.urlencode(qs, doseq=True)
             if value is not None:
+                parsed = urllib.parse.urlsplit(url)
                 encoded_value = urllib.parse.quote(value, safe="", encoding="latin-1")
-                sep = "&" if new_query else ""
-                new_query = f"{new_query}{sep}{name}={encoded_value}"
-            target_url = urllib.parse.urlunsplit(
-                (parsed.scheme, parsed.netloc, parsed.path, new_query, parsed.fragment)
-            )
+                new_query = self._replace_pair(parsed.query, name, encoded_value)
+                target_url = urllib.parse.urlunsplit(
+                    (parsed.scheme, parsed.netloc, parsed.path, new_query, parsed.fragment)
+                )
         elif location in ("body", "form_body"):
             if value is not None:
+                content_type = next((v for k, v in headers.items() if k.lower() == "content-type"), "")
+                if "multipart/" in content_type.lower():
+                    raise ValueError("multipart form bodies cannot be rebuilt faithfully yet")
                 encoded_value = urllib.parse.quote(value, safe="", encoding="latin-1")
-                body = f"{name}={encoded_value}".encode("ascii")
-                headers["Content-Type"] = "application/x-www-form-urlencoded"
+                original_body = body.decode("latin-1") if body else ""
+                body = self._replace_pair(original_body, name, encoded_value).encode("latin-1")
+                if not content_type:
+                    headers["Content-Type"] = "application/x-www-form-urlencoded"
         elif location == "raw_body":
             if value is not None:
                 body = value.encode("latin-1")
@@ -171,6 +186,19 @@ class ReplayRequest:
                 "length": len(raw),
                 "body_sample": raw[:2000].decode("utf-8", errors="replace"),
             }
+
+    @staticmethod
+    def _replace_pair(raw: str, name: str, encoded_value: str) -> str:
+        # Swap only the value of `name` in an "a=1&b=2" string; every other pair
+        # stays byte-identical (no re-encoding of the parameters we don't test).
+        parts = raw.split("&") if raw else []
+        for i, part in enumerate(parts):
+            key = part.split("=", 1)[0]
+            if urllib.parse.unquote_plus(key) == name:
+                parts[i] = f"{key}={encoded_value}"
+                return "&".join(parts)
+        parts.append(f"{urllib.parse.quote(name, safe='')}={encoded_value}")
+        return "&".join(parts)
 
     CONTENT_DIFF_SIMILARITY_THRESHOLD = 0.8
 

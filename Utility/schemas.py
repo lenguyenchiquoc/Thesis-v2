@@ -29,7 +29,11 @@ class CleanedVectorRequired(TypedDict):
     cleaned_value: str
 
 
-class CleanedVector(ScanVector, CleanedVectorRequired):
+class CleanedVectorExtra(TypedDict, total=False):
+    clean_steps: list[dict]
+
+
+class CleanedVector(ScanVector, CleanedVectorRequired, CleanedVectorExtra):
     pass
 
 
@@ -82,6 +86,9 @@ class MutationVectorRequired(TypedDict):
 
 class MutationVectorExtra(TypedDict, total=False):
     request_context: RequestContext
+    clean_steps: list[dict]
+    transform_chain: list[dict]
+    slot_value: str
 
 
 class MutationVector(MutationVectorRequired, MutationVectorExtra):
@@ -106,6 +113,8 @@ class MutationPayloadExtra(TypedDict, total=False):
     payload_raw: str
     note: str
     request_context: RequestContext
+    transform_chain: list[dict] | None
+    slot_value: str | None
 
 
 class MutationPayload(MutationPayloadCore, MutationPayloadExtra):

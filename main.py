@@ -49,6 +49,12 @@ def _analyze_one(vector: dict) -> dict:
     mutation_vector = dict(vector)
     mutation_vector["value"] = candidate
     mutation_vector["encoding_chain"] = normalizer.get_encoding_chain(candidate)
+    # Full provenance from the captured HTTP slot down to the candidate, so replay
+    # can put a mutation back exactly where the candidate came from.
+    mutation_vector["slot_value"] = vector.get("original_value", vector.get("value"))
+    mutation_vector["transform_chain"] = (
+        list(vector.get("clean_steps") or []) + normalizer.get_transform_chain(candidate)
+    )
     mutations = PayloadMutation(exploit_result, mutation_vector).mutate()
 
     return {

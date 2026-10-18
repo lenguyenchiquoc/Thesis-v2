@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "EthicalQuoc Capture",
+  "version": "1.0",
+  "description": "Capture browser traffic and scan it for insecure deserialization with the local EthicalQuoc server. No DevTools needed.",
+  "permissions": ["debugger", "tabs", "storage", "downloads"],
+  "host_permissions": ["<all_urls>"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "EthicalQuoc Capture"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}

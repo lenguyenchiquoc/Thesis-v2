@@ -15,7 +15,16 @@ class HarLoader:
         try:
             with open(self.file_path, 'r', encoding='utf-8') as f:
                 har_data = json.load(f)
+            return self.parse_data(har_data)
+        except Exception as e:
+            print(f"[!] HAR Parsing failed: {e}")
+            return []
 
+    def parse_data(self, har_data):
+        # Same extraction as parse(), but from an already-loaded HAR dict — lets the
+        # local server (ethicalquoc serve) feed a HAR posted by the browser extension
+        # without writing a temp file first.
+        try:
             entries = har_data['log']['entries']
             if not entries:
                 print("[!] HAR file empty")

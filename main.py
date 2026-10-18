@@ -101,6 +101,10 @@ def main():
     report_cmd.add_argument("--format", choices=["json", "pdf", "html"], default="json")
     report_cmd.add_argument("-o", "--output", type=str, help="Output report file")
 
+    serve_cmd = subparsers.add_parser("serve", help="Run local bridge server for the browser extension")
+    serve_cmd.add_argument("--host", type=str, default="127.0.0.1", help="Bind host (loopback only by default)")
+    serve_cmd.add_argument("--port", type=int, default=8099, help="Bind port")
+
     args = parser.parse_args()
     handle_arg(args)
 
@@ -265,6 +269,10 @@ def handle_arg(args):
             phase="report",
             version=VERSION
         )
+
+    elif args.command == "serve":
+        from Server.serve import serve
+        serve(host=args.host, port=args.port)
 
 
 if __name__ == "__main__":

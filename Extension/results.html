@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>EthicalQuoc — Scan Report</title>
+  <style>
+    :root { --fg:#1f2937; --muted:#6b7280; --line:#e5e7eb; --blue:#2563eb; --red:#dc2626; --chip:#f3f4f6; }
+    body { font-family: -apple-system, Segoe UI, Arial, sans-serif; color: var(--fg); max-width: 1000px;
+           margin: 0 auto; padding: 24px; font-size: 14px; background:#fff; }
+    h1 { color: var(--blue); margin: 0 0 4px; }
+    .sub { color: var(--muted); margin-bottom: 16px; }
+    .bar { display:flex; gap:10px; margin-bottom:18px; }
+    button { font: inherit; padding: 8px 14px; border-radius:7px; border:1px solid var(--line);
+             background:var(--chip); cursor:pointer; }
+    .finding { border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin-bottom:14px; }
+    .finding.vuln { border-color:#fecaca; background:#fef2f2; }
+    .ftop { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+    .badge { font-size:11px; padding:3px 9px; border-radius:11px; white-space:nowrap; }
+    .badge.vuln { background:var(--red); color:#fff; } .badge.safe { background:#e5e7eb; color:#374151; }
+    .ep { font-family: ui-monospace, monospace; font-size:12px; color:var(--muted); margin:6px 0; word-break:break-all; }
+    .kv { color: var(--muted); font-size:13px; margin:2px 0; }
+    .attempt { border:1px solid #eef0f3; border-radius:8px; padding:10px 12px; margin-top:10px; background:#fff; }
+    pre { background:#f8fafc; border:1px solid #eef0f3; border-radius:6px; padding:8px 10px; overflow:auto;
+          font-size:12px; white-space:pre-wrap; word-break:break-all; margin:5px 0; }
+    .ind { color:#374151; font-size:12px; margin:2px 0; }
+    .empty { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <h1>EthicalQuoc — Scan Report</h1>
+  <div id="sub" class="sub"></div>
+  <div class="bar">
+    <button id="dlJson">Download JSON</button>
+    <button id="dlHtml">Download HTML</button>
+    <button id="print">Print / Save PDF</button>
+  </div>
+  <div id="findings"></div>
+  <script src="results.js"></script>
+</body>
+</html>

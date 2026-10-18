@@ -1,5 +1,156 @@
 # Ghi chú tiến độ — EthicalQuoc
 
+**[LÀM XONG Phase 8 — Chrome extension + local server (`ethicalquoc serve`). Build + test plumbing OK, chưa load thử trên browser thật (browser đang ngắt kết nối).]**
+
+**Server (`main.py serve`):**
+- [Server/serve.py](Server/serve.py) — stdlib `http.server` (ThreadingHTTPServer), **ZERO dependency** (hợp
+  graders Mac). Bind `127.0.0.1:8099`. `GET /health` → `{status:ok}`; `POST /scan` (nhận `{"har":{...},
+  "replay":true}`) → chạy `run_pipeline()` = HarLoader.parse_data→VectorFiltering→cleanfilter→`_analyze_one`
+  →(tùy chọn) ReplayRequest → trả JSON findings (type/subtype/probe/severity/likely_vulnerable/indicators).
+  CORS chỉ cho origin `chrome-extension://`. Tái dùng `_analyze_one` + `ReplayRequest` của main.py, KHÔNG
+  đụng core.
+- [har_loader.py](Scanner/har_loader.py): refactor nhẹ — tách `parse_data(har_dict)` ra khỏi `parse()` (đọc
+  file) để server feed HAR in-memory không cần ghi file tạm.
+- [main.py](main.py): thêm subcommand `serve` (--host/--port).
+
+**Extension ([Extension/](../Web%20vul%20env/../../Thesis/Thesis/Extension)):** MV3.
+- **Quyết định kỹ thuật quan trọng**: `chrome.devtools.network.getHAR()` CHỈ chạy trong DevTools panel (vẫn
+  phải mở DevTools) → KHÔNG đạt mục tiêu "không cần mở DevTools". Nên dùng **`chrome.debugger` API** từ
+  background service worker: attach CDP vào tab, `Network.enable`, buffer `requestWillBeSent`/
+  `responseReceived`, tự dựng HAR khi bấm Complete. Capture được mà KHÔNG cần mở DevTools (chỉ hiện banner
+  "đang debug").
+- `background.js`: capture + buildHar (parse Cookie header → `cookies[]`, parse URL → `queryString[]`,
+  lấy `postData.text` — đúng shape HarLoader cần; lọc bỏ ext tĩnh css/js/img).
+- `popup.html`/`popup.js`: health check (ping `/health`, disable Complete khi server offline + nhắc chạy
+  `python main.py serve`), Start/Complete/Cancel, hiện findings (badge LIKELY VULN / suspected), **click
+  finding để mở chi tiết** (payload + baseline→mutated + indicators), nút **"Download JSON"** + **"View
+  full report"**.
+- `results.html`/`results.js`: **trang report ĐẦY ĐỦ** (mở tab riêng) — mỗi finding kèm payload đã gửi,
+  baseline↔mutated response, mọi indicator, notes; nút Download JSON / Download HTML / Print→PDF. Dữ liệu
+  truyền qua `chrome.storage.local`.
+- Server `/scan` enrich: mỗi finding thêm `attempts[]` (payload_raw + baseline/mutated status+body_sample
+  (cắt 800) + indicators mỗi lần replay) + `notes`/`confidence`/`normalized`. Verify WSL+app live: finding
+  Jackson có 6 attempts đầy đủ payload+baseline200→mutated400+body+indicators, likely_vulnerable=True. ✓
+- `manifest.json`: permissions `debugger`/`tabs`/`storage`, host `<all_urls>`.
+- [Extension/README.md](Extension/README.md): hướng dẫn load unpacked + dùng.
+
+**Verify:**
+- `run_pipeline()` trên localhost.har thật: 168 vector → 21 findings, detect đúng (Jackson/Java/PHP). ✓
+- HTTP layer: `/health` ok, `/scan` trả findings, CORS echo đúng `chrome-extension://` origin. ✓
+- **Mô phỏng HAR đúng shape background.js sinh ra** (cookies parse từ header + postData.text) → feed server
+  → detect đúng `raw_body/payload Java/Jackson Polymorphic Typing`. ✓ (chứng minh HAR extension khớp
+  HarLoader mà không cần browser thật.)
+- Suite: **116/116 pass** (refactor HarLoader không phá gì).
+
+**CÒN LẠI (cần browser để test thật)**: load extension vào `chrome://extensions` (Developer mode → Load
+unpacked → chọn `Extension/`), chạy `python main.py serve`, bấm Start → duyệt → Complete → xem popup. Đây
+là bước user tự làm trên browser (browser đang ngắt khi build). Lưu ý: assess cần java/.NET runtime trên máy
+chạy `serve` (như CLI) — detection thì không cần.
+
+---
+
+**[Ý TƯỞNG/THIẾT KẾ GỐC — Phase 8: Chrome extension + local server (ĐÃ IMPLEMENT — xem entry "[LÀM XONG Phase 8]" ở trên; giữ đoạn này làm hồ sơ thiết kế).]**
+
+**Mục tiêu**: user duyệt web + bấm "Complete" trên extension → tự lấy HAR → tự chạy tool → hiện kết quả.
+Không phải mở DevTools export HAR thủ công như hiện tại.
+
+**Giới hạn then chốt (đã phân tích)**: Chrome extension KHÔNG chạy được chương trình local (sandbox) →
+KHÔNG tự `python` được. Phải có cầu nối. Đã so 3 cách → **CHỐT: local server** (user chạy `ethicalquoc
+serve` trước, giống bật Burp trước khi proxy — quen với pentester). Loại Native Messaging (phải đăng ký
+native host manifest mỗi OS, phức tạp). Loại "chỉ tải HAR" (không tự động như mong muốn).
+
+**Kiến trúc chốt:**
+```
+[Extension] bấm Complete -> getHAR() -> POST http://127.0.0.1:8099/scan (kèm HAR)
+      -> [ethicalquoc serve = FastAPI bọc pipeline san co] HarLoader->analyze->assess->report
+      -> tra JSON -> [Extension popup] hien bang likely_vulnerable / nut tai report
+```
+
+**Phần A — Capture HAR + tải (DỄ, làm được 100%):**
+- DevTools-panel extension gọi `chrome.devtools.network.getHAR()` → HAR chuẩn (cách sạch nhất), HOẶC
+  background + `chrome.debugger` attach Network domain tự dựng HAR (mạnh hơn, chạy nền, nhưng Chrome hiện
+  banner "đang debug"). Có thể lọc sẵn chỉ request trong scope → HAR gọn.
+- `chrome.downloads.download()` nếu muốn lưu file; hoặc gửi thẳng HAR qua POST không cần lưu.
+- MV3 (bắt buộc hiện nay): `chrome.debugger`/devtools API/`chrome.downloads`/native messaging đều còn dùng
+  được; chỉ `webRequest` kiểu CHẶN bị siết — nhưng ta chỉ QUAN SÁT nên không ảnh hưởng. (Nên verify lại API
+  MV3 bằng search trước khi code cho chắc.)
+
+**Phần B — Tool cần thêm (NHẸ, không đụng core):**
+- `ethicalquoc serve` = bọc FastAPI quanh pipeline đã có (`_analyze_one` + replay):
+  - `GET /health` → `{"status":"ok"}` (cho extension ping).
+  - `POST /scan` (nhận HAR) → chạy HarLoader→analyze→assess→report → trả JSON.
+- **CHỈ bind `127.0.0.1`** (không ra mạng — an toàn vì HAR chứa cookie/token thật của session).
+- CORS: cho phép origin `chrome-extension://<id>`.
+
+**UX giảm ma sát "phải chạy server trước":**
+1. Extension ping `/health` khi mở popup; chưa chạy → nhắc *"Hãy chạy `ethicalquoc serve` trước"* + nút
+   copy lệnh.
+2. Nút "Complete" disable tới khi thấy server sẵn sàng.
+3. Server in khi khởi động: `[+] EthicalQuoc server ready at http://127.0.0.1:8099 — extension can connect`.
+
+**Effort ~2.5-3 ngày**: extension capture+download ~1-1.5; `serve` endpoint ~0.5; nối + popup kết quả ~1.
+**Thứ tự ưu tiên**: LÀM SAU core thesis (các cặp vuln/secure + precision/recall). Đây là đóng góp UX/triển
+khai (biến CLI → 1-click), feature riêng — Phase 8.
+
+---
+
+**[KẾ HOẠCH + RESEARCH — mở rộng test-env đa ngôn ngữ (vuln/secure pair) + đo precision/recall. Research thư viện phổ biến nhất hiện nay (WebSearch 2025-2026), chưa code, mới là scope.]**
+
+**Phương pháp luận (chuẩn ngành, khi KHÔNG có dataset có nhãn)**: dựng cặp **vuln + secure giống hệt nhau
+trừ phần vá** cho mỗi case/ngôn ngữ (= labeled testbed / negative-control, như đã làm với Java:
+VULN=39 / SECURE=0). Đo bằng confusion matrix: TP/FP/FN/TN → Precision=TP/(TP+FP), Recall=TP/(TP+FN), F1.
+Bổ sung benchmark công khai (OWASP Benchmark, Juice Shop, Vulhub) cho uy tín. KHÔNG dùng ML (tool là
+rule-based, không có weight để học; ML cần dataset có nhãn — chính cái đang thiếu).
+
+**Hiện trạng lab** (verify từ `Web vul env/`): Java vuln+secure XONG. PHP chỉ có vuln (SessionHelper
+`unserialize` + monolog + User privesc), THIẾU secure. Node/Python/Ruby/.NET: tool hỗ trợ nhưng CHƯA có app.
+
+**Mô hình "native + thư viện thêm" (câu hỏi gốc: ngôn ngữ nào cũng có kiểu OIS→Jackson không?)** — 3 nhóm:
+- **Đơn nhất (PHP)**: chỉ `unserialize()`+phpggc thống trị; phar chỉ là cùng unserialize khác trigger →
+  KHÔNG cần "Jackson-equivalent". 1 cặp đủ.
+- **Đa thư viện (Java, Python, Ruby, .NET)**: có native + nhiều lib format khác → mỗi format 1 sub-case.
+- **Thuần thư viện (Node.js)**: JS không có deser-to-object native (JSON.parse an toàn); mọi lỗ hổng từ lib.
+
+**THƯ VIỆN CHỌN cho test-case (theo research mức độ liên quan 2025-2026):**
+- **Python**: pickle (#1) + PyYAML (`yaml.load`). jsonpickle = "Jackson của Python" (JSON + dựng object),
+  optional. ⭐ Xu hướng nóng: pickle trong ML model loading — CVE-2025-32434 (PyTorch), CVE-2025-32444
+  (vLLM, CVSS 10) → dùng làm điểm "thời sự".
+- **Ruby**: Marshal (#1, rất thời sự: CVE-2026-41316 ERB bypass 04/2026, gadget Ruby 4.0 về tới 3.3) +
+  Psych/YAML (phụ — LƯU Ý Psych 4 / Ruby 3.1+ đã safe mặc định, chỉ vuln khi app bypass). **Tool CHƯA hỗ
+  trợ Psych → đây là gap "kiểu Jackson" nếu muốn làm đủ.**
+- **Node.js**: node-serialize (canonical, CVE-2017-5941 CVSS 9.8, NHƯNG đã ngừng bảo trì — classic để
+  test) + prototype pollution (lớp riêng, phổ biến). = đúng 2 probe tool đã có.
+- **.NET**: Json.NET `TypeNameHandling!=None` (hiện đại, còn dùng rộng — SharePoint RCE 2025-26; "Jackson
+  của .NET") + ViewState (classic). BinaryFormatter = legacy (deprecated .NET5, GỠ .NET9) → 1 case cho đủ,
+  ghi rõ legacy.
+- **PHP**: `unserialize()`+phpggc (monolog). 1 case.
+
+**Framing lớn cho thesis**: xu hướng dịch từ **serializer nhị phân native cũ** (BinaryFormatter/pickle/
+Marshal — đang bị deprecated/cảnh báo) sang **(1) lib JSON-có-type-info** (Jackson/Json.NET/jsonpickle),
+**(2) YAML unsafe**, **(3) ML model loading (pickle)**, **(4) prototype pollution**. Đúng hành trình Java
+OIS→Jackson của tool → luận điểm xuyên suốt: "tool phải theo kịp dịch chuyển native-binary → library/JSON".
+
+**⚠️ Verify trước khi trích thesis**: "phổ biến nhất" ở đây là ĐỊNH TÍNH (canonical/được-trích-nhiều),
+không phải số download/incident cứng — cần tra npm/PyPI stats + NVD count riêng nếu muốn số. Vài CVE-2026
+(Docling, LightLLM, SharePoint 2026) nguồn tự nhận CHƯA verify → tra NVD gốc trước khi dùng.
+
+**LỊCH DỰ KIẾN (~8-11 ngày công, khuôn mẫu đã có từ Java nên sau nhanh hơn):**
+- Phase 0: harness Precision/Recall (`ground_truth.json` mỗi app + `evaluate.py` đếm TP/FP/FN → P/R/F1).
+  0.5-1 ngày. NỀN TẢNG, làm trước.
+- Phase 1: PHP secure (vuln có sẵn). 0.5 ngày.
+- Phase 2: Node.js vuln+secure (node-serialize + proto pollution). 1-1.5 ngày.
+- Phase 3: Python vuln+secure (pickle + PyYAML). 1-1.5 ngày.
+- Phase 4: Ruby vuln+secure (Marshal [+Psych nếu bổ sung tool]). 1-1.5 ngày.
+- Phase 5: .NET vuln+secure (Json.NET + ViewState). 1.5-2 ngày. RỦI RO NHẤT (runtime, Windows/WSL2, graders
+  dùng Mac → Docker phải chạy được).
+- Phase 6: benchmark công khai. 1-2 ngày.
+- Phase 7: tổng hợp metrics + viết chương đánh giá. 1 ngày.
+Gợi ý: Tuần 1 (18-24/10) P0+P1; Tuần 2 (25-31/10) P2+P3; Tuần 3 (01-07/11) P4+P5; Tuần 4 (08-14/11) P6+P7.
+Rủi ro lịch: mỗi ngôn ngữ cần user tự capture HAR bằng browser (bước handoff); cặp vuln/secure phải giống
+hệt trừ phần vá; Phase 0 bắt buộc làm trước.
+
+---
+
 **[NEGATIVE-CONTROL TEST + 2 CẢI TIẾN replay oracle] Dựng app vá (java-app-secure) để kiểm tra tool có phân biệt vuln vs đã-vá không — phát hiện giới hạn, sửa, verify.**
 
 **1. Thêm case Jackson kiểu KHÁC vào java-app (vuln)**: endpoint `POST /api/theme/import`
@@ -51,9 +202,27 @@ vuln/đã-vá sạch ngay ở boolean `likely_vulnerable`. Test: thêm 4 test (`
 `test_4xx_that_leaks_exception_is_still_strong`, `test_timestamp_only_diff_is_not_flagged`). Suite:
 **116/116 pass**.
 
+**6. XÁC NHẬN CUỐI trên file chạy lại THẬT (user tự re-run tool sau khi sửa, không phải re-score offline):**
+`debug_step8.json` (vuln 8081) + `debug_step8_sc.json` (secure 8083) chạy lại 15:26-15:27. Đếm
+`likely_vulnerable` trong output thật:
+- **VULN flagged = 39** (session dashboard/profile 14, integration 7, theme 6, webhook 12 — tất cả là sink
+  thật).
+- **SECURE flagged = 0** (mọi endpoint, gồm favicon 404→404).
+Khớp 100% với bảng re-score ở mục 5 → cải tiến đã ăn vào output thật của tool.
+
+**FILE ĐÃ SỬA/THÊM trong 2 cải tiến (để tra nhanh sau này):**
+- [replay_request.py](Replay/replay_request.py): `import re`; thêm `VOLATILE_PATTERNS` + `_strip_volatile()`;
+  sửa `_compare()` (biến `clean_rejection`, downgrade status/length khi clean 4xx, thêm so sánh
+  `_strip_volatile` ở nhánh content-diff).
+- [test_replay_request.py](TestCase/test_replay_request.py): +4 test (2 case clean-4xx weak, 1 case
+  4xx-lộ-exception vẫn strong, 1 case timestamp-only-diff không flag).
+- Web vul env (target lab, KHÔNG phải code tool): java-app thêm `ThemeImportController`/`ThemeImportRequest`/
+  `model/theme/ColorBackground` + UI card "Theme appearance"; dựng mới thư mục `java-app-secure/` (port 8083,
+  vá OIS bằng look-ahead `resolveClass()` allow-list, vá Jackson bằng bind List/Map + lỗi generic).
+
 **Giá trị thesis**: đây là negative-control hoàn chỉnh — chứng minh tool (a) không false-negative trên app
-lỗ hổng, (b) không false-positive trên app đã vá, (c) phương pháp luận "dựng cặp vuln/secure giống hệt để
-đo khả năng phân biệt" + đã lộ & sửa 2 giới hạn cụ thể của replay oracle.
+lỗ hổng (39 flag), (b) không false-positive trên app đã vá (0 flag), (c) phương pháp luận "dựng cặp
+vuln/secure giống hệt để đo khả năng phân biệt" + đã lộ & sửa 2 giới hạn cụ thể của replay oracle.
 
 ---
 

@@ -21,7 +21,6 @@ from Replay.replay_request import ReplayRequest
 VERSION = "2025.1.0.0"
 
 def _apply_replay_confirmation(exploit_analysis: dict, replay_result: dict) -> dict:
-    # Never auto-confirms — replay heuristics are unreliable; always leave this to manual review.
     result = dict(exploit_analysis)
     severity = result.get("severity", "Low")
     result["confirmation_status"] = "Suspected"
@@ -49,8 +48,6 @@ def _analyze_one(vector: dict) -> dict:
     mutation_vector = dict(vector)
     mutation_vector["value"] = candidate
     mutation_vector["encoding_chain"] = normalizer.get_encoding_chain(candidate)
-    # Full provenance from the captured HTTP slot down to the candidate, so replay
-    # can put a mutation back exactly where the candidate came from.
     mutation_vector["slot_value"] = vector.get("original_value", vector.get("value"))
     mutation_vector["transform_chain"] = (
         list(vector.get("clean_steps") or []) + normalizer.get_transform_chain(candidate)

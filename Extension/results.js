@@ -21,6 +21,7 @@ function render(data) {
     let h = `<div class="ftop"><div><b>${esc(f.type)}</b> · ${esc(f.subtype || f.exploit_type || "-")}</div>${badge}</div>`;
     h += `<div class="ep">${esc(f.method)} ${esc(f.url)} &nbsp;[${esc(f.location)}/${esc(f.name)}]</div>`;
     h += `<div class="kv">Severity: ${esc(f.severity)} · ${esc(f.confirmation_status)} · confidence=${esc(f.confidence)} · probe=${esc(f.suggested_probe)}</div>`;
+    if (f.severity_note) h += `<div class="kv">⬆ ${esc(f.severity_note)}</div>`;
     if (f.notes) h += `<div class="kv">${esc(f.notes)}</div>`;
     if (f.normalized && f.normalized.length) h += `<div class="kv">Normalized candidate:</div><pre>${esc(f.normalized[0])}</pre>`;
 
@@ -60,7 +61,9 @@ function toHtml(data) {
     "<div>" + document.getElementById("findings").innerHTML + "</div></body>";
 }
 
-chrome.storage.local.get("lastReport", ({ lastReport }) => {
+// Report lives in the `scan` key written by popup.js when the scan finished (single copy).
+chrome.storage.local.get("scan", ({ scan }) => {
+  const lastReport = scan && scan.status === "done" ? scan.data : null;
   if (!lastReport) { document.getElementById("findings").innerHTML = "<div class='empty'>No report data.</div>"; return; }
   render(lastReport);
   const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);

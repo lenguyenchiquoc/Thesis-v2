@@ -41,7 +41,6 @@ class ReplayRequest:
         try:
             raw_payload = self._select_payload_value(payload)
         except TransformError as e:
-            # Fail loudly rather than send the fragment in place of the whole slot.
             return self._skip_result(payload, f"Cannot faithfully rebuild the request slot: {e}")
         if raw_payload is None:
             return self._skip_result(payload, "No usable payload value found")
@@ -86,7 +85,6 @@ class ReplayRequest:
                 raise TransformError("mutation carries a transform_chain but no slot_value")
             return rebuild(slot_value, transform_chain, raw_value)
 
-        # Legacy mutations (built without provenance): only pure encoding chains.
         encoding_chain = cast("list[str] | None", payload.get("encoding_chain")) or []
         if encoding_chain and all(op in self.REWRAPPABLE_OPS for op in encoding_chain):
             return self._reapply_encoding_chain(raw_value, encoding_chain)
@@ -190,8 +188,6 @@ class ReplayRequest:
 
     @staticmethod
     def _replace_pair(raw: str, name: str, encoded_value: str) -> str:
-        # Swap only the value of `name` in an "a=1&b=2" string; every other pair
-        # stays byte-identical (no re-encoding of the parameters we don't test).
         parts = raw.split("&") if raw else []
         for i, part in enumerate(parts):
             key = part.split("=", 1)[0]
@@ -203,10 +199,6 @@ class ReplayRequest:
 
     CONTENT_DIFF_SIMILARITY_THRESHOLD = 0.8
 
-    # Fields that change between two otherwise-identical responses just because the
-    # requests were sent at different moments. Stripped before deciding a content
-    # difference is meaningful, so e.g. a Spring 404 error page whose only change is
-    # its "timestamp" is not mistaken for a payload-induced difference.
     VOLATILE_PATTERNS = [
         re.compile(r"\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:[.,]\d+)?(?:Z|[+-]\d{2}:?\d{2})?"),
         re.compile(r"\b\d{13}\b"),
@@ -233,12 +225,6 @@ class ReplayRequest:
         mutated_lower = mutated["body_sample"].lower()
         error_hits = [kw for kw in self.ERROR_KEYWORDS if kw in mutated_lower]
 
-        # A 4xx response that leaks no exception/stack trace is the app cleanly
-        # rejecting malformed or unauthorised input — expected defensive behaviour,
-        # not evidence of a reachable sink. Its status/length changes are therefore
-        # recorded but NOT treated as strong signals. A 5xx, or any response that
-        # discloses an exception, is never "clean" (the input was processed far
-        # enough to break something, or internals leaked).
         clean_rejection = (400 <= mutated["status"] < 500) and not error_hits
 
         delay_delta = mutated["elapsed_sec"] - baseline["elapsed_sec"]

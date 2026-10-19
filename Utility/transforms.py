@@ -217,7 +217,6 @@ def inverse(step: Step, new_child: str, parent: str) -> str:
 
 
 def _equivalent(step: Step, rebuilt: str, parent: str) -> bool:
-    # Encodings with several valid spellings of the same content.
     op = step.get("op")
     try:
         if op == "url":

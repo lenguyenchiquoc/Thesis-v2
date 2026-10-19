@@ -21,9 +21,6 @@ class HarLoader:
             return []
 
     def parse_data(self, har_data):
-        # Same extraction as parse(), but from an already-loaded HAR dict — lets the
-        # local server (ethicalquoc serve) feed a HAR posted by the browser extension
-        # without writing a temp file first.
         try:
             entries = har_data['log']['entries']
             if not entries:

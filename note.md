@@ -1,5 +1,63 @@
 # Ghi chú tiến độ — EthicalQuoc
 
+**[CHORE 2026-10-19 — Xóa toàn bộ comment `#` trong code Python của tool.]**
+- Phạm vi: tất cả `.py` trong d:\Thesis\Thesis, **trừ** `TestCase/` và `tools/` (gopherus/phpggc là vendor bên
+  thứ ba, không đụng để khỏi lệch upstream). 11/17 file có comment → đã xóa.
+- Cách làm an toàn: script `tokenize`-based (scratchpad `strip_comments.py`) chỉ xóa token COMMENT — KHÔNG đụng
+  `#` nằm trong string (màu `#1f2937`, `rstrip('=')`, regex…). **Giữ lại docstring** (docstring là string literal,
+  không phải comment). Mỗi file `ast.parse` trước+sau, hỏng thì bỏ qua.
+- Verify: `py_compile` toàn bộ = 0 lỗi; grep string có `#` còn nguyên; **116/116 test pass**.
+- (Nếu sau này muốn xóa luôn docstring, hoặc xử lý cả `tools/`, nói — lần này cố ý giữ.)
+
+**[FEAT 2026-10-19 — Nâng `severity` theo bằng chứng replay (attempts), giữ `confirmation_status` = Suspected.]**
+- **Vấn đề**: `severity` tĩnh chấm trên GIÁ TRỊ CHỤP ĐƯỢC (probe mẫu "hello" vô hại) nên `/api/integration/receive`
+  ra `Low` dù attempt CC6 lộ `Runtime.exec` — bằng chứng RCE mạnh nhất lại bị ghi mức thấp. User quyết: nâng
+  severity theo attempts, GHI ĐÈ thẳng (không thêm field mức độ thứ 2), kèm `severity_note` giải thích lý do.
+- **Không đụng `confirmation_status`** (vẫn luôn "Suspected", [note.md:936](#)) — nâng severity ≠ auto-confirm.
+  Chỉ nâng khi bằng chứng MẠNH + CỤ THỂ (nội dung response), KHÔNG nâng theo tín hiệu chung (status/length đổi)
+  mà note:936 đã nói không tin cậy → tránh nâng oan ca Jackson bị app chặn (note:265).
+- **Sửa**: [serve.py](Server/serve.py) — thêm `_escalate_severity(static_severity, attempts)`:
+  - RCE marker (`functorexception`/`invokertransformer`/`java.lang.runtime`/`runtime' threw`) → **Critical**
+  - Deser marker (`objectinputstream`/`invalidclassexception`/`streamcorruptedexception`) → **High**
+  - `receivedType` đổi + indicator "content differs" → **High**
+  - CHỈ NÂNG không hạ (`_SEVERITY_RANK`), trả `severity_note` chỉ khi thật sự nâng. Finding dict thêm field
+  `severity_note` (None nếu không nâng). [results.js](Extension/results.js) hiện dòng `⬆ <note>` dưới Severity.
+- **Verify**: 6 unit case tay (RCE→Critical, OIS→High, receivedType→High, Jackson-chặn giữ High KHÔNG nâng,
+  benign giữ Low, Critical không bị hạ) đều đúng; áp lên report thật `ethicalquoc-report-...07-59-43.json`:
+  `receive/raw_body` Low→**Critical** (RCE note), 4 Jackson giữ High, `receive/header` giữ Low. **116/116 test pass**.
+- **Chỉ ở serve.py** (đường extension). CLI `assess`/`report` chưa có nâng này — nếu cần đồng bộ sau thì chuyển
+  `_escalate_severity` xuống core.
+
+**[FIX 2026-10-19 — Report: bỏ `risk_level` khỏi output, chỉ giữ 1 đánh giá `severity`.]**
+- **Lý do**: report hiện 2 nhãn mức độ cạnh nhau và lệch nhau gây hiểu lầm — `risk_level` (Fingerprint, chấm
+  theo LOẠI định dạng: Java=High) vs `severity` (ExploitAnalyze, chấm theo NỘI DUNG payload chụp được: không
+  gadget=Low). VD `/api/integration/receive` (probe mẫu "hello") ra `risk_level:High` + `severity:Low`. Theo
+  đúng triết lý "tool chỉ đưa 1 đánh giá, không confirm" → giữ `severity`, bỏ `risk_level` khỏi phần hiển thị.
+- **Sửa**: [serve.py:104](Server/serve.py) — xoá dòng `"risk_level": fp.get("risk_level")` khỏi finding dict.
+  Chỉ 1 chỗ: CLI report ([main.py:244-255](main.py)) dùng `display_severity`, không có risk_level; extension JS
+  cũng không dùng. Fingerprint VẪN tính `risk_level` nội bộ (không đụng schema/test).
+- **Lưu ý trùng lặp chưa dọn**: gadget detection chạy 2 lần 2 danh sách khác nhau — Fingerprint
+  `GADGET_KEYWORDS` ([finderprint.py:74-76](Analyze/finderprint.py#L74)) nâng risk_level→Critical, ExploitAnalyze
+  `JAVA_GADGET_MAP` ([ExploitabilityAnalysis.py:276](Analyze/ExploitabilityAnalysis.py#L276)) cộng score. Có thể
+  lệch nhau; chưa gộp vì risk_level đã bỏ khỏi hiển thị nên tạm hết gây rối.
+- **Verify**: `ast.parse` serve.py OK; grep risk_level trong serve.py/main.py/Extension = trống; **116/116 test pass**.
+
+**[FIX 2026-10-19 — Extension: bấm "View full report" không hiện gì.]**
+- **Nguyên nhân**: report lớn (lần quét YouTube: 1200 findings, file JSON 6.8 MB) bị lưu 2 lần vào
+  `chrome.storage.local`: `scan.data` ([popup.js](Extension/popup.js) lúc scan xong) + `lastReport` (lúc bấm
+  nút) → ~13.6 MB > quota 10 MB (không có `unlimitedStorage`) → `set({lastReport})` reject → `tabs.create`
+  không bao giờ chạy, không try/catch nên không báo lỗi gì.
+- **Sửa**: [results.js](Extension/results.js) đọc thẳng `scan.data` (khi `scan.status==="done"`), bỏ key
+  `lastReport`; nút reportBtn trong popup.js chỉ còn `tabs.create` + try/catch → `say()` lỗi; popup tự
+  `remove("lastReport")` dọn key cũ; [manifest.json](Extension/manifest.json) thêm `unlimitedStorage`.
+- **Verify**: `node --check` 3 file JS OK, manifest parse OK. Chưa test click thật trên browser (MCP không
+  mở được trang `chrome-extension://`) → cần reload extension ở `chrome://extensions` rồi bấm lại.
+- **Vấn đề riêng, CHƯA xử lý**: quét YouTube ra 11720 vectors → 1200 findings, 0 likely_vulnerable — đa số
+  nhiễu telemetry Google (`header/X-Goog-Visitor-Id` 219, `url_param/ei` 159, `X-YouTube-*` 116); 1200 findings
+  nhưng chỉ 1050 bộ (method,url,location,name) khác nhau → có trùng.
+
+---
+
 **[LÀM XONG Phase 8 — Chrome extension + local server (`ethicalquoc serve`). Build + test plumbing OK, chưa load thử trên browser thật (browser đang ngắt kết nối).]**
 
 **Server (`main.py serve`):**

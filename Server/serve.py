@@ -19,15 +19,36 @@ from Analyze.cleanfilter import cleanfilter
 from Replay.replay_request import ReplayRequest
 from main import _analyze_one, _apply_replay_confirmation
 
+_SEVERITY_RANK = {"Low": 0, "Medium": 1, "High": 2, "Critical": 3}
+_RCE_MARKERS = ("functorexception", "invokertransformer", "java.lang.runtime", "runtime' threw")
+_DESER_MARKERS = ("objectinputstream", "invalidclassexception", "streamcorruptedexception")
+
+
+def _escalate_severity(static_severity: str, attempts: list) -> tuple:
+    """Return (severity, note|None). Raises severity to match the strongest replay
+    evidence; keeps the static value (and returns note=None) if nothing stronger seen."""
+    body_blob = " ".join(
+        (a.get("mutated", {}).get("body_sample") or "").lower() for a in attempts
+    )
+    evidence_tier = None
+    reason = None
+    if any(m in body_blob for m in _RCE_MARKERS):
+        evidence_tier, reason = "Critical", "response leaked RCE evidence (gadget chain reached Runtime.exec)"
+    elif any(m in body_blob for m in _DESER_MARKERS):
+        evidence_tier, reason = "High", "response leaked deserialization evidence (ObjectInputStream processed attacker bytes)"
+    elif "receivedtype" in body_blob and any(
+        "content differs" in ind.lower() for a in attempts for ind in a.get("indicators", [])
+    ):
+        evidence_tier, reason = "High", "response shows deserialized type changed (receivedType), confirming the payload was deserialized"
+
+    if evidence_tier and _SEVERITY_RANK[evidence_tier] > _SEVERITY_RANK.get(static_severity, 0):
+        return evidence_tier, f"raised from {static_severity} — {reason}"
+    return static_severity, None
+
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8099
-# Only the browser extension (any id) may call us; the page's own scripts cannot.
 ALLOWED_ORIGIN_PREFIX = "chrome-extension://"
 
-# Scans run in a background thread (payload generation via java/php/etc. can take
-# a while) so the HTTP request returns a job id immediately. The extension polls
-# /result — this way a long scan never depends on the browser keeping a request
-# (or its service worker) alive. Jobs are kept in memory until the server stops.
 _jobs = {}
 _jobs_lock = threading.Lock()
 
@@ -60,7 +81,7 @@ def run_pipeline(har_data: dict, do_replay: bool = True) -> dict:
 
         likely = False
         indicators: list[str] = []
-        attempts = []  # full per-payload evidence, for the detailed report
+        attempts = []
         if replayer and mutations:
             for mutation in mutations:
                 result = replayer.replay(mutation)
@@ -93,6 +114,7 @@ def run_pipeline(har_data: dict, do_replay: bool = True) -> dict:
                 if not indicators:
                     indicators = result.get("indicators", [])
 
+        severity, severity_note = _escalate_severity(ex.get("severity"), attempts)
         findings.append({
             "url": entry["vector"].get("url"),
             "method": entry["vector"].get("method"),
@@ -101,10 +123,10 @@ def run_pipeline(har_data: dict, do_replay: bool = True) -> dict:
             "type": fp.get("type"),
             "subtype": fp.get("subtype"),
             "confidence": fp.get("confidence"),
-            "risk_level": fp.get("risk_level"),
             "exploit_type": ex.get("exploit_type"),
             "suggested_probe": ex.get("suggested_probe"),
-            "severity": ex.get("severity"),
+            "severity": severity,
+            "severity_note": severity_note,
             "confirmation_status": ex.get("confirmation_status"),
             "notes": ex.get("notes"),
             "normalized": entry.get("normalized", [])[:3],
@@ -147,8 +169,6 @@ class _Handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(body)
         except (ConnectionAbortedError, ConnectionResetError, BrokenPipeError):
-            # The extension/popup closed before we finished (e.g. a long scan while
-            # the popup was closed). Nothing to send to; don't crash the thread.
             print("    [extension] client disconnected before response was sent")
 
     def do_OPTIONS(self):
@@ -179,7 +199,7 @@ class _Handler(BaseHTTPRequestHandler):
             length = int(self.headers.get("Content-Length", 0))
             raw = self.rfile.read(length)
             payload = json.loads(raw.decode("utf-8"))
-            har = payload.get("har", payload)  # accept {"har": {...}} or a raw HAR
+            har = payload.get("har", payload)
             do_replay = bool(payload.get("replay", True)) if isinstance(payload, dict) else True
             job_id = uuid.uuid4().hex
             with _jobs_lock:

@@ -110,9 +110,6 @@ def main():
         _emit(results, args.output)
         return
 
-    # Step >= 7 needs the exact same normalize->fingerprint->exploit->mutate result
-    # main.py's "analyze" command produces — reuse it instead of recomputing, so the
-    # two entry points can never drift apart the way they did before.
     from main import _analyze_one, _apply_replay_confirmation
 
     results = [_analyze_one(vector) for vector in cleaned_vectors]
@@ -141,7 +138,6 @@ def main():
 
 
 def _emit(data, output_path):
-    #print(json.dumps(data, indent=2, ensure_ascii=False, default=str))
     if output_path:
         with open(output_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False, default=str)

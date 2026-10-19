@@ -19,8 +19,6 @@ class cleanfilter:
 
     def __init__(self, filter_output: list[ScanVector]):
         self.data = filter_output
-    # Trailing '=' is NOT stripped: it is base64 padding far more often than junk,
-    # and dropping it made the replayed value differ from what was captured.
     LEAD_JUNK = '= \t\n\r;,"'
     TRAIL_JUNK = ' \t\n\r;,"'
 
@@ -34,8 +32,6 @@ class cleanfilter:
         return start, end
 
     def _clean_spans(self, value: str, location: str | None, name: str | None) -> list[tuple[int, int]]:
-        # Every operation here only narrows the value, so each result is an exact
-        # [start:end] span of the original - recorded as a reversible slice step.
         start, end = self._strip_span(value, 0, len(value))
         cleaned = value[start:end]
 

@@ -90,10 +90,6 @@ class DataNormalizer:
         return signatures.looks_like_serialized(value)
 
     def _extract_json_nodes(self, obj, path: list | None = None, depth: int = 0, out: list | None = None) -> list:
-        # Every non-root node with its JSON path: leaf strings AND sub-objects /
-        # sub-arrays. A polymorphic wrapper nested under a key (e.g. Jackson's
-        # ["pkg.Class",{...}] at ["channel"]) must be its own candidate, with a
-        # path that lets replay put a mutation back in exactly that place.
         path = path or []
         out = [] if out is None else out
         if depth > 5 or len(out) >= self.MAX_JSON_NODES:
@@ -211,9 +207,6 @@ class DataNormalizer:
         if re.search(r'O:\d+:"[^"]+":\d+:\{', value):
             score += 6
 
-        # Jackson polymorphic typing: the wrapper structure (["pkg.Class",{...}] /
-        # @class) IS the signal. Without this the wrapper is generic JSON (score 0)
-        # and collapse() discards it in favour of its own leaf strings.
         if any(re.search(p, value) for p in signatures.JACKSON_PATTERNS):
             score += 8
 

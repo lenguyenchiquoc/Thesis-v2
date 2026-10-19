@@ -187,11 +187,18 @@ async function init() {
     const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
     downloadBlob(`ethicalquoc-report-${ts}.json`, JSON.stringify(lastReport, null, 2), "application/json");
   };
+  // results.html reads the report straight from the `scan` key (already stored when the scan
+  // finished) — do NOT copy it into a second key: a large report stored twice blows the
+  // chrome.storage quota, set() rejects and the tab silently never opens.
   $("reportBtn").onclick = async () => {
     if (!lastReport) return;
-    await chrome.storage.local.set({ lastReport });
-    chrome.tabs.create({ url: chrome.runtime.getURL("results.html") });
+    try {
+      await chrome.tabs.create({ url: chrome.runtime.getURL("results.html") });
+    } catch (e) {
+      say("Could not open report: " + (e.message || e));
+    }
   };
+  chrome.storage.local.remove("lastReport");   // drop the old duplicate key from earlier versions
 }
 
 init();

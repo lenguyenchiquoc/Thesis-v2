@@ -150,8 +150,6 @@ class Fingerprint:
 
         jackson_hits = [p for p in self.JACKSON_PATTERNS if re.search(p, raw)]
         if jackson_hits:
-            # The wrapper defines the transport (Jackson JSON), so it overrides a
-            # gadget-keyword subtype — those gadgets can't be delivered via ysoserial here.
             subtype = "Jackson Polymorphic Typing"
             score  += 5
             if any(cls in lower for cls in self.JACKSON_DANGEROUS_CLASSES):
@@ -162,13 +160,9 @@ class Fingerprint:
     def _detect_pickle(self, raw: str, lower: str, bin_data: bytes) -> dict:
         score = 0
 
-        # A pickle protocol-2+ stream BEGINS with the PROTO opcode (\x80 <proto>).
-        # Checking `startswith` (not substring) avoids flagging any long binary/
-        # base64 blob that happens to contain \x80\x02..\x80\x05 by chance — the
-        # cause of false "Pickle RCE" hits on e.g. ad-tracking URL params.
         if any(bin_data.startswith(magic) for magic in self.PICKLE_MAGIC_BYTES):
             score += 6
-            if bin_data.endswith(b'.'):   # STOP opcode — a complete pickle stream
+            if bin_data.endswith(b'.'):
                 score += 2
 
         for indicator in self.PICKLE_TEXT_INDICATORS:

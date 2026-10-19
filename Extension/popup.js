@@ -112,34 +112,52 @@ function downloadBlob(filename, text, mime) {
   chrome.downloads.download({ url, filename, saveAs: true }, () => setTimeout(() => URL.revokeObjectURL(url), 10000));
 }
 
+function say(msg) {
+  $("summary").style.display = "block";
+  $("summary").textContent = msg;
+  console.log("[EthicalQuoc]", msg);
+}
+
+let pollTimer = null;
+function stopPoll() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
+
+async function tick() {
+  const { scan } = await chrome.storage.local.get("scan");
+  if (!scan) { stopPoll(); return; }
+  if (scan.status === "empty") { stopPoll(); say("No requests captured for this app. Click Start, use the site, then Complete — on the SAME tab."); return; }
+  if (scan.status === "error") { stopPoll(); say("Scan failed: " + scan.error + " — is the server running?"); return; }
+  if (scan.status === "done") { stopPoll(); renderResults(scan.data); return; }
+  if (scan.status === "scanning") {
+    if (!scan.job) { say(scan.phase || "Preparing…"); return; }   // still building HAR / POSTing
+    say(scan.phase || "Scanning…");
+    try {
+      const r = await fetch(`${scan.server}/result?job=${scan.job}`);
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      const job = await r.json();
+      if (job.status === "done") {
+        stopPoll();
+        await chrome.storage.local.set({ scan: { status: "done", data: job.result } });
+        renderResults(job.result);
+      } else if (job.status === "error") {
+        stopPoll(); say("Scan failed: " + job.error);
+        await chrome.storage.local.set({ scan: { status: "error", error: job.error } });
+      }
+      // else still running — keep polling
+    } catch (e) {
+      say("Waiting for server… (" + (e.message || e) + ")");
+    }
+  }
+}
+function startPoll() { stopPoll(); tick(); pollTimer = setInterval(tick, 1000); }
+function applyScanState() { tick(); }
+
 async function onComplete() {
   $("completeBtn").disabled = true;
-  $("capText").textContent = "Building HAR + scanning…";
-  const res = await send({ cmd: "complete", tabId });
   setCapturing(false);
-  if (!res || !res.ok) {
-    $("summary").style.display = "block";
-    $("summary").textContent = "Capture error: " + (res ? res.error : "no response");
-    return;
-  }
-  if (!res.count) {
-    $("summary").style.display = "block";
-    $("summary").textContent = "No requests captured. Did you interact with the site?";
-    return;
-  }
-  try {
-    const r = await fetch(`${SERVER}/scan`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ har: res.har, replay: true }),
-    });
-    const data = await r.json();
-    if (data.error) throw new Error(data.error);
-    renderResults(data);
-  } catch (e) {
-    $("summary").style.display = "block";
-    $("summary").textContent = "Scan failed: " + (e.message || e);
-  }
+  say("Building HAR…");
+  const res = await send({ cmd: "scan", tabId, server: SERVER });
+  if (!res || !res.ok) { say("Could not start scan: " + (res ? res.error : "no response")); return; }
+  startPoll();
 }
 
 async function init() {
@@ -149,12 +167,17 @@ async function init() {
   const st = await send({ cmd: "status", tabId });
   setCapturing(st && st.capturing, st && st.count);
 
+  // If a scan is running or finished (popup was closed during it), resume it.
+  const { scan } = await chrome.storage.local.get("scan");
+  if (scan && scan.status === "scanning") startPoll();
+  else if (scan && (scan.status === "done" || scan.status === "error" || scan.status === "empty")) tick();
+
   $("startBtn").onclick = async () => {
     const ok = await checkServer();
-    if (!ok) return;
+    if (!ok) { say("Server offline — run `python main.py serve` first."); return; }
     const res = await send({ cmd: "start", tabId });
-    if (res && res.ok) setCapturing(true, 0);
-    else { $("summary").style.display = "block"; $("summary").textContent = "Could not start: " + (res ? res.error : "?"); }
+    if (res && res.ok) { setCapturing(true, 0); say("Capturing — use the site, then reopen and click Complete."); }
+    else { say("Could not start capture: " + (res ? res.error : "?") + " (close DevTools on this tab if open)"); }
   };
   $("completeBtn").onclick = onComplete;
   $("cancelBtn").onclick = async () => { await send({ cmd: "cancel", tabId }); setCapturing(false); };

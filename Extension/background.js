@@ -1,126 +1,118 @@
-// Service worker: attaches the Chrome debugger (CDP) to the active tab and buffers
-// network requests, so traffic is captured WITHOUT the user opening DevTools. On
-// "complete" it builds a HAR from the buffered requests. The popup drives it via
-// messages and does the POST to the local EthicalQuoc server itself.
+// Service worker: captures a tab's traffic via chrome.debugger (no DevTools) and
+// buffers it in chrome.storage.session, NOT in memory — MV3 can recycle the worker
+// at any time, which would otherwise lose the capture and leave "Complete" dead.
+// Event listeners are registered at top level so they survive a worker restart.
 
 const PROTOCOL_VERSION = "1.3";
+const keyFor = (tabId) => `cap_${tabId}`;
 
-// tabId -> { requests: Map<requestId, entry>, attached: bool }
-const sessions = {};
-
-function targetFor(tabId) {
-  return { tabId };
+// Serialize read-modify-write so concurrent network events don't clobber storage.
+let writeChain = Promise.resolve();
+function update(tabId, fn) {
+  writeChain = writeChain.then(async () => {
+    const key = keyFor(tabId);
+    const data = (await chrome.storage.session.get(key))[key] || { capturing: false, requests: {} };
+    fn(data);
+    await chrome.storage.session.set({ [key]: data });
+  }).catch(() => {});
+  return writeChain;
+}
+async function read(tabId) {
+  const key = keyFor(tabId);
+  return (await chrome.storage.session.get(key))[key] || { capturing: false, requests: {} };
 }
 
-async function sendCommand(tabId, method, params) {
+function target(tabId) { return { tabId }; }
+
+function sendCommand(tabId, method, params) {
   return new Promise((resolve, reject) => {
-    chrome.debugger.sendCommand(targetFor(tabId), method, params || {}, (res) => {
+    chrome.debugger.sendCommand(target(tabId), method, params || {}, (res) => {
       if (chrome.runtime.lastError) reject(new Error(chrome.runtime.lastError.message));
       else resolve(res);
     });
   });
 }
 
-function onEvent(source, method, params) {
+// ---- capture ----
+chrome.debugger.onEvent.addListener((source, method, params) => {
   const tabId = source.tabId;
-  const s = sessions[tabId];
-  if (!s) return;
-
   if (method === "Network.requestWillBeSent") {
     const r = params.request;
-    s.requests.set(params.requestId, {
-      startedDateTime: new Date().toISOString(),
-      request: {
-        method: r.method,
-        url: r.url,
-        headers: r.headers || {},
-        postData: r.postData,
-        hasPostData: r.hasPostData || false,
-      },
-      response: { status: 0 },
+    update(tabId, (d) => {
+      if (!d.capturing) return;
+      d.requests[params.requestId] = {
+        startedDateTime: new Date().toISOString(),
+        request: { method: r.method, url: r.url, headers: r.headers || {},
+                   postData: r.postData, hasPostData: r.hasPostData || false },
+        response: { status: 0 },
+      };
     });
   } else if (method === "Network.responseReceived") {
-    const e = s.requests.get(params.requestId);
-    if (e) e.response.status = params.response.status;
+    update(tabId, (d) => {
+      if (d.requests[params.requestId]) d.requests[params.requestId].response.status = params.response.status;
+    });
   }
-}
+});
+
+chrome.debugger.onDetach.addListener((source) => {
+  // Keep the buffer (user may still Complete), just mark not capturing.
+  update(source.tabId, (d) => { d.capturing = false; });
+});
 
 async function startCapture(tabId) {
-  if (sessions[tabId]) return;
-  sessions[tabId] = { requests: new Map(), attached: false };
+  let origin = null;
+  try { const tab = await chrome.tabs.get(tabId); origin = new URL(tab.url).origin; } catch (_) {}
   await new Promise((resolve, reject) => {
-    chrome.debugger.attach(targetFor(tabId), PROTOCOL_VERSION, () => {
+    chrome.debugger.attach(target(tabId), PROTOCOL_VERSION, () => {
       if (chrome.runtime.lastError) reject(new Error(chrome.runtime.lastError.message));
       else resolve();
     });
   });
-  sessions[tabId].attached = true;
   await sendCommand(tabId, "Network.enable");
+  await update(tabId, (d) => { d.capturing = true; d.requests = {}; d.origin = origin; });
 }
 
+// ---- HAR building ----
 const IGNORE_EXT = /\.(css|js|png|jpe?g|gif|svg|ico|woff2?|ttf|map|mp4|mp3)(\?|$)/i;
-
-function headerArray(obj) {
-  return Object.entries(obj || {}).map(([name, value]) => ({ name, value: String(value) }));
-}
-
+const headerArray = (o) => Object.entries(o || {}).map(([name, value]) => ({ name, value: String(value) }));
 function parseCookies(headers) {
-  const cookieHeader = Object.entries(headers || {}).find(([k]) => k.toLowerCase() === "cookie");
-  if (!cookieHeader) return [];
-  return cookieHeader[1].split(";").map((p) => {
-    const i = p.indexOf("=");
-    return i < 0 ? null : { name: p.slice(0, i).trim(), value: p.slice(i + 1).trim() };
+  const h = Object.entries(headers || {}).find(([k]) => k.toLowerCase() === "cookie");
+  if (!h) return [];
+  return h[1].split(";").map((p) => {
+    const i = p.indexOf("="); return i < 0 ? null : { name: p.slice(0, i).trim(), value: p.slice(i + 1).trim() };
   }).filter(Boolean);
 }
-
 function parseQuery(url) {
-  try {
-    const u = new URL(url);
-    return [...u.searchParams.entries()].map(([name, value]) => ({ name, value }));
-  } catch (_) {
-    return [];
-  }
+  try { return [...new URL(url).searchParams.entries()].map(([name, value]) => ({ name, value })); }
+  catch (_) { return []; }
 }
+const contentTypeOf = (h) => { const c = Object.entries(h || {}).find(([k]) => k.toLowerCase() === "content-type"); return c ? c[1] : "application/octet-stream"; };
 
-function contentTypeOf(headers) {
-  const ct = Object.entries(headers || {}).find(([k]) => k.toLowerCase() === "content-type");
-  return ct ? ct[1] : "application/octet-stream";
-}
-
-async function buildHar(tabId) {
-  const s = sessions[tabId];
+async function buildHar(tabId, data) {
   const entries = [];
-  for (const [requestId, e] of s.requests.entries()) {
+  const origin = data.origin;
+  for (const [requestId, e] of Object.entries(data.requests || {})) {
     const r = e.request;
-    if (IGNORE_EXT.test(r.url)) continue;
-    if (!/^https?:/i.test(r.url)) continue;
-
+    if (IGNORE_EXT.test(r.url) || !/^https?:/i.test(r.url)) continue;
+    // Only the app under test — drop third-party analytics/CDN noise that would
+    // otherwise blow the scan up to thousands of irrelevant vectors.
+    if (origin) { try { if (new URL(r.url).origin !== origin) continue; } catch (_) { continue; } }
     let postData;
     if (r.postData !== undefined) {
       postData = { mimeType: contentTypeOf(r.headers), text: r.postData };
     } else if (r.hasPostData) {
-      try {
-        const res = await sendCommand(tabId, "Network.getRequestPostData", { requestId });
-        if (res && res.postData) postData = { mimeType: contentTypeOf(r.headers), text: res.postData };
-      } catch (_) { /* best effort — some bodies are gone after the request completes */ }
+      try { const res = await sendCommand(tabId, "Network.getRequestPostData", { requestId });
+            if (res && res.postData) postData = { mimeType: contentTypeOf(r.headers), text: res.postData }; }
+      catch (_) {}
     }
-
     const entry = {
       startedDateTime: e.startedDateTime,
-      request: {
-        method: r.method,
-        url: r.url,
-        httpVersion: "HTTP/1.1",
-        headers: headerArray(r.headers),
-        queryString: parseQuery(r.url),
-        cookies: parseCookies(r.headers),
-        headersSize: -1,
-        bodySize: postData ? (postData.text || "").length : 0,
-      },
+      request: { method: r.method, url: r.url, httpVersion: "HTTP/1.1",
+        headers: headerArray(r.headers), queryString: parseQuery(r.url), cookies: parseCookies(r.headers),
+        headersSize: -1, bodySize: postData ? (postData.text || "").length : 0 },
       response: { status: e.response.status, statusText: "", httpVersion: "HTTP/1.1",
-                  headers: [], cookies: [], content: {}, redirectURL: "", headersSize: -1, bodySize: -1 },
-      cache: {},
-      timings: { send: 0, wait: 0, receive: 0 },
+        headers: [], cookies: [], content: {}, redirectURL: "", headersSize: -1, bodySize: -1 },
+      cache: {}, timings: { send: 0, wait: 0, receive: 0 },
     };
     if (postData) entry.request.postData = postData;
     entries.push(entry);
@@ -129,40 +121,64 @@ async function buildHar(tabId) {
 }
 
 async function stopCapture(tabId) {
-  const s = sessions[tabId];
-  if (!s) return { log: { version: "1.2", entries: [] } };
-  const har = await buildHar(tabId);
-  if (s.attached) {
-    await new Promise((resolve) => chrome.debugger.detach(targetFor(tabId), () => resolve()));
-  }
-  delete sessions[tabId];
+  const data = await read(tabId);
+  const har = await buildHar(tabId, data);
+  try { await new Promise((resolve) => chrome.debugger.detach(target(tabId), () => resolve())); } catch (_) {}
+  await chrome.storage.session.remove(keyFor(tabId));
   return har;
 }
 
-chrome.debugger.onEvent.addListener(onEvent);
-chrome.debugger.onDetach.addListener((source) => { delete sessions[source.tabId]; });
+// ---- messaging ----
+async function setScan(state) { await chrome.storage.local.set({ scan: state }); }
+
+// Builds the HAR and hands it to the server, which runs the (possibly slow) scan
+// in its OWN thread and returns a job id immediately. The popup then polls the
+// server for the result — so neither the service worker nor the popup needs to
+// stay alive through a long scan.
+async function runScan(tabId, server) {
+  await setScan({ status: "scanning", phase: "Building HAR…", server });
+  const har = await stopCapture(tabId);
+  const count = har.log.entries.length;
+  if (!count) { await setScan({ status: "empty" }); return; }
+  try {
+    const r = await fetch(`${server}/scan`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ har, replay: true }),
+    });
+    if (!r.ok) throw new Error("server HTTP " + r.status);
+    const data = await r.json();
+    if (data.error || !data.job_id) throw new Error(data.error || "no job id");
+    await setScan({ status: "scanning", phase: `Captured ${count} requests — scanning…`, count,
+                    server, job: data.job_id });
+  } catch (e) {
+    await setScan({ status: "error", error: String((e && e.message) || e) });
+  }
+}
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   (async () => {
     try {
       if (msg.cmd === "start") {
         await startCapture(msg.tabId);
+        await setScan({ status: "idle" });
         sendResponse({ ok: true, capturing: true });
-      } else if (msg.cmd === "complete") {
-        const har = await stopCapture(msg.tabId);
-        sendResponse({ ok: true, har, count: har.log.entries.length });
+      } else if (msg.cmd === "scan") {
+        // Fire-and-forget: run in background, popup polls chrome.storage for result.
+        runScan(msg.tabId, msg.server);
+        sendResponse({ ok: true, started: true });
       } else if (msg.cmd === "status") {
-        sendResponse({ ok: true, capturing: !!sessions[msg.tabId],
-                       count: sessions[msg.tabId] ? sessions[msg.tabId].requests.size : 0 });
+        const d = await read(msg.tabId);
+        sendResponse({ ok: true, capturing: !!d.capturing, count: Object.keys(d.requests || {}).length });
       } else if (msg.cmd === "cancel") {
         await stopCapture(msg.tabId);
+        await setScan({ status: "idle" });
         sendResponse({ ok: true });
       } else {
         sendResponse({ ok: false, error: "unknown cmd" });
       }
     } catch (e) {
-      sendResponse({ ok: false, error: String(e.message || e) });
+      sendResponse({ ok: false, error: String((e && e.message) || e) });
     }
   })();
-  return true; // async response
+  return true; // keep the message channel open for the async sendResponse
 });

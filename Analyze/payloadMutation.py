@@ -10,6 +10,23 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from tool_config import get_tool_path, get_oob_domain
 from Utility.schemas import ExploitResult, MutationVector, Mutations, MutationPayload
 
+_JAVA_AVAILABLE: bool | None = None
+
+
+def _java_available() -> bool:
+    """Whether a JRE is on PATH. Checked once and cached — without it, every
+    ysoserial attempt would spawn a failing subprocess, flooding logs and making
+    a large scan crawl."""
+    global _JAVA_AVAILABLE
+    if _JAVA_AVAILABLE is None:
+        try:
+            subprocess.run(["java", "-version"], capture_output=True, timeout=5)
+            _JAVA_AVAILABLE = True
+        except Exception:
+            _JAVA_AVAILABLE = False
+    return _JAVA_AVAILABLE
+
+
 class PayloadMutation:
 
     YSOSERIAL_PATH = get_tool_path("ysoserial")
@@ -104,6 +121,12 @@ class PayloadMutation:
 
     def _run_ysoserial(self, chain: str, command: str) -> str | None:
         if not os.path.exists(self.YSOSERIAL_PATH):
+            return None
+        if not _java_available():
+            # No JRE on PATH — skip immediately instead of spawning a failing
+            # subprocess per chain/command (which otherwise floods the log and makes
+            # a large scan crawl). Detection still works; only Java payload-generation
+            # is unavailable here.
             return None
         try:
             flags = self._get_java_flags()

@@ -162,9 +162,14 @@ class Fingerprint:
     def _detect_pickle(self, raw: str, lower: str, bin_data: bytes) -> dict:
         score = 0
 
-        for magic in self.PICKLE_MAGIC_BYTES:
-            if magic in bin_data:
-                score += 6
+        # A pickle protocol-2+ stream BEGINS with the PROTO opcode (\x80 <proto>).
+        # Checking `startswith` (not substring) avoids flagging any long binary/
+        # base64 blob that happens to contain \x80\x02..\x80\x05 by chance — the
+        # cause of false "Pickle RCE" hits on e.g. ad-tracking URL params.
+        if any(bin_data.startswith(magic) for magic in self.PICKLE_MAGIC_BYTES):
+            score += 6
+            if bin_data.endswith(b'.'):   # STOP opcode — a complete pickle stream
+                score += 2
 
         for indicator in self.PICKLE_TEXT_INDICATORS:
             if indicator in raw:

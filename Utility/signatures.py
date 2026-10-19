@@ -189,7 +189,10 @@ def looks_like_serialized(value: str) -> bool:
         decoded_lower = value_lower
 
     bin_data = value.encode('latin-1', errors='ignore')
-    if any(magic in bin_data for magic in JAVA_MAGIC_BYTES + PICKLE_MAGIC_BYTES + RUBY_MAGIC_BYTES):
+    # Serialized streams carry their magic as a HEADER (start of stream), so match
+    # startswith — not substring, which flags any long binary/base64 blob that
+    # happens to contain a 2-byte magic (\x80\x04 pickle, \x04\x08 ruby) by chance.
+    if any(bin_data.startswith(magic) for magic in JAVA_MAGIC_BYTES + PICKLE_MAGIC_BYTES + RUBY_MAGIC_BYTES):
         return True
 
     if any(re.search(p, value) or re.search(p, decoded_value) for p in PHP_STRONG + PHP_WEAK):

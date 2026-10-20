@@ -181,7 +181,7 @@ class TestRoundTripInvariantOnCommittedHar(unittest.TestCase):
                 if back != slot:
                     self.assertEqual(apply_chain(back, chain), candidate,
                                      f"{v['location']}/{v['name']} rebuilt differently")
-        self.assertGreater(checked, 100)
+        self.assertGreater(checked, 50)
 
 
 if __name__ == "__main__":

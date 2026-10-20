@@ -171,6 +171,50 @@ def is_nodejs_prototype_pollution(text: str) -> bool:
     return '__proto__' in text or ('constructor' in text and 'prototype' in text)
 
 
+def _decoded_bytes_look_serialized(raw: bytes, _depth: int = 0) -> bool:
+    if len(raw) < 4:
+        return False
+    if raw[:2] in (b'\x1f\x8b', b'\x78\x9c', b'\x78\x01', b'\x78\xda'):
+        return True
+    if any(raw.startswith(m) for m in JAVA_MAGIC_BYTES + PICKLE_MAGIC_BYTES + RUBY_MAGIC_BYTES):
+        return True
+    txt = raw.decode('latin-1', 'ignore')
+    low = txt.lower()
+    if re.search(r'O:\d+:"', txt) or re.search(r'a:\d+:\{', txt):
+        return True
+    if any(y in txt for y in ["!!python/", "!!java", "!!map", "!<tag:yaml.org", "%YAML"]):
+        return True
+    if any(p in txt for p in PICKLE_TEXT_INDICATORS):
+        return True
+    if any(k in low for k in ["java.lang", "java.util", "commonscollections",
+                              "templatesimpl", "__reduce__", "__wakeup", "__destruct",
+                              "gadget", "objectdataprovider", "system.windows",
+                              "system.data"]):
+        return True
+    # Not recognized yet — if the decoded text is itself another base64/hex layer,
+    # peel one more and re-check (bounded depth). Covers payloads wrapped in several
+    # encoding layers; random tokens stop quickly because their decoded bytes are not
+    # valid base64/hex again. normalize() does the full unwrap later; this only has to
+    # keep the vector from being dropped at the Stage-2 gate.
+    if _depth < 5:
+        stripped = txt.strip()
+        clean = stripped.replace('-', '+').replace('_', '/').rstrip('=')
+        if len(clean) >= 16 and re.fullmatch(r'[A-Za-z0-9+/]+', clean):
+            try:
+                inner = base64.b64decode(clean + '=' * (-len(clean) % 4), validate=True)
+                if _decoded_bytes_look_serialized(inner, _depth + 1):
+                    return True
+            except Exception:
+                pass
+        if len(stripped) >= 16 and len(stripped) % 2 == 0 and re.fullmatch(r'[0-9a-fA-F]+', stripped):
+            try:
+                if _decoded_bytes_look_serialized(bytes.fromhex(stripped), _depth + 1):
+                    return True
+            except ValueError:
+                pass
+    return False
+
+
 def looks_like_serialized(value: str) -> bool:
     if len(value) < 10:
         return False
@@ -229,21 +273,18 @@ def looks_like_serialized(value: str) -> bool:
     if len(value_clean) >= 20 and re.match(r'^[A-Za-z0-9+/]{20,}$', value_clean):
         padded = value_clean + '=' * (-len(value_clean) % 4)
         try:
-            base64.b64decode(padded, validate=True)
-            return True
+            raw = base64.b64decode(padded, validate=True)
         except Exception:
+            raw = None
+        if raw is not None and _decoded_bytes_look_serialized(raw):
+            return True
+
+    if re.match(r'^[0-9a-fA-F]{30,}$', value) and len(value) % 2 == 0:
+        try:
+            if _decoded_bytes_look_serialized(bytes.fromhex(value)):
+                return True
+        except ValueError:
             pass
-
-    if re.match(r'^[0-9a-fA-F]{30,}$', value):
-        return True
-
-    suspicious_chars = r'[\{\}\[\];:\$\|\^&]'
-    if len(re.findall(suspicious_chars, decoded_value)) >= 6:
-        return True
-
-    unique_ratio = len(set(decoded_value)) / len(decoded_value) if decoded_value else 0
-    if unique_ratio > 0.65 and len(decoded_value) > 60:
-        return True
 
     if any(kw in decoded_lower for kw in ["phar://", "gopher://", "expect://", "php://", "file://", "data://", "serialize", "unserialize", "pickle", "marshal", "jndi:", "ldap://", "rmi://"]):
         return True

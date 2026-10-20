@@ -1,5 +1,33 @@
 # Ghi chú tiến độ — EthicalQuoc
 
+**[FIX 2026-10-20 — Siết signature `looks_like_serialized()` để giảm false positive detection.]**
+- **Vấn đề**: quét web thật (YouTube/FB) ra FP rate ~10-19% ở tầng detection, gần như toàn bộ là token
+  base64/hex/protobuf bị nhận nhầm là serialized (vd `X-YouTube-Device`). Gốc: 4 luật "catch-all" cuối
+  `signatures.py` chấp nhận theo HÌNH DẠNG, không decode để kiểm magic.
+- **Sửa** ([signatures.py](Utility/signatures.py)): thêm helper `_decoded_bytes_look_serialized(raw)` — decode
+  base64/hex RỒI mới check (magic Java/pickle/ruby, gzip/zlib, text marker PHP `O:`/`a:`, YAML, pickle,
+  class-name java./system., VÀ wrapper base64 lồng `Tzo`/`rO0`/`aced0005` cho payload double-encode). Luật base64
+  và hex giờ chỉ pass nếu decoded thật sự giống serialized. **Bỏ 2 luật heuristic thuần hình dạng**
+  (`suspicious_chars>=6`, `unique_ratio>0.65`) — nguồn FP, không decode.
+- **Regression (detection-only, do_replay=False, không gửi mạng)** — before → after:
+  - youtube.har: 1425 → **15** findings (Unknown 1379→11, Java-FP 34→3, Ruby-FP 12→1). FP rate 19.3%→0.2%.
+  - comprehensive.har (synthetic đủ format): typed **48 → 48 GIỮ NGUYÊN** (PHP17 Java10 Ruby3 Wrapper6 YAML3
+    NodeJS3 Pickle3 DotNet3), Unknown 97→26. 0 mất detection.
+  - localhost.har (thật): 21 → 21, typed **20 → 20 GIỮ NGUYÊN**. 0 mất.
+- **Bug phát hiện khi verify**: lần sửa đầu làm rớt 1 PHP thật ở comprehensive (double-base64
+  `VHpv...`→`Tzo...`→`O:4:"User"`) — helper chỉ nhìn 1 lớp. Fix: thêm nhận diện wrapper base64 lồng (`Tzo`/`rO0`)
+  → PHP 16→17 trở lại. Đúng cảnh báo note:767 (từng mất PHP thật khi siết), lần này bắt được nhờ regression.
+- **Test**: [test_transforms.py:184](TestCase/test_transforms.py#L184) sanity floor `checked>100` → `>50`
+  (số candidate giảm hợp lệ do lọc bớt nhiễu; invariant round-trip vẫn đúng toàn bộ). **116/116 pass**.
+- **FOLLOW-UP (cùng ngày) — lỗ hổng multi-layer do chính lần siết này tạo ra**: helper ban đầu chỉ check 1 lớp
+  (+ marker double-base64 thủ công). Test tay xác nhận payload base64 **≥3 lớp** bị gate loại nhầm (gate=False)
+  dù normalize (Stage 4, depth 12) thừa sức bóc — nhưng vector bị chặn ở Stage 2 nên không tới normalize được.
+  Gốc: gate quyết pass/drop trong 1 lần nhìn giá trị thô, còn normalize mới bóc lặp. Fix: cho
+  `_decoded_bytes_look_serialized(raw, _depth)` **bóc lặp base64/hex có giới hạn** (`_depth<5` → tối đa ~6 lớp
+  tính cả lớp caller), check magic mỗi lớp; bỏ dòng marker `tzo/ro0ab` thủ công (vòng lặp tự xử lý double).
+  Verify: L1–L6 đều gate=True; nhiễu (protobuf/sha256-hex/jwt) vẫn False; youtube vẫn 15 (FP không tăng lại),
+  comprehensive typed 48, localhost typed 20 giữ nguyên; 116/116 pass.
+
 **[CHORE 2026-10-19 — Xóa toàn bộ comment `#` trong code Python của tool.]**
 - Phạm vi: tất cả `.py` trong d:\Thesis\Thesis, **trừ** `TestCase/` và `tools/` (gopherus/phpggc là vendor bên
   thứ ba, không đụng để khỏi lệch upstream). 11/17 file có comment → đã xóa.

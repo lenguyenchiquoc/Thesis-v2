@@ -20,18 +20,53 @@ from Analyze.payloadMutation import PayloadMutation
 from Replay.replay_request import ReplayRequest
 VERSION = "2025.1.0.0"
 
+_SEVERITY_RANK = {"Low": 0, "Medium": 1, "High": 2, "Critical": 3}
+_RCE_MARKERS = ("functorexception", "invokertransformer", "java.lang.runtime", "runtime' threw")
+_DESER_MARKERS = ("objectinputstream", "invalidclassexception", "streamcorruptedexception")
+
+
+def _escalate_severity(static_severity: str, mutated_bodies, indicators) -> tuple:
+    """Raise severity to match the strongest replay evidence seen in the mutated
+    response bodies/indicators. Never lowers; returns (severity, note|None) where note
+    is set only when actually raised. confirmation_status stays "Suspected" regardless
+    — this reflects observed impact, it does NOT auto-confirm."""
+    body_blob = " ".join((b or "").lower() for b in mutated_bodies)
+    ind_blob = " ".join((i or "").lower() for i in indicators)
+    evidence_tier = None
+    reason = None
+    if any(m in body_blob for m in _RCE_MARKERS):
+        evidence_tier, reason = "Critical", "response leaked RCE evidence (gadget chain reached Runtime.exec)"
+    elif any(m in body_blob for m in _DESER_MARKERS):
+        evidence_tier, reason = "High", "response leaked deserialization evidence (ObjectInputStream processed attacker bytes)"
+    elif "receivedtype" in body_blob and "content differs" in ind_blob:
+        evidence_tier, reason = "High", "response shows deserialized type changed (receivedType), confirming the payload was deserialized"
+
+    if evidence_tier and _SEVERITY_RANK[evidence_tier] > _SEVERITY_RANK.get(static_severity, 0):
+        return evidence_tier, f"raised from {static_severity} — {reason}"
+    return static_severity, None
+
+
 def _apply_replay_confirmation(exploit_analysis: dict, replay_result: dict) -> dict:
     result = dict(exploit_analysis)
-    severity = result.get("severity", "Low")
+    static_severity = result.get("severity", "Low")
     result["confirmation_status"] = "Suspected"
-    result["display_severity"] = f"Suspected-{severity}"
     result["confidence_source"] = "static_signature"
 
     if replay_result.get("skipped"):
+        result["display_severity"] = f"Suspected-{static_severity}"
         result["replay_note"] = replay_result.get("reason")
         return result
 
-    result["observations"] = replay_result.get("indicators", [])
+    mutated = replay_result.get("mutated") or {}
+    indicators = replay_result.get("indicators", [])
+    severity, severity_note = _escalate_severity(
+        static_severity, [mutated.get("body_sample") or ""], indicators
+    )
+    result["severity"] = severity
+    result["display_severity"] = f"Suspected-{severity}"
+    if severity_note:
+        result["severity_note"] = severity_note
+    result["observations"] = indicators
     result["replay_note"] = "Not auto-confirmed — review baseline/mutated response manually"
     return result
 
@@ -241,6 +276,7 @@ def handle_arg(args):
                 findings.append({
                     "exploit_type": exploit_analysis.get("exploit_type"),
                     "severity": exploit_analysis.get("display_severity"),
+                    "severity_note": exploit_analysis.get("severity_note"),
                     "score": exploit_analysis.get("score"),
                     "suggested_probe": exploit_analysis.get("suggested_probe"),
                     "notes": exploit_analysis.get("notes"),

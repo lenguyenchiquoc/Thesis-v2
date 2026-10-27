@@ -1,5 +1,52 @@
 # Ghi chú tiến độ — EthicalQuoc
 
+**[ĐIỀU TRA 2026-10-27 — Truy gốc bug "Invalid header value" + FP `X-YouTube-Device`. CHƯA sửa code, chỉ xác minh trạng thái.]**
+- **Hiện tượng**: trong report cũ (`results/ethicalquoc-report-2026-10-19T07-17-37.json`, TRƯỚC lần siết signature 2026-10-20),
+  header `X-YouTube-Device` (`location=header`) bị gắn `Java / Rome Gadget Chain`, rồi replay báo
+  `Skipped: Request failed: Invalid header value b'\xac\xed\x00\x05sr...'`.
+- **Chuỗi nhân quả đầy đủ (đã verify bằng dữ liệu thật từ `D:\Download\www.youtube.com.har`)**:
+  1. Giá trị thô của header là plaintext query-string: `cbr=Chrome&cbrver=155.0.0.0&...&cplatform=DESKTOP`.
+  2. Gate Stage 2 cũ cho lọt vì heuristic **`suspicious_chars >= 6`** — chuỗi có **18** ký tự cấu trúc
+     (`=`×7, `&`×6, `.`×5). (Loại trừ `unique_ratio>0.65`: thực đo chỉ **0.385**, không chạm ngưỡng.)
+  3. Fingerprint Stage 5 gắn Java vì **`"rome"` ⊂ `"Chrome"`** — [finderprint.py:146](Analyze/finderprint.py#L146)
+     `gadget_hits = [kw for kw in JAVA_GADGET_CHAINS if kw in lower]` khớp chuỗi con, không ranh giới từ.
+  4. Replay nhét payload Java nhị phân (`\xac\xed...`) vào slot header text-only
+     ([replay_request.py:139](Replay/replay_request.py#L139) `headers[name] = value`) → urllib ném
+     `ValueError: Invalid header value` → bắt ở [L54](Replay/replay_request.py#L54) → skip.
+- **ĐÃ FIX SẴN (bởi lần siết signature 2026-10-20, xem entry bên dưới)**: bước (2) đã đóng — xóa
+  `suspicious_chars`/`unique_ratio`, gate giờ decode-rồi-check-magic. Verify LẠI 2026-10-27:
+  `signatures.looks_like_serialized('cbr=Chrome&...')` → **False**. Nên `X-YouTube-Device` giờ bị drop ngay
+  Stage 2, không tới fingerprint/replay → bug "Invalid header value" **không còn tái hiện** trên traffic này.
+  Postfilter gọi đúng hàm: [postfiltered.py:72-73](Analyze/postfiltered.py#L72-L73).
+- **KẾT LUẬN về bug "Invalid header value"**: KHÔNG phải vuln thật bị bỏ sót. Byte Java thô (có `0x00`) vật lý
+  không thể nằm trong header HTTP hợp lệ; deser-qua-header THẬT luôn mã-hoá (base64/hex) → mang
+  `transform_chain` → `_select_payload_value` đi nhánh `rebuild()` ([replay_request.py:86](Replay/replay_request.py#L86))
+  re-encode đúng slot → gửi được. Đường byte-thô-vào-header chỉ xuất hiện khi detection bắt nhầm plaintext.
+- **CÒN MỞ (tuyến hai, chưa fix)**: [finderprint.py:73](Analyze/finderprint.py#L73) + [:146](Analyze/finderprint.py#L146)
+  vẫn khớp gadget-keyword bằng chuỗi con (`kw in lower`). `rome`/`spring`/`groovy`/`clojure`/`beanshell`
+  dễ dính nhầm trong token thường. Giờ không gây FP thực tế (vì gate đã chặn trước), nhưng nên vá:
+  đổi sang khớp có ranh giới từ (regex `(?<![a-z0-9])kw(?![a-z0-9])`) ± siết keyword ngắn sang dạng định danh
+  đầy đủ (`rome`→`com.sun.syndication`/`rometools`, `spring`→`springframework`, ...). Nếu làm phải đo
+  before/after trên `youtube.har` + `comprehensive.har` (giữ typed 48) + `localhost.har` (typed 20) để chắc 0 FN.
+- **(Tùy chọn) phòng thủ phụ ở replay**: với slot header/cookie, nếu `value` chứa byte không in được thì skip
+  với lý do rõ hơn ("binary payload cannot target a text-only header — likely mis-detection") thay vì để lộ
+  "Invalid header value" khó hiểu. KHÔNG ép base64 rồi gửi (sẽ gửi thứ không ứng vuln thật).
+
+**[REFACTOR 2026-10-27 — Đồng bộ nâng `severity` theo attempts xuống CLI `assess`/`report` (trước chỉ có ở serve.py).]**
+- **Vấn đề**: `_escalate_severity` (nâng severity theo bằng chứng replay) tuần trước chỉ sống ở
+  [serve.py](Server/serve.py) (đường extension). CLI `assess`/`report` không nâng → 2 đường lệch nhau.
+- **Fix (1 nguồn dùng chung, theo quy tắc consistency)**: chuyển `_escalate_severity` + 3 hằng
+  (`_SEVERITY_RANK`/`_RCE_MARKERS`/`_DESER_MARKERS`) về [main.py](main.py) (serve.py vốn đã import từ main.py).
+  Tổng quát signature: `_escalate_severity(static_severity, mutated_bodies, indicators)` — nhận list body +
+  list indicator thay vì cấu trúc `attempts` riêng của serve.py. Cả 2 đường adapt data rồi gọi chung:
+  - serve.py (per-vector): gộp body+indicator của mọi attempt.
+  - CLI `_apply_replay_confirmation` (per-mutation): dùng body+indicator của 1 replay_result; nay set luôn
+    `result["severity"]` (nâng) + `display_severity` theo severity đã nâng + `severity_note`.
+  - [main.py report](main.py) finding dict thêm field `severity_note`.
+- **Giữ nguyên triết lý**: `confirmation_status` vẫn luôn "Suspected" — nâng severity ≠ auto-confirm.
+- **Verify**: 6 case helper giống hệt serve.py cũ; `_apply_replay_confirmation` CC6→`Suspected-Critical`+note,
+  skip→giữ static; end-to-end `main.py report` mang đúng `Suspected-Critical`+`severity_note`. **116/116 pass**.
+
 **[FIX 2026-10-20 — Siết signature `looks_like_serialized()` để giảm false positive detection.]**
 - **Vấn đề**: quét web thật (YouTube/FB) ra FP rate ~10-19% ở tầng detection, gần như toàn bộ là token
   base64/hex/protobuf bị nhận nhầm là serialized (vd `X-YouTube-Device`). Gốc: 4 luật "catch-all" cuối

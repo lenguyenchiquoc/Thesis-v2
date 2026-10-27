@@ -17,33 +17,7 @@ from Scanner.har_loader import HarLoader
 from Analyze.postfiltered import VectorFiltering
 from Analyze.cleanfilter import cleanfilter
 from Replay.replay_request import ReplayRequest
-from main import _analyze_one, _apply_replay_confirmation
-
-_SEVERITY_RANK = {"Low": 0, "Medium": 1, "High": 2, "Critical": 3}
-_RCE_MARKERS = ("functorexception", "invokertransformer", "java.lang.runtime", "runtime' threw")
-_DESER_MARKERS = ("objectinputstream", "invalidclassexception", "streamcorruptedexception")
-
-
-def _escalate_severity(static_severity: str, attempts: list) -> tuple:
-    """Return (severity, note|None). Raises severity to match the strongest replay
-    evidence; keeps the static value (and returns note=None) if nothing stronger seen."""
-    body_blob = " ".join(
-        (a.get("mutated", {}).get("body_sample") or "").lower() for a in attempts
-    )
-    evidence_tier = None
-    reason = None
-    if any(m in body_blob for m in _RCE_MARKERS):
-        evidence_tier, reason = "Critical", "response leaked RCE evidence (gadget chain reached Runtime.exec)"
-    elif any(m in body_blob for m in _DESER_MARKERS):
-        evidence_tier, reason = "High", "response leaked deserialization evidence (ObjectInputStream processed attacker bytes)"
-    elif "receivedtype" in body_blob and any(
-        "content differs" in ind.lower() for a in attempts for ind in a.get("indicators", [])
-    ):
-        evidence_tier, reason = "High", "response shows deserialized type changed (receivedType), confirming the payload was deserialized"
-
-    if evidence_tier and _SEVERITY_RANK[evidence_tier] > _SEVERITY_RANK.get(static_severity, 0):
-        return evidence_tier, f"raised from {static_severity} — {reason}"
-    return static_severity, None
+from main import _analyze_one, _apply_replay_confirmation, _escalate_severity
 
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8099
@@ -114,7 +88,11 @@ def run_pipeline(har_data: dict, do_replay: bool = True) -> dict:
                 if not indicators:
                     indicators = result.get("indicators", [])
 
-        severity, severity_note = _escalate_severity(ex.get("severity"), attempts)
+        severity, severity_note = _escalate_severity(
+            ex.get("severity"),
+            [(a.get("mutated") or {}).get("body_sample") or "" for a in attempts],
+            [ind for a in attempts for ind in a.get("indicators", [])],
+        )
         findings.append({
             "url": entry["vector"].get("url"),
             "method": entry["vector"].get("method"),

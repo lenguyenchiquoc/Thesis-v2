@@ -1,5 +1,57 @@
 # Ghi chú tiến độ — EthicalQuoc
 
+**[FIX 2026-10-27 — Replay chết trên site HTTP/2 vì pseudo-header `:authority`. ĐÃ SỬA.]**
+- **Hiện tượng**: report extension trên lab PortSwigger PHP deser (`TestCase/ethicalquoc-report-2026-10-27T14-44-23.json`)
+  detect đúng 5× `cookie/session` PHP High, nhưng MỌI replay attempt bị skip:
+  `"reason": "Request failed: Invalid header name b':Authority'"` → `likely_vulnerable` mãi = 0.
+- **Gốc rễ**: site chạy HTTP/2, HAR chứa pseudo-header `:authority`/`:method`/`:path`/`:scheme`. `_send` dựng lại
+  request bằng `urllib` (nói HTTP/1.1, CẤM dấu `:` trong tên header) → `urllib` ném "Invalid header name" ngay
+  khi gặp `:authority` → bắt ở [replay_request.py:54](Replay/replay_request.py#L54) → skip toàn bộ. Detect vẫn
+  đúng, chỉ bước xác nhận động chết.
+- **Fix (1 dòng)**: [replay_request.py:124-127](Replay/replay_request.py#L124-L127) thêm `and not k.startswith(":")`
+  vào bộ lọc header khi dựng request. Pseudo-header là đặc thù HTTP/2, thông tin đã có trong URL+method (`urllib`
+  tự sinh `Host`/request-line tương đương) → bỏ không mất gì. Header thật (Cookie/Content-Type/UA...) giữ nguyên.
+- **Verify (offline, không gửi PortSwigger)**: lấy header thật từ `download` HAR qua har_loader → sau lọc:
+  pseudo-header = NONE, Cookie giữ, mọi header thật giữ; tên header `urllib` sẽ từ chối = NONE.
+- **LƯU Ý vận hành**: serve đang chạy phải **restart** (`python main.py serve`) để nạp code mới.
+- **FIX tiếp (cùng ngày) — bỏ luôn `accept-encoding` khi replay**: xác nhận lab này **98/105 response là
+  `Content-Encoding: gzip`** (không phải lo xa). Browser tự thêm `Accept-Encoding: gzip,br` vào request gốc,
+  `_send` sao lại y nguyên → server nén response → `urllib` (không tự giải nén) đọc raw → `.decode(utf-8)` ra rác →
+  oracle so sánh baseline/mutated kém chính xác (có thể không bật `likely_vulnerable` dù lab thật dính). Fix: thêm
+  `"accept-encoding"` vào bộ lọc header [replay_request.py:124-127](Replay/replay_request.py#L124-L127). An toàn
+  theo RFC 9110 §12.5.3: "If no Accept-Encoding header field is in the request, any content coding is considered
+  acceptable" — vắng header này server trả bản không nén (identity), KHÔNG có chuyện server bắt buộc phải có nó
+  (không có 406 cho việc thiếu). Verify: sau lọc, `accept-encoding` biến mất, Cookie + header thật giữ nguyên.
+
+**[FIX 2026-10-27 — Extension mất header `Cookie` khi tự chụp → quét lab PortSwigger ra 0 finding. ĐÃ SỬA.]**
+- **Hiện tượng**: user test lab PHP deser PortSwigger ("Modifying serialized objects") qua extension→serve → UI
+  **0 finding**. Nhưng HAR cùng lab export từ DevTools (`TestCase/download.har`) chạy pipeline ra **16 finding
+  PHP High** (`O:4:"User":2:{...s:5:"admin";b:0;}`, exploit=Privilege Escalation — Boolean Flip). → detection
+  đúng, vấn đề ở **khâu capture của extension**.
+- **Gốc rễ**: [background.js](Extension/background.js) tự dựng HAR từ CDP, nhưng chỉ nghe `Network.requestWillBeSent`
+  và đọc `request.headers` — mà header **`Cookie`** (cookie HttpOnly `session`, chính là vector payload) KHÔNG
+  nằm ở event đó; nó do network stack thêm, chỉ có ở `Network.requestWillBeSentExtraInfo` (xác nhận qua CDP docs).
+  Extension không nghe event này → `parseCookies(r.headers)` trả `[]` → cookie `session` không vào HAR → 0 finding.
+  DevTools export có cookie vì DevTools tự gộp extraInfo. (Verify: `run_pipeline(download.har)` = 16 PHP High;
+  bản extension tự chụp thiếu cookie = 0.)
+- **Vì sao tự build HAR chứ không "tải HAR DevTools"**: không có API cho extension mở DevTools/tải HAR của nó
+  (`chrome.devtools.network.getHAR()` chỉ chạy khi user tự mở DevTools + trong ngữ cảnh devtools_page; và 1 tab
+  chỉ cho 1 debugger client). `chrome.debugger` tự chụp là cách duy nhất "1 nút, không cần DevTools" — đúng hướng,
+  chỉ thiếu bước gộp extraInfo.
+- **Fix (port tay pattern của `sitespeedio/chrome-har`, KHÔNG thêm dependency — giữ extension zero-dep)**:
+  1. Thêm listener `Network.requestWillBeSentExtraInfo` → buffer `params.headers` theo `requestId` vào
+     `d.extraHeaders` (reset trong `startCapture`). 2 event không đảm bảo thứ tự → buffer, merge lúc build.
+  2. `buildHar()`: `mergedHeaders = mergeHeaders(r.headers, extraHeaders[requestId])` (extraInfo đè,
+     case-insensitive), rồi `headerArray`/`parseCookies`/`contentTypeOf` chạy trên header đã merge.
+  3. Thêm helper `mergeHeaders(base, extra)`.
+  - So sánh 2 lib đã đọc source: **chrome-har** xử lý đúng extraInfo (concat headers + append cookie bỏ
+    `blockedReasons`) → dựa theo; **chrome-har-capturer** KHÔNG đụng extraInfo, request `cookies: []` hardcode →
+    không dùng (dính đúng blind spot như cũ).
+- **Verify**: (a) test JS merge cả 2 thứ tự event (normal + extraInfo-đến-trước) → đều lấy được cookie `session`;
+  baseline cũ không-merge = rỗng (tái hiện bug). (b) end-to-end: HAR kiểu extension-đã-vá (có cookie) →
+  `run_pipeline` ra **PHP High**, normalize đúng object. Chưa test live trên Chrome (cần user reload extension +
+  chụp lại) — logic đã verify bằng mô phỏng event.
+
 **[ĐIỀU TRA 2026-10-27 — Truy gốc bug "Invalid header value" + FP `X-YouTube-Device`. CHƯA sửa code, chỉ xác minh trạng thái.]**
 - **Hiện tượng**: trong report cũ (`results/ethicalquoc-report-2026-10-19T07-17-37.json`, TRƯỚC lần siết signature 2026-10-20),
   header `X-YouTube-Device` (`location=header`) bị gắn `Java / Rome Gadget Chain`, rồi replay báo

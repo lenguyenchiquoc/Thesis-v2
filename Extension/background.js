@@ -51,6 +51,16 @@ chrome.debugger.onEvent.addListener((source, method, params) => {
     update(tabId, (d) => {
       if (d.requests[params.requestId]) d.requests[params.requestId].response.status = params.response.status;
     });
+  } else if (method === "Network.requestWillBeSentExtraInfo") {
+    // The Cookie header (and other headers the network stack adds, e.g. httpOnly
+    // session cookies — the primary deserialization vector) is NOT in
+    // requestWillBeSent.request.headers; it arrives here. No ordering guarantee vs
+    // requestWillBeSent, so buffer by requestId and merge at HAR-build time.
+    update(tabId, (d) => {
+      if (!d.capturing) return;
+      d.extraHeaders = d.extraHeaders || {};
+      d.extraHeaders[params.requestId] = params.headers || {};
+    });
   }
 });
 
@@ -69,12 +79,25 @@ async function startCapture(tabId) {
     });
   });
   await sendCommand(tabId, "Network.enable");
-  await update(tabId, (d) => { d.capturing = true; d.requests = {}; d.origin = origin; });
+  await update(tabId, (d) => { d.capturing = true; d.requests = {}; d.extraHeaders = {}; d.origin = origin; });
 }
 
 // ---- HAR building ----
 const IGNORE_EXT = /\.(css|js|png|jpe?g|gif|svg|ico|woff2?|ttf|map|mp4|mp3)(\?|$)/i;
 const headerArray = (o) => Object.entries(o || {}).map(([name, value]) => ({ name, value: String(value) }));
+// Merge extraInfo headers over the base request headers, case-insensitively, so a
+// network-stack header (Cookie above all) overrides/supplements requestWillBeSent.
+function mergeHeaders(base, extra) {
+  const out = {};
+  const seen = {};
+  for (const [k, v] of Object.entries(base || {})) { out[k] = v; seen[k.toLowerCase()] = k; }
+  for (const [k, v] of Object.entries(extra || {})) {
+    const prev = seen[k.toLowerCase()];
+    if (prev !== undefined && prev !== k) delete out[prev];
+    out[k] = v; seen[k.toLowerCase()] = k;
+  }
+  return out;
+}
 function parseCookies(headers) {
   const h = Object.entries(headers || {}).find(([k]) => k.toLowerCase() === "cookie");
   if (!h) return [];
@@ -97,18 +120,20 @@ async function buildHar(tabId, data) {
     // Only the app under test — drop third-party analytics/CDN noise that would
     // otherwise blow the scan up to thousands of irrelevant vectors.
     if (origin) { try { if (new URL(r.url).origin !== origin) continue; } catch (_) { continue; } }
+    // Fold in the Cookie/auth headers that only requestWillBeSentExtraInfo carried.
+    const mergedHeaders = mergeHeaders(r.headers, (data.extraHeaders || {})[requestId] || {});
     let postData;
     if (r.postData !== undefined) {
-      postData = { mimeType: contentTypeOf(r.headers), text: r.postData };
+      postData = { mimeType: contentTypeOf(mergedHeaders), text: r.postData };
     } else if (r.hasPostData) {
       try { const res = await sendCommand(tabId, "Network.getRequestPostData", { requestId });
-            if (res && res.postData) postData = { mimeType: contentTypeOf(r.headers), text: res.postData }; }
+            if (res && res.postData) postData = { mimeType: contentTypeOf(mergedHeaders), text: res.postData }; }
       catch (_) {}
     }
     const entry = {
       startedDateTime: e.startedDateTime,
       request: { method: r.method, url: r.url, httpVersion: "HTTP/1.1",
-        headers: headerArray(r.headers), queryString: parseQuery(r.url), cookies: parseCookies(r.headers),
+        headers: headerArray(mergedHeaders), queryString: parseQuery(r.url), cookies: parseCookies(mergedHeaders),
         headersSize: -1, bodySize: postData ? (postData.text || "").length : 0 },
       response: { status: e.response.status, statusText: "", httpVersion: "HTTP/1.1",
         headers: [], cookies: [], content: {}, redirectURL: "", headersSize: -1, bodySize: -1 },

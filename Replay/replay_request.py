@@ -123,7 +123,7 @@ class ReplayRequest:
         request_context = request_context or {}
         headers = {
             k: v for k, v in (request_context.get("headers") or {}).items()
-            if k.lower() not in ("content-length", "host")
+            if k.lower() not in ("content-length", "host", "accept-encoding") and not k.startswith(":")
         }
         headers.setdefault("User-Agent", "EthicalQuoc/replay")
         cookies = dict(request_context.get("cookies") or {})

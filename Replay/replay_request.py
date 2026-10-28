@@ -55,6 +55,10 @@ class ReplayRequest:
             return self._skip_result(payload, f"Request failed: {e}")
 
         indicators, strong_signal = self._compare(baseline, mutated, comparison_value)
+        # body_compare is only for the diff above; drop it so the wide window doesn't
+        # bloat stored assess/report output (body_sample is kept for display).
+        baseline.pop("body_compare", None)
+        mutated.pop("body_compare", None)
 
         return {
             "url": url,
@@ -175,6 +179,7 @@ class ReplayRequest:
                     "elapsed_sec": round(elapsed, 3),
                     "length": len(raw),
                     "body_sample": raw[:2000].decode("utf-8", errors="replace"),
+                    "body_compare": raw[:self.COMPARE_BODY_LIMIT].decode("utf-8", errors="replace"),
                 }
         except urllib.error.HTTPError as e:
             elapsed = time.monotonic() - start
@@ -184,6 +189,7 @@ class ReplayRequest:
                 "elapsed_sec": round(elapsed, 3),
                 "length": len(raw),
                 "body_sample": raw[:2000].decode("utf-8", errors="replace"),
+                "body_compare": raw[:self.COMPARE_BODY_LIMIT].decode("utf-8", errors="replace"),
             }
 
     @staticmethod
@@ -198,6 +204,10 @@ class ReplayRequest:
         return "&".join(parts)
 
     CONTENT_DIFF_SIMILARITY_THRESHOLD = 0.8
+    # Compare a wider window than body_sample (2000) so content changes deep in the
+    # page (e.g. an "Admin panel" link appended far below the header boilerplate) are
+    # not missed. Bounded to keep difflib cost sane.
+    COMPARE_BODY_LIMIT = 20000
 
     VOLATILE_PATTERNS = [
         re.compile(r"\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:[.,]\d+)?(?:Z|[+-]\d{2}:?\d{2})?"),
@@ -251,25 +261,36 @@ class ReplayRequest:
             )
             if not clean_rejection:
                 strong_signal = True
+        elif length_delta > 0 and mutated["status"] == baseline["status"] and not error_hits:
+            # Small but real length change on an otherwise-identical response: surface it
+            # as an OBSERVATION for the human, but do NOT auto-confirm (PortSwigger notes
+            # access-control/logic flaws are prone to false positives when auto-decided).
+            indicators.append(
+                f"Observation: response length changed by {mutated['length'] - baseline['length']:+d} bytes "
+                f"(baseline={baseline['length']} mutated={mutated['length']}, same status {mutated['status']}) "
+                f"— possible behavioral change, verify manually"
+            )
 
         if error_hits:
             indicators.append(f"Error/exception disclosure in response: {error_hits}")
             strong_signal = True
 
+        base_cmp = baseline.get("body_compare") or baseline["body_sample"]
+        mut_cmp = mutated.get("body_compare") or mutated["body_sample"]
         if (
             mutated["status"] == baseline["status"]
             and not length_changed_significantly
             and not error_hits
-            and mutated["body_sample"] != baseline["body_sample"]
-            and self._strip_volatile(mutated["body_sample"]) != self._strip_volatile(baseline["body_sample"])
+            and mut_cmp != base_cmp
+            and self._strip_volatile(mut_cmp) != self._strip_volatile(base_cmp)
         ):
-            similarity = difflib.SequenceMatcher(None, baseline["body_sample"], mutated["body_sample"]).ratio()
+            similarity = difflib.SequenceMatcher(None, base_cmp, mut_cmp).ratio()
             if similarity >= self.CONTENT_DIFF_SIMILARITY_THRESHOLD:
                 indicators.append(
-                    f"Response content differs in a small, localized way despite same status/length (similarity={similarity:.2f}) "
-                    f"(baseline={baseline['body_sample'][:200]!r} mutated={mutated['body_sample'][:200]!r})"
+                    f"Response content differs in a small, localized way despite same status (similarity={similarity:.2f}) "
+                    f"(baseline={base_cmp[:200]!r} mutated={mut_cmp[:200]!r})"
                 )
-                if not self._is_mere_reflection(mutated["body_sample"], injected_value):
+                if not self._is_mere_reflection(mut_cmp, injected_value):
                     strong_signal = True
 
         return indicators, strong_signal

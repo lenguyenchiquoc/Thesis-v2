@@ -1,5 +1,42 @@
 # Ghi chú tiến độ — EthicalQuoc
 
+**[FIX 2026-10-28 — Oracle bỏ sót diff sâu + thêm ô nhập OOB domain cho extension. ĐÃ SỬA.]**
+- **Bối cảnh**: lab PortSwigger "Modifying serialized objects" (report `results/ethicalquoc-report-2026-10-28T02-59-02.json`),
+  SAU khi vá `:authority`/`accept-encoding`: replay chạy, body đọc được HTML. Nhưng mọi mutated response **dài hơn
+  baseline đúng +69 byte** (link "Admin panel" khi admin=`b:1`) mà oracle vẫn `likely_vulnerable=false`, `indicators=[]`.
+- **Gốc rễ (2 cái, đều trong `_compare`)**:
+  1. Ngưỡng length cứng 50% ([replay_request.py:246]) — +69 chỉ ~2% nên không kích hoạt.
+  2. `body_sample` cắt ở 2000 ký tự ([replay_request.py:177]); nội dung admin nằm **sau** 2000 → nhánh content-diff
+     ([:259-275]) so 2000 ký tự đầu thấy giống hệt → không báo gì.
+- **Tham khảo tài liệu trước khi sửa (để không tự chế ngưỡng)**: PortSwigger — oracle chuẩn cho deser là **OAST/URLDNS**
+  (DNS callback tới Collaborator), KHÔNG phải diff length; và **access-control/logic flaw** (đúng lab này) dễ false
+  positive nhất khi auto-quyết. ⇒ hướng sửa: **bề mặt hoá bằng chứng cho con người, không hạ ngưỡng để auto-"vulnerable"**.
+  Nguồn: RFC 9110 §12.5.3 (Accept-Encoding), PortSwigger deserialization/exploiting + guide-to-vulnerability-scanning,
+  Invicti FP whitepaper, arXiv 1706.08017.
+- **Fix oracle** ([replay_request.py](Replay/replay_request.py)):
+  - Thêm `body_compare` (cửa sổ 20000 ký tự, hằng `COMPARE_BODY_LIMIT`) trong `_send`; `_compare` dùng nó cho nhánh
+    content-diff thay vì `body_sample[:2000]` → bắt được diff sâu (như link admin). GIỮ NGUYÊN quyết định cũ đã có
+    test: content-diff "giá trị dẫn xuất, không phải echo payload" = strong (test_derived_value) → lab này giờ
+    `likely_vulnerable=true` khi replay lại (vẫn `confirmation_status=Suspected`, tool không auto-confirm).
+  - Thêm **observation** cho thay đổi length nhỏ (`>0` nhưng `<50%`, same status, no error): sinh indicator
+    "Observation: response length changed by +N bytes..." nhưng **KHÔNG** set strong_signal (không auto-confirm).
+  - `body_compare` được `pop()` khỏi kết quả sau khi so, để không phình file assess/report (chỉ nội bộ).
+  - Test: +2 case (`test_minor_length_change_is_observation_not_strong`, `test_deep_content_diff_beyond_body_sample_is_detected`).
+    **118/118 pass.**
+  - ⚠️ Đánh đổi: nới cửa sổ so 2000→20000 làm tăng rủi ro FP trên trang động có nội dung đổi sâu >2KB mà `_strip_volatile`
+    chưa bắt (CSRF/nonce). Chưa đo FP trên traffic lành (cần replay site thật). Follow-up nếu thấy FP: mở rộng
+    `VOLATILE_PATTERNS` hoặc yêu cầu delta ổn định/lặp lại.
+- **Thêm ô nhập OOB domain cho extension** (hết phải sửa `config.json` mỗi lần):
+  - `tool_config.py`: thêm `set_oob_override(domain)` + biến `_oob_override` — ưu tiên **cao nhất** trong `get_oob_domain()`
+    (override > env `ETHICALQUOC_OOB_DOMAIN` > config.json). Process-global, giả định 1 scan/lần (đúng mô hình extension).
+  - `Server/serve.py`: `do_POST` đọc `oob_domain` từ body → `_run_job` → `run_pipeline(har, do_replay, oob_domain)` gọi
+    `set_oob_override` đầu mỗi scan (để trống = clear, rơi về config).
+  - Extension: ô input `#oobInput` trong [popup.html](Extension/popup.html); [popup.js](Extension/popup.js) nhớ giá trị qua
+    `chrome.storage.local` (`oobDomain`) + gửi `oob` trong message `scan`; [background.js](Extension/background.js) `runScan`
+    nhét `oob_domain` vào body POST `/scan` (chỉ khi có).
+  - Verify: `run_pipeline(..., oob_domain='abc123.oastify.com')` → `get_oob_domain()` trả đúng; để trống → rơi về config.
+- **VẬN HÀNH**: phải **restart serve** (nạp code replay/serve mới) + **reload extension** (nạp popup/background mới).
+
 **[FIX 2026-10-27 — Replay chết trên site HTTP/2 vì pseudo-header `:authority`. ĐÃ SỬA.]**
 - **Hiện tượng**: report extension trên lab PortSwigger PHP deser (`TestCase/ethicalquoc-report-2026-10-27T14-44-23.json`)
   detect đúng 5× `cookie/session` PHP High, nhưng MỌI replay attempt bị skip:

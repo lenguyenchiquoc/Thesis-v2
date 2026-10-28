@@ -155,7 +155,8 @@ async function onComplete() {
   $("completeBtn").disabled = true;
   setCapturing(false);
   say("Building HAR…");
-  const res = await send({ cmd: "scan", tabId, server: SERVER });
+  const oob = ($("oobInput").value || "").trim();
+  const res = await send({ cmd: "scan", tabId, server: SERVER, oob });
   if (!res || !res.ok) { say("Could not start scan: " + (res ? res.error : "no response")); return; }
   startPoll();
 }
@@ -166,6 +167,15 @@ async function init() {
   await checkServer();
   const st = await send({ cmd: "status", tabId });
   setCapturing(st && st.capturing, st && st.count);
+
+  // OOB domain: remember the last value so users don't retype it each scan.
+  try {
+    const { oobDomain } = await chrome.storage.local.get("oobDomain");
+    if (oobDomain) $("oobInput").value = oobDomain;
+  } catch (_) {}
+  $("oobInput").onchange = () => {
+    chrome.storage.local.set({ oobDomain: ($("oobInput").value || "").trim() });
+  };
 
   // If a scan is running or finished (popup was closed during it), resume it.
   const { scan } = await chrome.storage.local.get("scan");

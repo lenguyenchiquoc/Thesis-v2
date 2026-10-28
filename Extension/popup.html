@@ -63,6 +63,15 @@
       Click <b>Start</b>, use the site normally, then <b>Complete</b> to scan.
     </div>
 
+    <div class="row" style="margin-top:10px;">
+      <input id="oobInput" type="text" autocomplete="off" spellcheck="false"
+             placeholder="OOB domain (optional) — e.g. abc123.oastify.com"
+             style="flex:1; padding:7px 9px; border:1px solid var(--line); border-radius:7px; font:inherit; color:var(--fg); background:var(--bg);">
+    </div>
+    <div class="muted" style="margin-top:4px;">
+      For blind confirmation (URLDNS / SSRF canary). Leave empty to use config.json.
+    </div>
+
     <div id="summary" class="sum" style="display:none;"></div>
     <div id="reportRow" class="row" style="display:none; margin:6px 0 2px;">
       <button id="reportBtn" class="ghost">View full report</button>

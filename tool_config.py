@@ -43,7 +43,22 @@ def get_tool_path(name: str) -> str:
     return os.path.join(PROJECT_ROOT, path)
 
 
+_oob_override = None
+
+
+def set_oob_override(domain) -> None:
+    """Per-scan runtime override for the OOB domain (e.g. typed in the extension UI),
+    taking precedence over the env var and config.json so users don't have to edit a
+    file each run. Pass a falsy value to clear it. Note: process-global — assumes one
+    scan at a time, which is how the extension/serve bridge is used."""
+    global _oob_override
+    _oob_override = domain.strip() if isinstance(domain, str) and domain.strip() else None
+
+
 def get_oob_domain() -> str:
+    if _oob_override:
+        return _oob_override
+
     env_value = os.environ.get("ETHICALQUOC_OOB_DOMAIN")
     if env_value:
         return env_value

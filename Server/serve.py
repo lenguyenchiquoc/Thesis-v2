@@ -18,6 +18,7 @@ from Analyze.postfiltered import VectorFiltering
 from Analyze.cleanfilter import cleanfilter
 from Replay.replay_request import ReplayRequest
 from main import _analyze_one, _apply_replay_confirmation, _escalate_severity
+from tool_config import set_oob_override
 
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8099
@@ -27,9 +28,9 @@ _jobs = {}
 _jobs_lock = threading.Lock()
 
 
-def _run_job(job_id, har, do_replay):
+def _run_job(job_id, har, do_replay, oob_domain=None):
     try:
-        result = run_pipeline(har, do_replay=do_replay)
+        result = run_pipeline(har, do_replay=do_replay, oob_domain=oob_domain)
         with _jobs_lock:
             _jobs[job_id] = {"status": "done", "result": result}
     except Exception as e:
@@ -37,8 +38,13 @@ def _run_job(job_id, har, do_replay):
             _jobs[job_id] = {"status": "error", "error": str(e)}
 
 
-def run_pipeline(har_data: dict, do_replay: bool = True) -> dict:
-    """scan -> analyze -> (optional) assess on an in-memory HAR; returns findings."""
+def run_pipeline(har_data: dict, do_replay: bool = True, oob_domain: str | None = None) -> dict:
+    """scan -> analyze -> (optional) assess on an in-memory HAR; returns findings.
+
+    oob_domain, when provided (e.g. typed in the extension UI), overrides config.json /
+    env for this scan so URLDNS / blind-SSRF canaries embed the caller's Collaborator /
+    Interactsh subdomain. Set fresh each run (clears when empty) — see set_oob_override."""
+    set_oob_override(oob_domain)
     loader = HarLoader(file_path=None)
     vectors = loader.parse_data(har_data)
 
@@ -179,10 +185,11 @@ class _Handler(BaseHTTPRequestHandler):
             payload = json.loads(raw.decode("utf-8"))
             har = payload.get("har", payload)
             do_replay = bool(payload.get("replay", True)) if isinstance(payload, dict) else True
+            oob_domain = payload.get("oob_domain") if isinstance(payload, dict) else None
             job_id = uuid.uuid4().hex
             with _jobs_lock:
                 _jobs[job_id] = {"status": "running"}
-            threading.Thread(target=_run_job, args=(job_id, har, do_replay), daemon=True).start()
+            threading.Thread(target=_run_job, args=(job_id, har, do_replay, oob_domain), daemon=True).start()
             self._json(200, {"job_id": job_id})
         except Exception as e:
             self._json(400, {"error": f"scan failed: {e}"})

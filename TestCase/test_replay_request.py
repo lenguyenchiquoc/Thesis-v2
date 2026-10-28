@@ -150,6 +150,34 @@ class TestLikelyVulnerableWeighting(unittest.TestCase):
         self.assertEqual(indicators, [], "Khac biet duy nhat la timestamp -> khong co indicator nao")
         self.assertFalse(strong)
 
+    def test_minor_length_change_is_observation_not_strong(self):
+        # PortSwigger "Modifying serialized objects": flip b:0->b:1 adds a small admin
+        # element -> response a few dozen bytes longer, same 200. Must SURFACE as an
+        # observation for the human, but NOT auto-set likely_vulnerable (logic/access
+        # -control flaws are FP-prone when auto-decided).
+        baseline = sample(status=200, length=3307, body_sample="A" * 100)
+        mutated = sample(status=200, length=3376, body_sample="A" * 100)
+        indicators, strong = self.r._compare(baseline, mutated)
+        self.assertTrue(any("Observation: response length changed" in i for i in indicators))
+        self.assertFalse(strong, "Thay doi length nho + same status = observation, khong auto-confirm")
+
+    def test_deep_content_diff_beyond_body_sample_is_detected(self):
+        # Regression: the admin content appears FAR down the page, past the first 2000
+        # chars (body_sample). Old code compared only body_sample[:2000] -> identical ->
+        # missed it. With body_compare (wider window) the derived (non-echo) diff must be
+        # caught as a strong signal.
+        head = "X" * 2500
+        base_body = head + "<p>My Account: wiener</p>"
+        mut_body = head + "<p>My Account: wiener</p><a href=/admin>Admin panel</a>"
+        baseline = {"status": 200, "elapsed_sec": 0.01, "length": len(base_body),
+                    "body_sample": base_body[:2000], "body_compare": base_body}
+        mutated = {"status": 200, "elapsed_sec": 0.01, "length": len(mut_body),
+                   "body_sample": mut_body[:2000], "body_compare": mut_body}
+        injected = 'O:4:"User":2:{s:8:"username";s:6:"wiener";s:5:"admin";b:1;}'
+        indicators, strong = self.r._compare(baseline, mutated, injected)
+        self.assertTrue(any("content differs" in i.lower() for i in indicators))
+        self.assertTrue(strong, "Diff sau 2000 ky tu (admin link) phai bat duoc qua body_compare")
+
     def test_strong_and_weak_indicators_can_coexist(self):
         # Neu CA error disclosure VA content-diff deu xay ra (hiem, nhung co
         # the), strong_signal phai la True vi co it nhat 1 bang chung manh -

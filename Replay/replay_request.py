@@ -55,8 +55,6 @@ class ReplayRequest:
             return self._skip_result(payload, f"Request failed: {e}")
 
         indicators, strong_signal = self._compare(baseline, mutated, comparison_value)
-        # body_compare is only for the diff above; drop it so the wide window doesn't
-        # bloat stored assess/report output (body_sample is kept for display).
         baseline.pop("body_compare", None)
         mutated.pop("body_compare", None)
 
@@ -204,9 +202,6 @@ class ReplayRequest:
         return "&".join(parts)
 
     CONTENT_DIFF_SIMILARITY_THRESHOLD = 0.8
-    # Compare a wider window than body_sample (2000) so content changes deep in the
-    # page (e.g. an "Admin panel" link appended far below the header boilerplate) are
-    # not missed. Bounded to keep difflib cost sane.
     COMPARE_BODY_LIMIT = 20000
 
     VOLATILE_PATTERNS = [
@@ -262,9 +257,6 @@ class ReplayRequest:
             if not clean_rejection:
                 strong_signal = True
         elif length_delta > 0 and mutated["status"] == baseline["status"] and not error_hits:
-            # Small but real length change on an otherwise-identical response: surface it
-            # as an OBSERVATION for the human, but do NOT auto-confirm (PortSwigger notes
-            # access-control/logic flaws are prone to false positives when auto-decided).
             indicators.append(
                 f"Observation: response length changed by {mutated['length'] - baseline['length']:+d} bytes "
                 f"(baseline={baseline['length']} mutated={mutated['length']}, same status {mutated['status']}) "

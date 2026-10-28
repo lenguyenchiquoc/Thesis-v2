@@ -168,7 +168,6 @@ async function init() {
   const st = await send({ cmd: "status", tabId });
   setCapturing(st && st.capturing, st && st.count);
 
-  // OOB domain: remember the last value so users don't retype it each scan.
   try {
     const { oobDomain } = await chrome.storage.local.get("oobDomain");
     if (oobDomain) $("oobInput").value = oobDomain;

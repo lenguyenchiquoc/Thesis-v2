@@ -1,5 +1,30 @@
 # Ghi chú tiến độ — EthicalQuoc
 
+**[FEATURE 2026-10-28 — Thêm mutation PHP type-juggling (lab "Modifying serialized data types"). ĐÃ LÀM.]**
+- **Bối cảnh**: test lab PortSwigger này — cookie là `O:4:"User":2:{s:8:"username";s:6:"wiener";s:12:"access_token";s:32:"...";}`
+  (User có `username` + `access_token`, KHÔNG có boolean). Tool báo PHP Suspected Medium (`modify_string`), replay ra
+  **500 trên mọi mutation** (`likely_vulnerable=6` nhờ status 200→500 — vẫn là bằng chứng deser thật). Nhưng tool
+  KHÔNG tự ra được **payload thắng**: lời giải là **type juggling** — đổi `access_token` từ chuỗi sang **số nguyên
+  `i:0`** (vì PHP so sánh lỏng `0 == "chuỗi"` là true), kèm `username`→`administrator`. Payload đích:
+  `O:4:"User":2:{s:8:"username";s:13:"administrator";s:12:"access_token";i:0;}`.
+- **Vì sao thiếu**: `modify_string` chỉ đổi GIÁ TRỊ chuỗi (giữ kiểu `s:`); `_mutate_integer` chỉ đổi field vốn là `i:`;
+  không hàm nào ĐỔI KIỂU `s`→`i`.
+- **Fix** ([payloadMutation.py](Analyze/payloadMutation.py)): thêm `__type_juggle()`:
+  1. Đơn field: field chuỗi có KEY khớp `TOKEN_HINTS` (token/secret/key/access/auth/session/...) → `i:0`. **Gate theo
+     key** để KHÔNG bắn nhầm vào gadget-chain (CustomTemplate...) — chỉ nhắm field auth/token.
+  2. Kết hợp (hình mẫu khai thác thật): field khớp `MODIFY_STRING_HINTS` → `administrator` ĐỒNG THỜI field khớp
+     `TOKEN_HINTS` → `i:0` ⇒ đúng payload thắng lab.
+  - Promote `all_hints` của `__modify_string` thành hằng lớp `MODIFY_STRING_HINTS` (dùng chung), thêm `TOKEN_HINTS`.
+  - Dispatcher `__mutated_php_choose` gọi `__type_juggle(origin)` (self-guard = [] khi không có field hợp lệ) —
+    chạy cho mọi PHP object, nhưng vì gate theo key nên các payload test khác (admin-bool, comment, gadget-chain)
+    KHÔNG phát sinh type_juggle → 0 regression.
+  - Dùng parser theo vị trí `_iter_php_pairs` nên length prefix luôn đúng (`s:13:"administrator"`).
+- **Verify**: mutation trên cookie lab sinh đúng 2 payload type-juggle — single (`...access_token";i:0;}`) và combined
+  (payload thắng `...s:13:"administrator";...i:0;}`), khớp từng ký tự lời giải PortSwigger. Thêm 3 unit test
+  (`TestPhpTypeJuggling`), **121/121 pass**, 0 regression.
+- **Chưa làm**: chưa replay live để xác nhận payload thắng ra 200 + link `/admin` (cần lab instance mới + cho phép
+  gửi). Về mặt sinh payload thì đã đúng y hệt bước thủ công trong hướng dẫn lab.
+
 **[FIX 2026-10-28 — Oracle bỏ sót diff sâu + thêm ô nhập OOB domain cho extension. ĐÃ SỬA.]**
 - **Bối cảnh**: lab PortSwigger "Modifying serialized objects" (report `results/ethicalquoc-report-2026-10-28T02-59-02.json`),
   SAU khi vá `:authority`/`accept-encoding`: replay chạy, body đọc được HTML. Nhưng mọi mutated response **dài hơn

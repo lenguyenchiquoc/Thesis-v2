@@ -52,10 +52,6 @@ chrome.debugger.onEvent.addListener((source, method, params) => {
       if (d.requests[params.requestId]) d.requests[params.requestId].response.status = params.response.status;
     });
   } else if (method === "Network.requestWillBeSentExtraInfo") {
-    // The Cookie header (and other headers the network stack adds, e.g. httpOnly
-    // session cookies — the primary deserialization vector) is NOT in
-    // requestWillBeSent.request.headers; it arrives here. No ordering guarantee vs
-    // requestWillBeSent, so buffer by requestId and merge at HAR-build time.
     update(tabId, (d) => {
       if (!d.capturing) return;
       d.extraHeaders = d.extraHeaders || {};
@@ -85,8 +81,6 @@ async function startCapture(tabId) {
 // ---- HAR building ----
 const IGNORE_EXT = /\.(css|js|png|jpe?g|gif|svg|ico|woff2?|ttf|map|mp4|mp3)(\?|$)/i;
 const headerArray = (o) => Object.entries(o || {}).map(([name, value]) => ({ name, value: String(value) }));
-// Merge extraInfo headers over the base request headers, case-insensitively, so a
-// network-stack header (Cookie above all) overrides/supplements requestWillBeSent.
 function mergeHeaders(base, extra) {
   const out = {};
   const seen = {};
@@ -120,7 +114,6 @@ async function buildHar(tabId, data) {
     // Only the app under test — drop third-party analytics/CDN noise that would
     // otherwise blow the scan up to thousands of irrelevant vectors.
     if (origin) { try { if (new URL(r.url).origin !== origin) continue; } catch (_) { continue; } }
-    // Fold in the Cookie/auth headers that only requestWillBeSentExtraInfo carried.
     const mergedHeaders = mergeHeaders(r.headers, (data.extraHeaders || {})[requestId] || {});
     let postData;
     if (r.postData !== undefined) {

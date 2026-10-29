@@ -1,0 +1,1148 @@
+{
+  "disclaimer": "All findings are Suspected — the tool flags candidates and never auto-confirms; verify each manually.",
+  "findings": [
+    {
+      "attempts": [
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6Inh4aGRmOWd4b3FwZG5tMHM3ZHpyeWNuZmIwZGdyeWl6Ijt9",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjU6ImFkbWluIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6Inh4aGRmOWd4b3FwZG5tMHM3ZHpyeWNuZmIwZGdyeWl6Ijt9",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjQ6InJvb3QiO3M6MTI6ImFjY2Vzc190b2tlbiI7czozMjoieHhoZGY5Z3hvcXBkbm0wczdkenJ5Y25mYjBkZ3J5aXoiO30=",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjk6InN1cGVydXNlciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjMyOiJ4eGhkZjlneG9xcGRubTBzN2R6cnljbmZiMGRncnlpeiI7fQ==",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjt9",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjU6ImFkbWluIjt9",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjQ6InJvb3QiO30=",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjk6InN1cGVydXNlciI7fQ==",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": "access_token->i:0",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtpOjA7fQ==",
+          "payload_type": "type_juggle",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": "username=administrator + access_token=i:0",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO2k6MDt9",
+          "payload_type": "type_juggle_privesc",
+          "signal": "weak"
+        }
+      ],
+      "confidence": "High",
+      "evidence": "dynamic-weak",
+      "exploit_type": "Privilege Escalation — String Manipulation",
+      "indicators": [
+        "Status code changed: baseline=200 mutated=500",
+        "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+      ],
+      "location": "cookie",
+      "method": "GET",
+      "mutations_count": 10,
+      "name": "session",
+      "normalized": [
+        "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:12:\"access_token\";s:32:\"xxhdf9gxoqpdnm0s7dzrycnfb0dgryiz\";}"
+      ],
+      "notes": "String field detected — try changing role/privilege value",
+      "severity": "Medium",
+      "severity_note": null,
+      "subtype": null,
+      "suggested_probe": "modify_string",
+      "type": "PHP",
+      "url": "https://0a0500c10489541e81e8252900f400ad.web-security-academy.net/my-account?id=wiener"
+    },
+    {
+      "attempts": [
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6Inh4aGRmOWd4b3FwZG5tMHM3ZHpyeWNuZmIwZGdyeWl6Ijt9",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjU6ImFkbWluIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6Inh4aGRmOWd4b3FwZG5tMHM3ZHpyeWNuZmIwZGdyeWl6Ijt9",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjQ6InJvb3QiO3M6MTI6ImFjY2Vzc190b2tlbiI7czozMjoieHhoZGY5Z3hvcXBkbm0wczdkenJ5Y25mYjBkZ3J5aXoiO30=",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjk6InN1cGVydXNlciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjMyOiJ4eGhkZjlneG9xcGRubTBzN2R6cnljbmZiMGRncnlpeiI7fQ==",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjt9",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjU6ImFkbWluIjt9",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjQ6InJvb3QiO30=",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjk6InN1cGVydXNlciI7fQ==",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": "access_token->i:0",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtpOjA7fQ==",
+          "payload_type": "type_juggle",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": "username=administrator + access_token=i:0",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO2k6MDt9",
+          "payload_type": "type_juggle_privesc",
+          "signal": "weak"
+        }
+      ],
+      "confidence": "High",
+      "evidence": "dynamic-weak",
+      "exploit_type": "Privilege Escalation — String Manipulation",
+      "indicators": [
+        "Status code changed: baseline=200 mutated=500",
+        "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+      ],
+      "location": "cookie",
+      "method": "GET",
+      "mutations_count": 10,
+      "name": "session",
+      "normalized": [
+        "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:12:\"access_token\";s:32:\"xxhdf9gxoqpdnm0s7dzrycnfb0dgryiz\";}"
+      ],
+      "notes": "String field detected — try changing role/privilege value",
+      "severity": "Medium",
+      "severity_note": null,
+      "subtype": null,
+      "suggested_probe": "modify_string",
+      "type": "PHP",
+      "url": "https://0a0500c10489541e81e8252900f400ad.web-security-academy.net/my-account?id=wiener"
+    },
+    {
+      "attempts": [
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='",
+            "length": 10856,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10856 mutated=2590",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://portswigger.",
+            "length": 2590,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6Inh4aGRmOWd4b3FwZG5tMHM3ZHpyeWNuZmIwZGdyeWl6Ijt9",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='",
+            "length": 10856,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10856 mutated=2590",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://portswigger.",
+            "length": 2590,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjU6ImFkbWluIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6Inh4aGRmOWd4b3FwZG5tMHM3ZHpyeWNuZmIwZGdyeWl6Ijt9",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='",
+            "length": 10856,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10856 mutated=2590",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://portswigger.",
+            "length": 2590,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjQ6InJvb3QiO3M6MTI6ImFjY2Vzc190b2tlbiI7czozMjoieHhoZGY5Z3hvcXBkbm0wczdkenJ5Y25mYjBkZ3J5aXoiO30=",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='",
+            "length": 10856,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10856 mutated=2590",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://portswigger.",
+            "length": 2590,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjk6InN1cGVydXNlciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjMyOiJ4eGhkZjlneG9xcGRubTBzN2R6cnljbmZiMGRncnlpeiI7fQ==",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='",
+            "length": 10856,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10856 mutated=2590",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://portswigger.",
+            "length": 2590,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjt9",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='",
+            "length": 10856,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10856 mutated=2590",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://portswigger.",
+            "length": 2590,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjU6ImFkbWluIjt9",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='",
+            "length": 10856,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10856 mutated=2590",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://portswigger.",
+            "length": 2590,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjQ6InJvb3QiO30=",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='",
+            "length": 10856,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10856 mutated=2590",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://portswigger.",
+            "length": 2590,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjk6InN1cGVydXNlciI7fQ==",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='",
+            "length": 10856,
+            "status": 200
+          },
+          "chain": "access_token->i:0",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10856 mutated=2590",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://portswigger.",
+            "length": 2590,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtpOjA7fQ==",
+          "payload_type": "type_juggle",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='",
+            "length": 10856,
+            "status": 200
+          },
+          "chain": "username=administrator + access_token=i:0",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10856 mutated=2590",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://portswigger.",
+            "length": 2590,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO2k6MDt9",
+          "payload_type": "type_juggle_privesc",
+          "signal": "weak"
+        }
+      ],
+      "confidence": "High",
+      "evidence": "dynamic-weak",
+      "exploit_type": "Privilege Escalation — String Manipulation",
+      "indicators": [
+        "Status code changed: baseline=200 mutated=500",
+        "Response length changed significantly: baseline=10856 mutated=2590",
+        "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+      ],
+      "location": "cookie",
+      "method": "GET",
+      "mutations_count": 10,
+      "name": "session",
+      "normalized": [
+        "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:12:\"access_token\";s:32:\"xxhdf9gxoqpdnm0s7dzrycnfb0dgryiz\";}"
+      ],
+      "notes": "String field detected — try changing role/privilege value",
+      "severity": "Medium",
+      "severity_note": null,
+      "subtype": null,
+      "suggested_probe": "modify_string",
+      "type": "PHP",
+      "url": "https://0a0500c10489541e81e8252900f400ad.web-security-academy.net/"
+    },
+    {
+      "attempts": [
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6Inh4aGRmOWd4b3FwZG5tMHM3ZHpyeWNuZmIwZGdyeWl6Ijt9",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjU6ImFkbWluIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6Inh4aGRmOWd4b3FwZG5tMHM3ZHpyeWNuZmIwZGdyeWl6Ijt9",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjQ6InJvb3QiO3M6MTI6ImFjY2Vzc190b2tlbiI7czozMjoieHhoZGY5Z3hvcXBkbm0wczdkenJ5Y25mYjBkZ3J5aXoiO30=",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjk6InN1cGVydXNlciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjMyOiJ4eGhkZjlneG9xcGRubTBzN2R6cnljbmZiMGRncnlpeiI7fQ==",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjt9",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjU6ImFkbWluIjt9",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjQ6InJvb3QiO30=",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjk6InN1cGVydXNlciI7fQ==",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": "access_token->i:0",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtpOjA7fQ==",
+          "payload_type": "type_juggle",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='https://p",
+            "length": 3468,
+            "status": 200
+          },
+          "chain": "username=administrator + access_token=i:0",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO2k6MDt9",
+          "payload_type": "type_juggle_privesc",
+          "signal": "weak"
+        }
+      ],
+      "confidence": "High",
+      "evidence": "dynamic-weak",
+      "exploit_type": "Privilege Escalation — String Manipulation",
+      "indicators": [
+        "Status code changed: baseline=200 mutated=500",
+        "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+      ],
+      "location": "cookie",
+      "method": "GET",
+      "mutations_count": 10,
+      "name": "session",
+      "normalized": [
+        "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:12:\"access_token\";s:32:\"xxhdf9gxoqpdnm0s7dzrycnfb0dgryiz\";}"
+      ],
+      "notes": "String field detected — try changing role/privilege value",
+      "severity": "Medium",
+      "severity_note": null,
+      "subtype": null,
+      "suggested_probe": "modify_string",
+      "type": "PHP",
+      "url": "https://0a0500c10489541e81e8252900f400ad.web-security-academy.net/my-account?id=wiener"
+    },
+    {
+      "attempts": [
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='",
+            "length": 4601,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6Inh4aGRmOWd4b3FwZG5tMHM3ZHpyeWNuZmIwZGdyeWl6Ijt9",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='",
+            "length": 4601,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjU6ImFkbWluIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6Inh4aGRmOWd4b3FwZG5tMHM3ZHpyeWNuZmIwZGdyeWl6Ijt9",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='",
+            "length": 4601,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjQ6InJvb3QiO3M6MTI6ImFjY2Vzc190b2tlbiI7czozMjoieHhoZGY5Z3hvcXBkbm0wczdkenJ5Y25mYjBkZ3J5aXoiO30=",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='",
+            "length": 4601,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjk6InN1cGVydXNlciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjMyOiJ4eGhkZjlneG9xcGRubTBzN2R6cnljbmZiMGRncnlpeiI7fQ==",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='",
+            "length": 4601,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjt9",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='",
+            "length": 4601,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjU6ImFkbWluIjt9",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='",
+            "length": 4601,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjQ6InJvb3QiO30=",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='",
+            "length": 4601,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjk6InN1cGVydXNlciI7fQ==",
+          "payload_type": "modify_string",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='",
+            "length": 4601,
+            "status": 200
+          },
+          "chain": "access_token->i:0",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtpOjA7fQ==",
+          "payload_type": "type_juggle",
+          "signal": "weak"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a class=link-back href='",
+            "length": 4601,
+            "status": 200
+          },
+          "chain": "username=administrator + access_token=i:0",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting PHP deserialization with a pre-built gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting PHP deserialization with a pre-built gadget chain</h2>\n                            <a id='lab-link' class='button' href='/'>Back",
+            "length": 2688,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO2k6MDt9",
+          "payload_type": "type_juggle_privesc",
+          "signal": "weak"
+        }
+      ],
+      "confidence": "High",
+      "evidence": "dynamic-weak",
+      "exploit_type": "Privilege Escalation — String Manipulation",
+      "indicators": [
+        "Status code changed: baseline=200 mutated=500",
+        "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=1.00) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+      ],
+      "location": "cookie",
+      "method": "GET",
+      "mutations_count": 10,
+      "name": "session",
+      "normalized": [
+        "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:12:\"access_token\";s:32:\"xxhdf9gxoqpdnm0s7dzrycnfb0dgryiz\";}"
+      ],
+      "notes": "String field detected — try changing role/privilege value",
+      "severity": "Medium",
+      "severity_note": null,
+      "subtype": null,
+      "suggested_probe": "modify_string",
+      "type": "PHP",
+      "url": "https://0a0500c10489541e81e8252900f400ad.web-security-academy.net/product?productId=2"
+    }
+  ],
+  "stats": {
+    "after_filter": 5,
+    "dynamic_strong": 0,
+    "findings": 5,
+    "vectors_scanned": 143
+  },
+  "target": "0a0500c10489541e81e8252900f400ad.web-security-academy.net"
+}

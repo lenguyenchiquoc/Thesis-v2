@@ -56,9 +56,7 @@ class ExploitResult(TypedDict):
     exploit_type: str | None
     score: int
     severity: str
-    confidence_source: str
-    confirmation_status: str
-    display_severity: str
+    evidence: str
     suggested_probe: str
     notes: str
 
@@ -152,7 +150,7 @@ class ReplaySkipped(TypedDict):
     payload_type: str | None
     skipped: bool
     reason: str
-    likely_vulnerable: bool
+    signal: str
 
 
 class ReplaySuccess(TypedDict):
@@ -163,8 +161,9 @@ class ReplaySuccess(TypedDict):
     payload_type: str | None
     baseline: HttpProbeSample
     mutated: HttpProbeSample
+    control: dict | None
     indicators: list[str]
-    likely_vulnerable: bool
+    signal: str
 
 
 ReplayResult = ReplaySkipped | ReplaySuccess

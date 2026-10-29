@@ -22,8 +22,34 @@
     .attempt { border:1px solid #eef0f3; border-radius:8px; padding:10px 12px; margin-top:10px; background:#fff; }
     pre { background:#f8fafc; border:1px solid #eef0f3; border-radius:6px; padding:8px 10px; overflow:auto;
           font-size:12px; white-space:pre-wrap; word-break:break-all; margin:5px 0; }
-    .ind { color:#374151; font-size:12px; margin:2px 0; }
+    .ind { color:#374151; font-size:12px; margin:3px 0; padding-left:2px; }
+    .ind.strong { color:#b91c1c; font-weight:600; }
     .empty { color: var(--muted); }
+
+    .meta { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:8px 0; }
+    .meta .label { color:var(--muted); font-size:12px; }
+    .pill { display:inline-block; font-size:11px; font-weight:700; padding:3px 9px; border-radius:11px;
+            letter-spacing:.2px; print-color-adjust:exact; -webkit-print-color-adjust:exact; }
+    .pill.crit { background:#7f1d1d; color:#fff; }
+    .pill.high { background:#dc2626; color:#fff; }
+    .pill.med  { background:#f59e0b; color:#3b2600; }
+    .pill.low  { background:#9ca3af; color:#fff; }
+    .pill.sus  { background:#fef3c7; color:#92400e; border:1px solid #fcd34d; }
+    .pill.conf-high { background:#dbeafe; color:#1d4ed8; }
+    .pill.conf-med  { background:#e0e7ff; color:#4338ca; }
+    .pill.conf-low  { background:#f3f4f6; color:#6b7280; }
+    .pill.probe { background:#ede9fe; color:#6d28d9; font-family:ui-monospace, monospace; font-weight:600; }
+    .pill.ev-strong { background:#dc2626; color:#fff; }
+    .pill.ev-weak   { background:#f59e0b; color:#3b2600; }
+    .pill.ev-static { background:#e5e7eb; color:#374151; }
+    .pill.ptype { background:#eef2ff; color:#3730a3; font-family:ui-monospace, monospace; }
+    .code { font-weight:700; print-color-adjust:exact; -webkit-print-color-adjust:exact; }
+    .code.ok   { color:#059669; }
+    .code.warn { color:#d97706; }
+    .code.err  { color:#dc2626; }
+    .delta.up   { color:#dc2626; font-weight:600; }
+    .delta.down { color:#2563eb; font-weight:600; }
+    body { print-color-adjust:exact; -webkit-print-color-adjust:exact; }
   </style>
 </head>
 <body>

@@ -73,7 +73,7 @@ class PayloadMutation:
         if self.probe in ("gadget_chain", "magic_method"):
             return self._php_mutation()
         if self.probe in ("flip_boolean", "modify_string","modify_integer"):
-            return self.__mutated_php_choose()
+            return self.__mutated_php_choose() + [m for m in self._php_mutation() if "error" not in m]
         if self.probe == "pickle_exec":
             return self._mutate_pickle()
         if self.probe == "yaml_exec":

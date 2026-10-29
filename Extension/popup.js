@@ -47,18 +47,16 @@ function renderResults(data) {
   $("reportRow").style.display = "flex";
   $("summary").innerHTML =
     `Target <b>${data.target || "?"}</b> — ${s.findings} findings, ` +
-    `<span style="color:${s.likely_vulnerable ? "#dc2626" : "#059669"}">` +
-    `${s.likely_vulnerable} likely vulnerable</span> ` +
+    `<span style="color:${s.dynamic_strong ? "#dc2626" : "#059669"}">` +
+    `${s.dynamic_strong || 0} strong dynamic signal</span> ` +
     `<span class="muted">(${s.vectors_scanned} vectors scanned)</span>`;
 
   const box = $("results");
   box.innerHTML = "";
   for (const f of data.findings || []) {
     const div = document.createElement("div");
-    div.className = "finding" + (f.likely_vulnerable ? " vuln" : "");
-    const badge = f.likely_vulnerable
-      ? `<span class="badge vuln">LIKELY VULN</span>`
-      : `<span class="badge safe">${f.type === "Unknown" ? "unknown" : "suspected"}</span>`;
+    div.className = "finding" + (f.evidence === "dynamic-strong" ? " vuln" : "");
+    const badge = evBadge(f.evidence);
     const label = f.subtype || f.exploit_type || f.type || "?";
     div.innerHTML =
       `<div class="top"><span class="tag"><b>${f.type}</b> · ${label} ` +
@@ -83,16 +81,22 @@ function esc(s) {
   return String(s == null ? "" : s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
 }
 
+function evBadge(ev) {
+  if (ev === "dynamic-strong") return `<span class="badge vuln">dynamic: strong</span>`;
+  if (ev === "dynamic-weak") return `<span class="badge safe">dynamic: weak</span>`;
+  return `<span class="badge safe">static only</span>`;
+}
+
 function detailHtml(f) {
   let h = `<div style="margin-top:6px; border-top:1px dashed #e5e7eb; padding-top:6px;">`;
-  h += `<div class="muted">Severity: ${esc(f.severity)} · ${esc(f.confirmation_status)} · probe=${esc(f.suggested_probe)}</div>`;
+  h += `<div class="muted">Severity: ${esc(f.severity)} · evidence=${esc(f.evidence)} · probe=${esc(f.suggested_probe)}</div>`;
   if (f.notes) h += `<div class="muted" style="margin-top:4px;">${esc(f.notes)}</div>`;
   if (f.normalized && f.normalized.length)
     h += `<div style="margin-top:4px;">Normalized: <span class="copy">${esc(String(f.normalized[0]).slice(0, 160))}</span></div>`;
   for (const a of f.attempts || []) {
     h += `<div style="margin-top:6px; padding:6px; background:#fff; border:1px solid #eef0f3; border-radius:6px;">`;
     h += `<div><b>${esc(a.payload_type)}</b>${a.chain ? " · " + esc(a.chain) : ""}` +
-         (a.likely_vulnerable ? ` <span class="badge vuln">vuln</span>` : "") +
+         (a.signal === "strong" ? ` <span class="badge vuln">strong</span>` : "") +
          (a.skipped ? ` <span class="badge safe">skipped</span>` : "") + `</div>`;
     if (a.payload) h += `<div class="copy" style="margin-top:3px; white-space:pre-wrap; word-break:break-all;">${esc(String(a.payload).slice(0, 300))}</div>`;
     if (a.reason) h += `<div class="muted">skip: ${esc(a.reason)}</div>`;

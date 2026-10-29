@@ -23,6 +23,11 @@ class ReplayRequest:
 
     TIME_DELAY_THRESHOLD_SEC = 4.0
 
+    DESER_SPECIFIC_MARKERS = (
+        "unserialize()", "objectinputstream", "invalidclassexception",
+        "classnotfoundexception", "yaml.constructor", "pickle.unpicklingerror",
+    )
+
     def __init__(self, timeout: int = 10, verify_tls: bool = True):
         self.timeout = timeout
         self.verify_tls = verify_tls
@@ -54,7 +59,13 @@ class ReplayRequest:
         except (urllib.error.URLError, OSError, ValueError) as e:
             return self._skip_result(payload, f"Request failed: {e}")
 
-        indicators, strong_signal = self._compare(baseline, mutated, comparison_value)
+        control = None
+        try:
+            control = self._control_probe(url, method, location, name, payload, request_context)
+        except (urllib.error.URLError, OSError, ValueError):
+            control = None
+
+        indicators, strong_signal = self._compare(baseline, mutated, comparison_value, control)
         baseline.pop("body_compare", None)
         mutated.pop("body_compare", None)
 
@@ -66,14 +77,41 @@ class ReplayRequest:
             "payload_type": cast("str | None", payload.get("type")),
             "baseline": baseline,
             "mutated": mutated,
+            "control": {"status": control["status"], "length": control["length"]} if control else None,
             "indicators": indicators,
-            "likely_vulnerable": strong_signal,
+            "signal": "strong" if strong_signal else "weak",
         }
 
     def replay_all(self, payloads: list[Mutation]) -> list[ReplayResult]:
         return [self.replay(p) for p in payloads if "error" not in p]
 
     REWRAPPABLE_OPS = {"url", "base64", "base64_gzip", "hex"}
+
+    CONTROL_JUNK = "control_probe_not_a_serialized_object_0123456789abcdef"
+
+    def _make_control_value(self, payload: Mutation) -> str:
+        transform_chain = cast("list[dict] | None", payload.get("transform_chain"))
+        slot_value = cast("str | None", payload.get("slot_value"))
+        try:
+            if transform_chain is not None and slot_value is not None:
+                return rebuild(slot_value, transform_chain, self.CONTROL_JUNK)
+            encoding_chain = cast("list[str] | None", payload.get("encoding_chain")) or []
+            if encoding_chain and all(op in self.REWRAPPABLE_OPS for op in encoding_chain):
+                return self._reapply_encoding_chain(self.CONTROL_JUNK, encoding_chain)
+        except Exception:
+            pass
+        return self.CONTROL_JUNK
+
+    def _control_probe(self, url, method, location, name, payload, request_context):
+        if not hasattr(self, "_control_cache"):
+            self._control_cache = {}
+        key = (url, location, name)
+        if key in self._control_cache:
+            return self._control_cache[key]
+        value = self._make_control_value(payload)
+        sample = self._send(url, method, location, name, value=value, request_context=request_context)
+        self._control_cache[key] = sample
+        return sample
 
     def _select_payload_value(self, payload: Mutation) -> str | None:
         raw_value = self._decode_raw_value(payload)
@@ -222,7 +260,8 @@ class ReplayRequest:
         return injected_value in mutated_body.replace('\\"', '"')
 
     def _compare(
-        self, baseline: HttpProbeSample, mutated: HttpProbeSample, injected_value: str | None = None
+        self, baseline: HttpProbeSample, mutated: HttpProbeSample, injected_value: str | None = None,
+        control: HttpProbeSample | None = None,
     ) -> tuple[list[str], bool]:
         indicators = []
         strong_signal = False
@@ -285,6 +324,23 @@ class ReplayRequest:
                 if not self._is_mere_reflection(mut_cmp, injected_value):
                     strong_signal = True
 
+        if control is not None and strong_signal:
+            has_deser_marker = any(m in mutated_lower for m in self.DESER_SPECIFIC_MARKERS)
+            ctrl_cmp = control.get("body_compare") or control.get("body_sample") or ""
+            same_status = control["status"] == mutated["status"]
+            body_sim = (
+                difflib.SequenceMatcher(None, ctrl_cmp, mut_cmp).ratio()
+                if ctrl_cmp and mut_cmp else 0.0
+            )
+            if not has_deser_marker and same_status and body_sim >= self.CONTENT_DIFF_SIMILARITY_THRESHOLD:
+                strong_signal = False
+                indicators.append(
+                    f"Control probe (non-serialized junk) returned the same status {control['status']} and a "
+                    f"near-identical body (similarity={body_sim:.2f}) with no deserializer-specific marker — the "
+                    f"server reacts the same to any invalid value, so this change is NOT deserialization-specific "
+                    f"(downgraded, verify manually)"
+                )
+
         return indicators, strong_signal
 
     def _skip_result(self, payload: Mutation, reason: str) -> ReplaySkipped:
@@ -295,5 +351,5 @@ class ReplayRequest:
             "payload_type": cast("str | None", payload.get("type")),
             "skipped": True,
             "reason": reason,
-            "likely_vulnerable": False,
+            "signal": "skipped",
         }

@@ -59,7 +59,7 @@ def run_pipeline(har_data: dict, do_replay: bool = True, oob_domain: str | None 
         ex = entry["exploit_analysis"]
         mutations = [m for m in entry["mutations"] if "error" not in m]
 
-        likely = False
+        any_strong = False
         indicators: list[str] = []
         attempts = []
         if replayer and mutations:
@@ -72,24 +72,26 @@ def run_pipeline(har_data: dict, do_replay: bool = True, oob_domain: str | None 
                         "payload": mutation.get("payload_raw") or mutation.get("payload"),
                         "skipped": True,
                         "reason": result.get("reason"),
+                        "signal": "skipped",
                     })
                     continue
                 base = result.get("baseline", {})
                 mut = result.get("mutated", {})
-                vuln = bool(result.get("likely_vulnerable"))
+                sig = result.get("signal")
+                strong = sig == "strong"
                 attempts.append({
                     "payload_type": mutation.get("type"),
                     "chain": mutation.get("chain"),
                     "payload": mutation.get("payload_raw") or mutation.get("payload"),
-                    "likely_vulnerable": vuln,
+                    "signal": sig,
                     "indicators": result.get("indicators", []),
                     "baseline": {"status": base.get("status"), "length": base.get("length"),
                                  "body_sample": (base.get("body_sample") or "")[:800]},
                     "mutated": {"status": mut.get("status"), "length": mut.get("length"),
                                 "body_sample": (mut.get("body_sample") or "")[:800]},
                 })
-                if vuln and not likely:
-                    likely = True
+                if strong and not any_strong:
+                    any_strong = True
                     indicators = result.get("indicators", [])
                 if not indicators:
                     indicators = result.get("indicators", [])
@@ -99,6 +101,8 @@ def run_pipeline(har_data: dict, do_replay: bool = True, oob_domain: str | None 
             [(a.get("mutated") or {}).get("body_sample") or "" for a in attempts],
             [ind for a in attempts for ind in a.get("indicators", [])],
         )
+        sent_any = any(not a.get("skipped") for a in attempts)
+        evidence = "dynamic-strong" if any_strong else ("dynamic-weak" if sent_any else "static-only")
         findings.append({
             "url": entry["vector"].get("url"),
             "method": entry["vector"].get("method"),
@@ -111,23 +115,24 @@ def run_pipeline(har_data: dict, do_replay: bool = True, oob_domain: str | None 
             "suggested_probe": ex.get("suggested_probe"),
             "severity": severity,
             "severity_note": severity_note,
-            "confirmation_status": ex.get("confirmation_status"),
+            "evidence": evidence,
             "notes": ex.get("notes"),
             "normalized": entry.get("normalized", [])[:3],
             "mutations_count": len(mutations),
-            "likely_vulnerable": likely,
             "indicators": indicators,
             "attempts": attempts,
         })
 
-    findings.sort(key=lambda f: (not f["likely_vulnerable"], f["type"] == "Unknown"))
+    _rank = {"dynamic-strong": 0, "dynamic-weak": 1, "static-only": 2}
+    findings.sort(key=lambda f: (_rank.get(f["evidence"], 3), f["type"] == "Unknown"))
     return {
         "target": loader.target_name,
+        "disclaimer": "All findings are Suspected — the tool flags candidates and never auto-confirms; verify each manually.",
         "stats": {
             "vectors_scanned": len(vectors),
             "after_filter": len(cleaned),
             "findings": len(findings),
-            "likely_vulnerable": sum(1 for f in findings if f["likely_vulnerable"]),
+            "dynamic_strong": sum(1 for f in findings if f["evidence"] == "dynamic-strong"),
         },
         "findings": findings,
     }

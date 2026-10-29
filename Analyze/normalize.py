@@ -197,6 +197,11 @@ class DataNormalizer:
     def _serialized_score(self, value: str) -> float:
         score = 0.0
 
+        raw = value.encode('latin-1', errors='ignore')
+        if any(raw.startswith(m) for m in
+               signatures.JAVA_MAGIC_BYTES + signatures.PICKLE_MAGIC_BYTES + signatures.RUBY_MAGIC_BYTES):
+            score += 12
+
         if 'java.' in value or 'org.apache' in value:
             score += 10
         if any(kw in value.lower() for kw in

@@ -1,5 +1,138 @@
 # Ghi chú tiến độ — EthicalQuoc
 
+**[FIX 2026-10-29 — A1 severity native PHP + A2 gating phpggc (cùng gốc CWE-502). ĐÃ LÀM.]**
+- **Phát hiện khi đối chứng 5 pair lab** (PAIR1 boolean / PAIR2 type-juggle / PAIR3 arbitrary-object-injection /
+  PAIR4 Java / PAIR5 phpggc gadget chain). Cùng gốc với bug Java severity (entry dưới).
+- **A1 — severity native PHP under-rate**: PAIR3/5 (RCE labs) để `Medium` vì cookie object `User` lành, không gadget
+  keyword → chấm heuristic privilege. Nhưng `unserialize()` input người dùng = **CWE-502, RCE-capable**. Fix
+  [_analyze_php](Analyze/ExploitabilityAnalysis.py): native PHP (`O:`/`C:`/`a:`) → `score = max(score, 6)` → **floor
+  High** + note CWE-502/phpggc. Verify: PAIR1/2/3/5 giờ đều **High** (trước 3/5 là Medium).
+- **A2 — phpggc có mà không bao giờ bắn**: [mutate()](Analyze/payloadMutation.py#L73) chỉ chạy `_php_mutation()` khi
+  `probe=="gadget_chain"`, mà probe đó chỉ set khi cookie ĐÃ có keyword gadget. Lab gadget-chain lại trình cookie LÀNH
+  → phpggc không fire đúng chỗ. Fix: nhánh field-manipulation PHP giờ **cũng append** `_php_mutation()` (lọc error dict
+  để máy không có phpggc không bị ảnh hưởng + test giữ nguyên). → native PHP thử cả phpggc default chains. Cần `php`
+  CLI + phpggc trên máy chạy.
+- **Verify**: 124/124 test pass. Test chậm hơn (~10s) do phpggc subprocess — tối ưu (check `php` 1 lần) sau.
+- **GIỚI HẠN (ghi thesis)**: PAIR3 "Arbitrary object injection" KHÔNG auto được — payload thắng
+  `O:14:"CustomTemplate":1:{s:14:"lock_file_path";s:23:"/home/carlos/morale.txt";}` cần **source code** (class
+  app-specific, phpggc không có). → hướng "user-supplied gadget" để sau.
+- **B1 (control probe) chốt = A**; **B2 dedup** + **OOB auto-poll (localhost listener / interactsh-client)** còn treo.
+
+**[FIX 2026-10-29 — Severity native Java deser bị Low (ảo), nâng về High. ĐÃ SỬA.]**
+- **User chỉ ra**: lab Apache Commons (cookie `rO0AB...` = native Java object) khai thác được tới xóa user qua
+  ysoserial, mà tool để `severity=Low` → sai bản chất.
+- **Gốc**: [_analyze_java](Analyze/ExploitabilityAnalysis.py) chấm `score=2` nền + chỉ cộng điểm khi khớp **keyword
+  gadget đã biết**. Cookie custom (`AccessTokenUser`) không có keyword → score 2 → `_calc_severity` → Low. Model này
+  SAI: native Java serialized = `ObjectInputStream` trên input người dùng = **CWE-502, RCE-capable** nếu classpath có
+  gadget — "không thấy gadget" KHÔNG làm nó an toàn (attacker tự mang gadget).
+- **Fix**: nếu là **native Java serialized** (magic `\xac\xed` / `rO0AB` / `aced0005`) thì `score += 4` → nền 6 →
+  **High** cho native-no-gadget; +gadget keyword → ≥9 → Critical. Kèm note CWE-502 giải thích exploitability phụ thuộc
+  classpath. (Jackson JSON đi nhánh riêng, không ảnh hưởng.)
+- **Verify**: cookie lab Java giờ `severity=High` (notes CWE-502); 124/124 test pass; detection/type không đổi.
+- **Cân nhắc (chưa làm)**: nâng tiếp High→Critical ở `_escalate_severity` khi replay confirm động (200→500 / OOB nổ) —
+  để "confirmed native deser = Critical". Hiện mới sửa điểm nền static.
+
+**[REFACTOR 2026-10-29 — Gộp `likely_vulnerable`+`confirmation_status` (thừa/khó hiểu) thành 1 trường `evidence`. ĐÃ LÀM.]**
+- **Động cơ (user nhận xét)**: `confirmation_status` LUÔN "Suspected" (hằng số, mỗi finding y hệt → 0 thông tin) và
+  `likely_vulnerable` bool chỉ là tóm tắt "có strong indicator" → cặp này thừa + gây tổ hợp khó hiểu
+  (`likely_vulnerable=true` NHƯNG `Suspected` + `severity=Low`).
+- **Thay bằng 1 trục `evidence`** (3 mức): `static-only` (chưa replay / all skipped) · `dynamic-weak` (replay chạy,
+  không có strong) · `dynamic-strong` (replay thấy dấu hiệu mạnh). Attempt-level dùng `signal`: `strong`/`weak`/`skipped`.
+  Câu "tool không auto-confirm" chuyển thành **1 dòng `disclaimer`** ở đầu report, không lặp mỗi finding.
+- **Sửa**: [ExploitabilityAnalysis._result](Analyze/ExploitabilityAnalysis.py) bỏ `confidence_source`/`confirmation_status`/
+  `display_severity`, thêm `evidence:"static-only"`. [main.py](main.py) `_apply_replay_confirmation` set `evidence` theo
+  `signal`; report dùng `severity` (bỏ `display_severity` "Suspected-"), thêm `evidence` + `disclaimer`.
+  [serve.py](Server/serve.py) tính finding-level `evidence` (sent_any + any_strong), bỏ `confirmation_status`/
+  `likely_vulnerable`, stats đổi `likely_vulnerable`→`dynamic_strong`, sort theo rank evidence, thêm `disclaimer`.
+  [replay_request.py](Replay/replay_request.py) đổi `likely_vulnerable`→`signal` (strong/weak/skipped).
+  [schemas.py](Utility/schemas.py) cập nhật TypedDict.
+- **Extension**: [results.js](Extension/results.js)+[popup.js](Extension/popup.js) thêm `evPill`/`evBadge`/`sigBadge`,
+  bỏ badge "LIKELY VULN" + pill confirmation_status, hiện pill evidence (strong=đỏ/weak=cam/static=xám), stats hiện
+  "N with strong dynamic signal" + dòng disclaimer. CSS evidence pill trong [results.html](Extension/results.html).
+- **Ba trục rõ ràng, không chồng**: `type`+`confidence` (là gì, chắc không) · `severity` (nguy hiểm cỡ nào) ·
+  `evidence` (replay xác nhận tới đâu).
+- **Verify**: 124/124 test pass; JS syntax OK; pipeline ra `evidence`/`disclaimer`/`dynamic_strong`, không còn
+  `confirmation_status`/`likely_vulnerable`; `_apply_replay_confirmation` 3 nhánh (skipped/strong/weak) đúng.
+- **VẬN HÀNH**: restart serve + reload extension để thấy UI mới.
+
+**[FEATURE 2026-10-29 — Control probe (đối chứng rác) ở oracle để giảm FP "500 do xử-lý-lỗi-ẩu". ĐÃ LÀM.]**
+- **Động cơ**: user (kinh nghiệm thực tế) chỉ ra 500 không đáng tin — nhiều app trả 500 cho input sai (đáng lẽ 400) do
+  không bắt lỗi. Oracle cũ coi mọi `200→500` là strong → FP.
+- **Ý tưởng**: gửi thêm request thứ 3 — **giá trị RÁC non-serialized** (`CONTROL_JUNK`) vào CÙNG slot, mã hoá y hệt
+  attack (qua `rebuild`/encoding_chain). So phản ứng của server với rác vs với payload serialized.
+- **Luật hạ cấp** ([replay_request.py](Replay/replay_request.py) `_compare`): nếu control **cùng status** + **body
+  giống** attack (similarity≥0.8) VÀ mutated **không có marker đặc thù deser** (`DESER_SPECIFIC_MARKERS`:
+  objectinputstream/invalidclassexception/unserialize()/...) → server phản ứng giống nhau với mọi input sai → **không
+  đặc thù deser → strong_signal=False + indicator giải thích**. Nếu có marker deser (bằng chứng cứng) hoặc control bị
+  từ chối SẠCH (vd 401 khác 500) → **giữ strong**.
+- **Chi tiết**: `_control_probe` cache theo (url,location,name) → gửi **1 lần/vector** (không spam). `_compare` nhận
+  thêm param `control=None` (mặc định None → hành vi cũ, không phá 118 test cũ). Thêm field `control` {status,length}
+  vào replay result.
+- **Verify**: +3 test (`test_control_probe_*`): generic-500-giống-control → downgrade; có ObjectInputStream → giữ;
+  control 401 sạch → giữ. **124/124 pass.** Detection không đổi (comprehensive 48 typed y nguyên).
+- **⚠️ HỆ QUẢ QUAN TRỌNG (tradeoff)**: lab Java deser thật mà server trả **500 generic cho CẢ junk** (vì junk cũng
+  không deserialize được → StreamCorruptedException → 500) sẽ bị **downgrade về likely_vulnerable=false** NẾU body 500
+  giống nhau + không lộ marker. Đây là giới hạn black-box thật (không phân biệt được "deser 500-trên-mọi-input" vs
+  "xử-lý-lỗi-ẩu" khi cả hai đều 500 generic). Downgrade kèm indicator giải thích để người review. Nếu muốn ít quyết
+  liệt hơn: chỉ thêm cảnh báo mà KHÔNG tắt likely_vulnerable — cần user quyết.
+
+**[FIX 2026-10-29 — Bug Java-cookie-base64 bên dưới: ĐÃ SỬA ở normalize (Stage 4).]**
+- **Gốc rễ chính xác (truy thêm)**: KHÔNG phải "normalize quên decode" — nó CÓ decode ra binary trong BFS, nhưng hàm
+  `_serialized_score` ([normalize.py](Analyze/normalize.py)) chấm **binary Java đã decode = 0 điểm** (object
+  `AccessTokenUser` không chứa keyword `java.`/gadget mà hàm thưởng), còn **lớp vỏ base64 `rO0AB` = +1** (marker `rO0`).
+  Logic `collapse` so `0 >= 1` = False → **giữ lớp vỏ base64**, không bóc xuống binary → `transform_chain=[]` → replay
+  nhét binary thô → "Invalid header value".
+- **Fix**: trong `_serialized_score`, cộng **+12** khi `value` (latin-1) bắt đầu bằng magic serialized thô
+  (`JAVA_MAGIC_BYTES + PICKLE_MAGIC_BYTES + RUBY_MAGIC_BYTES`). → ruột binary thắng vỏ base64 → collapse bóc đúng xuống
+  binary → candidate = binary, `transform_chain=['url','base64']` → replay `rebuild()` tự re-encode base64 → cookie
+  hợp lệ `rO0AB...` → gửi được → OOB nổ được.
+- **Verify**: (a) normalize trả candidate binary + chain `['url','base64']`; (b) mô phỏng `_select_payload_value` với
+  mutation java → ra base64 text-safe (`rO0AB...`), không còn byte điều khiển; (c) comprehensive.har type distribution
+  GIỮ NGUYÊN 48 typed (`PHP17 Java10 Ruby3 Wrapper6 YAML3 NodeJS3 Pickle3 DotNet3`); (d) 121/121 test pass. 0 regression.
+- **Chưa test live**: cần máy có ysoserial + lab Java instance mới để xác nhận payload URLDNS gửi đi + Collaborator nhận
+  callback. Về mặt dựng/encode payload thì đã đúng text-safe.
+
+**[BUG NGHIÊM TRỌNG 2026-10-28 — Replay KHÔNG gửi được payload Java vào cookie base64 → toàn bộ Java deser chết. (ĐÃ FIX 2026-10-29, xem entry trên.)]**
+- **Phát hiện khi test lab "Exploiting Java deserialization with Apache Commons"** (report `results/ethicalquoc-report-2026-10-28T15-08-45.json`,
+  HAR `download3`). Cookie `session` = `rO0ABXNy...` (base64 của Java object `AccessTokenUser`).
+- **Hiện tượng**: **49/49 attempt Java** (7 `java_urldns` + 42 `java_rce_escalation`) đều skip
+  `Request failed: Invalid header value b'session=\xac\xed\x00\x05sr...oast.fun...'` → 7 finding, `likely_vulnerable=0`.
+  Payload URLDNS build ĐÚNG (có nhúng OOB canary `...oast.fun`) nhưng **không gửi được gói nào** → OOB không thể nổ.
+- **Gốc rễ (đã truy bằng code)**: [normalize](Analyze/normalize.py) với cookie Java base64 trả về
+  `candidate = "rO0AB..."` (GIỮ base64, KHÔNG decode) và **`transform_chain = []`** (rỗng). Ở replay
+  [_select_payload_value](Replay/replay_request.py#L76): payload ysoserial (base64) bị `_decode_raw_value` **decode ra
+  nhị phân**, rồi vì `transform_chain` rỗng → `rebuild()` **không mã hoá lại base64** → trả nhị phân thô → nhét vào
+  cookie → urllib "Invalid header value" → skip.
+- **Đây là ca thật của "bug A" mà trước đây (mục cũ) tôi kết luận nhầm là "không thể là vuln thật"**: với HEADER plaintext
+  thì đúng, NHƯNG với COOKIE/slot mà giá trị gốc LÀ base64 (rO0AB) thì payload PHẢI được mã hoá lại base64 — và nó
+  đang không làm. Cập nhật lại nhận định: bug A là THẬT cho slot base64.
+- **Đề xuất fix (2 hướng, chọn 1)**:
+  - **(A) Fix ở replay (ít rủi ro, ưu tiên)**: khi `transform_chain`/`encoding_chain` rỗng VÀ giá trị gửi là nhị phân VÀ
+    slot là text (cookie/header/query/form_body) → **base64-encode** payload (hoặc dùng thẳng field `payload` vốn đã là
+    base64) thay vì nhét nhị phân thô. Khớp đúng quy ước cookie Java `rO0AB...`. Slot `raw_body` giữ nhị phân như cũ.
+  - **(B) Fix ở normalize (đúng kiến trúc hơn, rủi ro cao hơn)**: khi nhận ra cookie là base64-của-serialized, ghi
+    `transform_chain=["base64"]` để `rebuild` tự re-encode. Nhưng phải decode Java base64 → nhị phân làm candidate,
+    ảnh hưởng fingerprint + nhiều path → cần test rộng.
+- **Lưu ý**: dedup finding (7 finding = 1 vuln cookie `session`) lại tái diễn — cùng vấn đề (1) ở mục REVIEW dưới.
+
+**[REVIEW 2026-10-28 — Rà report output (13-50-27, lab type-juggle). 3 vấn đề chất lượng, CHƯA FIX.]**
+- Context: review report + down2 HAR sau khi type-juggle chạy thành công. Không phải lỗi sai (vuln có thật), nhưng
+  ảnh hưởng độ gọn report + lượng traffic. Em-dash "—" trong indicator đã verify là U+2014 UTF-8 ĐÚNG (không hỏng,
+  "�" chỉ là terminal `-I`).
+- **(1) Trùng lặp finding**: 5 finding thực ra là **1 vuln** (gộp `(type,location,name,payload)` = 1 distinct). Cùng
+  cookie `session` trên 5 request; URL `/my-account?id=wiener` lặp **3 lần y hệt** → 3 finding giống hệt. Gốc:
+  [har_loader.py](Scanner/har_loader.py) không khử trùng **request trùng nhau** (3 GET `/my-account` → 3 vector cookie
+  y hệt). Đề xuất: gộp finding theo `(type,location,name,normalized)` + liệt kê URL bị ảnh hưởng; tối thiểu khử URL
+  trùng y hệt ở har_loader.
+- **(2) Over-flag / dư attempt**: mỗi finding 10 attempt, **cả 10 đều `likely_vulnerable=true`**. 8× `modify_string`
+  đều → 500 đều bị gắn vuln (cùng 1 sự thật "server lỗi khi tamper" lặp 8 lần). Tổng 5×10 = **50 request bắn vào lab**
+  cho 1 vuln. Đề xuất: gộp/giới hạn attempt cho kết quả giống nhau + giảm số request gửi.
+- **(3) `likely_vulnerable` gộp 2 ý khác nhau** (giới hạn khái niệm, nên ghi Threats to Validity): 8× modify_string→500
+  = "chạm sink nhưng server LỖI" vs `type_juggle_privesc`→200+content-diff = "khai thác THÀNH CÔNG". Cả hai cùng ra
+  `likely_vulnerable=true` → oracle không phân biệt "có deser" vs "exploit thành công". Một 500 chắc là có deser, chưa
+  chắc exploit được. Đề xuất (cân nhắc): tách nhãn `exploit_succeeded` (200+content-diff/admin) vs `deser_error` (500).
+- Ưu tiên đề xuất: (1) → (2) → (3). (1)(2) là report-quality + giảm traffic; (3) đụng oracle, có thể chỉ ghi luận văn.
+
 **[FEATURE 2026-10-28 — Thêm mutation PHP type-juggling (lab "Modifying serialized data types"). ĐÃ LÀM.]**
 - **Bối cảnh**: test lab PortSwigger này — cookie là `O:4:"User":2:{s:8:"username";s:6:"wiener";s:12:"access_token";s:32:"...";}`
   (User có `username` + `access_token`, KHÔNG có boolean). Tool báo PHP Suspected Medium (`modify_string`), replay ra

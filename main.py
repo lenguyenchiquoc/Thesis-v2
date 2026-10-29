@@ -28,8 +28,8 @@ _DESER_MARKERS = ("objectinputstream", "invalidclassexception", "streamcorrupted
 def _escalate_severity(static_severity: str, mutated_bodies, indicators) -> tuple:
     """Raise severity to match the strongest replay evidence seen in the mutated
     response bodies/indicators. Never lowers; returns (severity, note|None) where note
-    is set only when actually raised. confirmation_status stays "Suspected" regardless
-    — this reflects observed impact, it does NOT auto-confirm."""
+    is set only when actually raised. Reflects observed impact; it does NOT auto-confirm
+    (all findings remain Suspected)."""
     body_blob = " ".join((b or "").lower() for b in mutated_bodies)
     ind_blob = " ".join((i or "").lower() for i in indicators)
     evidence_tier = None
@@ -49,11 +49,9 @@ def _escalate_severity(static_severity: str, mutated_bodies, indicators) -> tupl
 def _apply_replay_confirmation(exploit_analysis: dict, replay_result: dict) -> dict:
     result = dict(exploit_analysis)
     static_severity = result.get("severity", "Low")
-    result["confirmation_status"] = "Suspected"
-    result["confidence_source"] = "static_signature"
 
     if replay_result.get("skipped"):
-        result["display_severity"] = f"Suspected-{static_severity}"
+        result["evidence"] = "static-only"
         result["replay_note"] = replay_result.get("reason")
         return result
 
@@ -63,7 +61,7 @@ def _apply_replay_confirmation(exploit_analysis: dict, replay_result: dict) -> d
         static_severity, [mutated.get("body_sample") or ""], indicators
     )
     result["severity"] = severity
-    result["display_severity"] = f"Suspected-{severity}"
+    result["evidence"] = "dynamic-strong" if replay_result.get("signal") == "strong" else "dynamic-weak"
     if severity_note:
         result["severity_note"] = severity_note
     result["observations"] = indicators
@@ -275,8 +273,9 @@ def handle_arg(args):
                 replay = entry.get("replay") or {}
                 findings.append({
                     "exploit_type": exploit_analysis.get("exploit_type"),
-                    "severity": exploit_analysis.get("display_severity"),
+                    "severity": exploit_analysis.get("severity"),
                     "severity_note": exploit_analysis.get("severity_note"),
+                    "evidence": exploit_analysis.get("evidence"),
                     "score": exploit_analysis.get("score"),
                     "suggested_probe": exploit_analysis.get("suggested_probe"),
                     "notes": exploit_analysis.get("notes"),
@@ -290,6 +289,7 @@ def handle_arg(args):
         results = {
             "summary": {
                 "total_findings": len(findings),
+                "disclaimer": "All findings are Suspected — the tool never auto-confirms; verify each manually.",
             },
             "findings": findings,
         }

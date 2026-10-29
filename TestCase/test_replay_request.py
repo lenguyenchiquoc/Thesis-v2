@@ -178,6 +178,37 @@ class TestLikelyVulnerableWeighting(unittest.TestCase):
         self.assertTrue(any("content differs" in i.lower() for i in indicators))
         self.assertTrue(strong, "Diff sau 2000 ky tu (admin link) phai bat duoc qua body_compare")
 
+    def test_control_probe_downgrades_generic_500(self):
+        # Server tra 500 cho moi cookie sai (xu ly loi au, dang le 400). Control rac
+        # (non-serialized) cho ra DUNG cung 500 + body giong het -> 500 KHONG dac thu
+        # deser -> ha cap, khong con likely_vulnerable.
+        body500 = "<html><h1>Internal Server Error</h1></html>"
+        baseline = sample(status=200, length=100, body_sample="<html>welcome</html>")
+        mutated = sample(status=500, length=len(body500), body_sample=body500)
+        control = sample(status=500, length=len(body500), body_sample=body500)
+        indicators, strong = self.r._compare(baseline, mutated, control=control)
+        self.assertFalse(strong, "500 giong het control rac -> downgrade")
+        self.assertTrue(any("Control probe" in i for i in indicators))
+
+    def test_control_probe_keeps_strong_when_deser_marker_present(self):
+        # Attack 500 co dau vet deserializer that (ObjectInputStream) -> bang chung
+        # cung, khong downgrade du control cung 500.
+        baseline = sample(status=200, length=100, body_sample="<html>welcome</html>")
+        mutated = sample(status=500, length=200,
+                         body_sample="java.io.ObjectInputStream.readObject ClassCastException trace")
+        control = sample(status=500, length=40, body_sample="<html>Internal Server Error</html>")
+        indicators, strong = self.r._compare(baseline, mutated, control=control)
+        self.assertTrue(strong, "500 co ObjectInputStream = bang chung deser that -> giu strong")
+
+    def test_control_probe_clean_reject_keeps_strong(self):
+        # Control rac bi tu choi SACH (401) nhung attack serialized ra 500 -> server
+        # phan ung KHAC voi bytes serialized -> khac biet co nghia -> giu strong.
+        baseline = sample(status=200, length=100, body_sample="<html>welcome</html>")
+        mutated = sample(status=500, length=120, body_sample="<html>oops page here</html>")
+        control = sample(status=401, length=30, body_sample='{"msg":"unauthorized"}')
+        indicators, strong = self.r._compare(baseline, mutated, control=control)
+        self.assertTrue(strong, "Control 401 sach vs attack 500 -> giu strong")
+
     def test_strong_and_weak_indicators_can_coexist(self):
         # Neu CA error disclosure VA content-diff deu xay ra (hiem, nhung co
         # the), strong_signal phai la True vi co it nhat 1 bang chung manh -

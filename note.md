@@ -1,5 +1,128 @@
 # Ghi chú tiến độ — EthicalQuoc
 
+**[2026-10-30 — ĐÃ LÀM: Dedup vector trùng ở loader + field `occurrences`.]**
+- **Đổi quyết định so với entry dưới**: entry 2026-10-30 trước ghi "KHÔNG làm dedup". Sau khi chốt lại ĐÚNG định nghĩa
+  "trùng" = y chang CẢ `(url, method, location, name, value)` (URL bắt buộc), user yêu cầu làm. Khác hẳn kiểu dedup bỏ URL
+  (SAI) mà trước đó lo ngại — cái này an toàn vì giữ nguyên URL trong key.
+- **Hiện tượng thực tế**: report PAIR5 (`…07-07-28`, PHP) có 3/5 finding y chang (`/my-account?id=wiener` ×3 cùng value);
+  report Ruby (`…07-26-54`) có 2 cặp trùng (#1≡#3 POST change-email, #2≡#5 GET my-account). Do lúc capture vào lại cùng
+  1 request nhiều lần → extension HAR có N request giống hệt → N finding giống hệt.
+- **Chỗ sửa**: [Scanner/har_loader.py](Scanner/har_loader.py) — thêm `_dedup()` gọi cuối `parse_data`, gom theo tuple
+  5-trường (raw value, pre-clean), **giữ bản đầu + đếm `occurrences`**. Lossless: mọi stage sau (normalize/fingerprint/
+  mutation/phpggc/replay) là hàm thuần của đúng tuple đó. Khác 1 trường bất kỳ (URL/endpoint/value khác) → giữ riêng
+  (cookie trên 2 route = 2 test khác nhau). Surface `occurrences` qua [main.py](main.py) `_analyze_one` →
+  [Server/serve.py](Server/serve.py) finding dict (report hiện "captured N×, tested once"). Print loader báo số dupe gom.
+- **KHÁC plan header/Cookie cũ** (`cheerful-munching-shore.md`): cái đó là trùng *cấu trúc trong 1 request*; cái này là
+  *request lặp lại*. Độc lập, không đụng nhau.
+- **Test**: `python -m unittest discover -s TestCase` = **124/124 OK**. Dedup regression tự viết (raw-pipeline vs
+  deduped-pipeline trên cùng vector, oracle đúng — KHÔNG so với output extension vì extension lọc wss/logout/static khác):
+  pair1-7 **ALL PASS** — `occ_sum == raw count`, `DEDUP == distinct(RAW)`, set finding raw==deduped (không mất/thêm). VD
+  pair1: 334→206 vector, 12→6 finding; pair6: 348→190 vector, 14→6; pair7 (Java): 284→168 vector, 10→5. End-to-end
+  `run_pipeline(do_replay=False)` pair1: `/my-account?id=wiener` `occurrences=3`, `academyLabHeader` `5`, còn lại `1`;
+  6 finding (gom từ 12). (Bản pair6 cũ từng ra 0 finding do file HAR không chứa cookie — export DevTools loại cookie; đã
+  được thay bằng capture mới có cookie, hết lỗi fixture.)
+- **Đối chứng nhãn `pairN-N.json`**: deduped pipeline vs nhãn, cả **6 pair `only_old=0`** (không mất finding nhãn nào) —
+  (pair1-7) đây là bằng chứng dedup an toàn. Nhãn tự có trùng (vd labeled 5→distinct 3) và output ra đúng distinct → gom đúng. Có
+  2–3 `only_new`/pair (`/logout`, `POST change-email`, `header/Cookie academyLabHeader`): là endpoint THẬT trong HAR
+  DevTools nhưng capture tạo nhãn không ghé → nhãn là **tập con** của HAR, KHÔNG do dedup (dedup chỉ bỏ bản trùng, không
+  thêm finding; raw≡deduped identity set). Muốn regression khớp 1:1 thì nên regen nhãn từ chính file pairN (TODO nếu cần).
+
+**[FUTURE WORK 2026-10-30 — Tối ưu hiệu năng + giảm footprint replay. 3 ý: 1 phần ĐÃ LÀM, 2 phần HOÃN (ghi vào Future Work luận văn).]**
+- **Bối cảnh**: test PAIR3 trên extension (report `ethicalquoc-report-2026-10-30T02-53-36.json`): 143 vector → 5 finding
+  (đều là 1 vuln `cookie/session` trên 5 URL khác nhau), mỗi finding ~34 attempt, `dynamic_strong=0` (control hạ hết về
+  weak — đúng thiết kế). Vấn đề: chạy ~10 phút; replay bắn ~18 req/vector vào cùng endpoint → **trông như brute-force/
+  DDoS/replay-attack, bị log hết** (user chỉ ra). Đây là **bản chất DAST** (Burp/sqlmap/ZAP cũng vậy) → Ethical-use +
+  Threats-to-Validity: tool chỉ chạy trên mục tiêu **được uỷ quyền**, không hợp quét lén/production.
+- **(ĐÃ LÀM) Trim phpggc command**: [payloadMutation.py](Analyze/payloadMutation.py) — PHP phpggc trước chạy `chains ×
+  PHP_TYPE(4) × TEST_COMMANDS(3: id/whoami/hostname)`. Lý do có 3 lệnh ban đầu: "phòng khi 1 lệnh bị chặn/output rỗng".
+  Nhưng gadget **blind** + oracle black-box (chỉ status+body diff) → output lệnh KHÔNG phản chiếu vào response → 3 lệnh
+  cho 0 tín hiệu thêm, chỉ tốn 3× subprocess+request. Thêm hằng **`PHP_TEST_COMMANDS = ["whoami"]`** riêng cho PHP (KHÔNG
+  đụng `TEST_COMMANDS` dùng chung Java/Pickle/...). Verify WSL: 24 → **8** payload/vector (Monolog×4+Laravel×4, Symfony
+  vẫn fail); 124/124 test pass. **KHÔNG làm dedup** (user chốt): gộp theo `(type,location,name,value)` mà bỏ URL là SAI —
+  endpoint là 1 phần danh tính test (cookie có thể chỉ bị unserialize ở vài route); "trùng ĐÚNG nghĩa" = y chang CẢ
+  `url+method+location+name+value`, trên extension chỉ xảy ra khi bấm lại 1 request cùng giá trị (hiếm). → 5 finding
+  PAIR3 là 5 test hợp lệ, không phải trùng.
+- **(ĐÃ LÀM) UI extension**: thêm **đồng hồ thời gian** (từ lúc bấm Complete → lúc show output; live 100ms, kết thúc hiện
+  `Completed/Failed in X.Xs`, sống sót khi đóng/mở popup) + **toggle "Send payloads (active replay)"** (mặc định ON; OFF =
+  detect-only, không gửi gì vào target → finding `evidence=static-only`, `attempts=[]`). Nối chuỗi popup→background→
+  `/scan` `body.replay`→serve.py `do_replay`. Lưu ý: **toggle chỉ tắt bước GỬI, KHÔNG tắt bước generate** (serve.py:57
+  `_analyze_one` luôn sinh mutation; :65 `if replayer` mới gác gửi) → detect-only vẫn spawn phpggc → **cache vẫn giúp cả
+  detect-only**.
+- **(HOÃN — FUTURE WORK) Cache (memoization) phpggc/ysoserial**: `_run_phpggc(chain,type,cmd)` / `_run_ysoserial(chain,cmd)`
+  là **hàm thuần** (KHÔNG phụ thuộc cookie/url), nên 1000 vector đang spawn 1000 lần sinh CÙNG payload. Thêm dict cache
+  key `(chain,type,cmd)` → sinh 1 lần, tái dùng. Cắt **spawn process** (tốc độ), kể cả detect-only; không đổi payload,
+  không đổi số request mạng. (Khác tầng với 2 ý dưới.)
+- **(HOÃN — FUTURE WORK) Early-exit**: dừng gửi ngay khi 1 vector có `signal=strong` (đã xác nhận → 15 payload còn lại
+  thừa). An toàn, nhưng **không cứu ca lab PHP** (control hạ hết về weak → không bao giờ strong → không kích hoạt). Phải
+  đi kèm budget.
+- **(HOÃN — FUTURE WORK) Attempt-budget**: trần cứng N payload GỬI/vector, hết N thì dừng **dù chưa kết luận** → đây mới
+  chặn "spam" ở ca all-weak (PAIR3). Rủi ro: N nhỏ + thứ tự xấu → cắt mất payload thắng (vd type_juggle xếp sau phpggc).
+  Khắc phục: xếp rẻ+khả-năng-thắng-cao trước (modify_string/type_juggle trước, phpggc sau — `mutate()` đã xếp vậy), N đủ
+  phủ nhóm đa dạng. **Chưa chốt N** (cần thử). Early-exit lo "thắng thì thôi"; budget lo "mãi không thắng cũng đừng bắn
+  vô hạn" — dùng chung. Cắt **request mạng** (footprint), chỉ khi replay bật.
+
+**[REF 2026-10-30 — CVE deserialization GẦN ĐÂY (2025-2026) cho Motivation/Related Work. CHỈ dùng CVE mới, mạnh.]**
+- Nguyên tắc: khi nhắc CVE phải là **gần đây + dẫn chứng mạnh** (actively-exploited / CVSS cao / framework phổ biến),
+  KHÔNG dùng CVE cũ (2013/2017). **VERIFY affected-version + CVSS trên NVD/MSRC trước khi trích số vào luận văn**
+  (nhiều nguồn ở đây là blog/aggregator thứ cấp).
+- **Java**: **CVE-2026-20131** (Cisco FMC) — CVSS 10.0, **đang khai thác thực tế, CISA KEV**, unauth RCE deser, 03/2026.
+  Phụ: CVE-2026-41855 (Spring Framework JMS, critical), CVE-2026-55083 (DHIS2, critical).
+- **PHP**: **CVE-2026-45247** (Magento/Mirasvit Cache Warmer) — critical, cookie→`unserialize()`→gadget RCE.
+  Phụ: CVE-2026-7654 (WordPress Admin Columns, Laravel POP gadget, authenticated RCE).
+- **.NET**: **CVE-2025-59287** (WSUS) — CVSS 9.8, **unauth RCE, khai thác thực tế**, BinaryFormatter trên cookie, 10/2025.
+  Phụ: CVE-2025-53770 "ToolShell" (SharePoint ViewState, khai thác diện rộng 2025), CVE-2026-26918 (BinaryFormatter .NET 8, CVSS 9.8).
+- **Python Pickle**: **CVE-2025-32444** (vLLM) — CVSS 10.0, pickle qua ZeroMQ, 04/2025.
+  Phụ: CVE-2026-25874 (HuggingFace LeRobot gRPC pickle, CVSS 8.8, 04/2026), CVE-2025-24357 (vLLM HF weights), CVE-2025-1716 (picklescan bypass).
+- **Ruby**: **CVE-2026-41316** (ERB/Rails) — CVSS 8.1, 04/2026, "6th-gen Marshal gadget", mọi app Rails gọi `Marshal.load`+erb/activesupport.
+  Phụ: Ruby 4.0 universal Marshal gadget chain (elttam, 08/2026, chưa có CVE).
+- **Node.js (hoãn, cơ sở MẠNH)**: **CVE-2025-55182** (Next.js React Server Components, critical, 12/2025),
+  **CVE-2026-23737** (seroval, CWE-502, CVSS 7.5, 01/2026). Tool detect `node-serialize`; biến thể RSC/seroval = future work.
+- **YAML (hoãn)**: nổi bật nhất vẫn là SnakeYAML CVE-2022-1471 (2022, hơi cũ) — chưa thấy CVE 2025-2026 nổi trội, cần tra riêng.
+- **Wrapper (hoãn)**: phar:// — chưa thấy CVE mới nổi bật.
+
+**[SCOPE 2026-10-30 — Chốt phạm vi ngôn ngữ: tập trung 6 (thêm Node.js), hoãn 2 (YAML, Wrapper). (Thầy khuyên "đừng ham nhiều" — vẫn giữ gọn.)]**
+- **Nguyên tắc**: breadth = detect cả 8 (giữ code, không xóa); DEPTH + trình bày chính = **5 ngôn ngữ iconic nhất**;
+  3 còn lại ghi **"chưa hoàn thiện / future work"** kèm **cơ sở CVE** để test sau. Tool đã detect cả 8 (xác nhận bằng
+  `comprehensive.har` 48 typed).
+- **TOP 6 (tập trung, xếp iconic→thời sự)** [cập nhật 2026-10-30: thêm Node.js vào trọng tâm]:
+  1. **Java** — ysoserial, Apache Commons; CVE-2026-20131 (Cisco FMC, CVSS 10, KEV). → **depth xong** (live+OOB).
+  2. **PHP** — unserialize()/phpggc; CVE-2026-45247 (Magento). → **depth xong** (live).
+  3. **Python Pickle** — ML model loading; CVE-2025-32444 (vLLM, CVSS 10). → detection ✓, **depth = ưu tiên kế**.
+  4. **.NET** — BinaryFormatter (MS khai tử), ViewState; CVE-2025-59287 (WSUS, 9.8, KEV). → detection ✓.
+  5. **Ruby** — Marshal, Rails; CVE-2026-41316 (ERB gadget). → detection ✓.
+  6. **Node.js/JS** — CVE-2025-55182 (Next.js RSC, critical, 12/2025), CVE-2026-23737 (seroval, 01/2026). → detection ✓
+     (`node-serialize`); biến thể JSON-based (RSC/seroval) = **future work** (cơ chế khác). Tool detect `node-serialize`.
+  - Depth (full exploit+live): PHP+Java (xong) + pickle (next). Detection: cả 6.
+- **HOÃN 2 (chưa hoàn thiện + cơ sở test sau)**:
+  - **YAML** — cơ sở: SnakeYAML CVE-2022-1471 (Java), PyYAML `!!python/object`. Là **format cross-language** (Python+Java/Ruby),
+    không phải ngôn ngữ riêng; detect ✓, chưa depth. (Thiếu CVE 2025-2026 nổi trội.)
+  - **Wrapper** — cơ sở: PHP `phar://` deser (thật); nhưng `gopher://`/`php://filter` = **SSRF/LFI** (adjacent, ngoài
+    deser-core) → khi viết nên tách "deser (phar)" vs "non-deser (SSRF/LFI)".
+- **Lưu ý trung thực**: dùng CVE mới (CVE-2025-55182/CVE-2026-23737) để chứng minh CLASS còn thời sự (Motivation),
+  KHÔNG claim tool detect đúng mấy CVE đó. Verify affected-version trên NVD trước khi trích số vào luận văn.
+
+**[CHỐT PHIÊN 2026-10-29 — Trạng thái để TEST SÁNG MAI.]**
+- **Môi trường (đã verify)**: `ethicalquoc.ps1` chạy trong **Ubuntu WSL** — ở đó **PHP 8.5.4 + phpggc CHẠY ĐƯỢC**
+  (list ra Gadget Chains). Default WSL distro là `docker-desktop` (đừng gõ `wsl` trần — wrapper tự `-d Ubuntu`).
+  Nên A2/phpggc sẽ sinh gadget thật khi chạy qua `.\ethicalquoc.ps1 serve`. (Windows không có php, nhưng không cần.)
+- **TRƯỚC KHI TEST**: restart serve (`.\ethicalquoc.ps1 serve`) + **reload extension** ở chrome://extensions (code
+  UI mới: evidence pills, bỏ likely_vulnerable/confirmation_status). Nhập OOB domain Interactsh MỚI vào ô extension.
+- **Checklist test sáng mai**:
+  1. **A1 severity PHP**: quét lại lab PHP (PAIR2/3/5-style) → severity phải **High** (trước Medium). Lab boolean (PAIR1) vẫn High.
+  2. **A2 phpggc**: quét lab PHP gadget-chain (PAIR5 "pre-built gadget chain") → report phải có thêm attempt
+     **`php_object`** (payload phpggc, chain Monolog/Laravel/Symfony...). Nếu không thấy → kiểm `php` trong WSL.
+  3. **Java severity**: lab Java (PAIR4) → severity **High** (fix CWE-502 trước đó).
+  4. **evidence/control probe**: finding có trường **`evidence`** (static-only/dynamic-weak/dynamic-strong) thay cho
+     likely_vulnerable; lab 500-trơn (Java/PHP-gadget) sẽ ra **dynamic-weak** (control hạ) — ĐÚNG thiết kế, không phải lỗi.
+  5. **OOB (Java/Ruby)**: check Interactsh tay — nếu lab cho egress, URLDNS sẽ nổ DNS (bằng chứng thật, độc lập với 500).
+- **ĐÃ LÀM xong hôm nay (tất cả 124/124 test pass)**: fix extension capture cookie (extraInfo), replay bỏ
+  `:authority`+`accept-encoding`, oracle so full-body + observation length, normalize scoring (Java base64→binary),
+  **Java severity High**, **control probe**, **evidence refactor** (bỏ likely_vulnerable/confirmation_status), ô nhập
+  **OOB domain** extension, mutation **type-juggle**, **A1 severity PHP**, **A2 phpggc gating**.
+- **CÒN TREO (chưa làm)**: B2 dedup finding (5-14 finding=1 vuln, URL trùng); OOB auto-poll (listener localhost cho
+  Web_vul_env / interactsh-client cho lab ngoài); user-supplied gadget cho PAIR3 (arbitrary object injection, cần
+  source); tối ưu phpggc subprocess (check `php` 1 lần). Control probe chốt = (A).
+
 **[FIX 2026-10-29 — A1 severity native PHP + A2 gating phpggc (cùng gốc CWE-502). ĐÃ LÀM.]**
 - **Phát hiện khi đối chứng 5 pair lab** (PAIR1 boolean / PAIR2 type-juggle / PAIR3 arbitrary-object-injection /
   PAIR4 Java / PAIR5 phpggc gadget chain). Cùng gốc với bug Java severity (entry dưới).

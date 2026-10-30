@@ -33,7 +33,13 @@ class HarLoader:
             for entry in entries:
                 self._process_entry(entry)
 
-            print(f"[+] Passive Scan: Extracted {len(self.vectors)} vectors")
+            raw_count = len(self.vectors)
+            self.vectors = self._dedup(self.vectors)
+            collapsed = raw_count - len(self.vectors)
+            msg = f"[+] Passive Scan: Extracted {len(self.vectors)} vectors"
+            if collapsed:
+                msg += f" ({collapsed} duplicate request(s) collapsed)"
+            print(msg)
             return self.vectors
 
         except Exception as e:
@@ -78,6 +84,29 @@ class HarLoader:
 
         elif 'text' in post_data:
             self._add_vector(url, req['method'], "raw_body", "payload", post_data['text'], request_context)
+
+    def _dedup(self, vectors):
+        """Collapse vectors identical on (url, method, location, name, value) —
+        the same request captured more than once, e.g. a page re-visited during
+        capture. Every downstream stage (normalize, fingerprint, mutation,
+        phpggc/ysoserial generation, replay) is a pure function of exactly this
+        tuple, so identical vectors always yield identical findings; keeping one
+        and recording how many times it was seen is lossless and cuts duplicate
+        process spawns + replay traffic. A difference in ANY field keeps the
+        vectors separate — the same cookie on two endpoints, or two different
+        values on one endpoint, are genuinely distinct tests, not duplicates.
+        Raw value is used (pre-clean) and dict insertion order preserves the
+        first occurrence."""
+        unique = {}
+        for v in vectors:
+            key = (v["url"], v["method"], v["location"], v["name"], v["value"])
+            existing = unique.get(key)
+            if existing is None:
+                v["occurrences"] = 1
+                unique[key] = v
+            else:
+                existing["occurrences"] += 1
+        return list(unique.values())
 
     def _add_vector(self, url, method, location, name, value, request_context):
         self.vectors.append({

@@ -1,0 +1,615 @@
+{
+  "target": "0a5b00630341893481d96bca00130032.web-security-academy.net",
+  "disclaimer": "All findings are Suspected — the tool flags candidates and never auto-confirms; verify each manually.",
+  "stats": {
+    "vectors_scanned": 183,
+    "after_filter": 7,
+    "findings": 7,
+    "dynamic_strong": 0
+  },
+  "findings": [
+    {
+      "url": "https://0a5b00630341893481d96bca00130032.web-security-academy.net/my-account?id=wiener",
+      "method": "GET",
+      "location": "cookie",
+      "name": "session",
+      "type": "Ruby",
+      "subtype": null,
+      "confidence": "Medium",
+      "exploit_type": "Ruby Marshal Deserialization",
+      "suggested_probe": "ruby_marshal",
+      "severity": "Medium",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "Marshal deserialization confirmed by Fingerprint stage | Try Marshal-based gadget chain (e.g. via a ruby -e helper script)",
+      "normalized": [
+        "\u0004\bo:\tUser\u0007:\u000e@usernameI\"\u000bwiener\u0006:\u0006EF:\u0012@access_tokenI\"%gogqb0gie6pdiqf5orw42x98zrshg0d4\u0006;\u0007F"
+      ],
+      "mutations_count": 3,
+      "indicators": [
+        "Status code changed: baseline=200 mutated=500",
+        "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.96) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+      ],
+      "attempts": [
+        {
+          "payload_type": "ruby_marshal",
+          "chain": "Marshal.dump helper",
+          "payload": "BAhvOgtPYmplY3QGOglAY21kSSIHaWQGOgZFVA==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.96) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3320,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a class=link-back href='htt"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2658,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a id='lab-link' class='button' href='/"
+          }
+        },
+        {
+          "payload_type": "ruby_marshal",
+          "chain": "Marshal.dump helper",
+          "payload": "BAhvOgtPYmplY3QGOglAY21kSSILd2hvYW1pBjoGRVQ=",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3320,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a class=link-back href='htt"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2662,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a id='lab-link' class='button' href='/"
+          }
+        },
+        {
+          "payload_type": "ruby_marshal",
+          "chain": "Marshal.dump helper",
+          "payload": "BAhvOgtPYmplY3QGOglAY21kSSINaG9zdG5hbWUGOgZFVA==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3320,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a class=link-back href='htt"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2664,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a id='lab-link' class='button' href='/"
+          }
+        }
+      ]
+    },
+    {
+      "url": "https://0a5b00630341893481d96bca00130032.web-security-academy.net/my-account/change-email",
+      "method": "POST",
+      "location": "cookie",
+      "name": "session",
+      "type": "Ruby",
+      "subtype": null,
+      "confidence": "Medium",
+      "exploit_type": "Ruby Marshal Deserialization",
+      "suggested_probe": "ruby_marshal",
+      "severity": "Medium",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "Marshal deserialization confirmed by Fingerprint stage | Try Marshal-based gadget chain (e.g. via a ruby -e helper script)",
+      "normalized": [
+        "\u0004\bo:\tUser\u0007:\u000e@usernameI\"\u000bwiener\u0006:\u0006EF:\u0012@access_tokenI\"%gogqb0gie6pdiqf5orw42x98zrshg0d4\u0006;\u0007F"
+      ],
+      "mutations_count": 3,
+      "indicators": [
+        "Response length changed significantly: baseline=21 mutated=2658",
+        "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.96) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+      ],
+      "attempts": [
+        {
+          "payload_type": "ruby_marshal",
+          "chain": "Marshal.dump helper",
+          "payload": "BAhvOgtPYmplY3QGOglAY21kSSIHaWQGOgZFVA==",
+          "signal": "weak",
+          "indicators": [
+            "Response length changed significantly: baseline=21 mutated=2658",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.96) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 500,
+            "length": 21,
+            "body_sample": "Internal Server Error"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2658,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a id='lab-link' class='button' href='/"
+          }
+        },
+        {
+          "payload_type": "ruby_marshal",
+          "chain": "Marshal.dump helper",
+          "payload": "BAhvOgtPYmplY3QGOglAY21kSSILd2hvYW1pBjoGRVQ=",
+          "signal": "weak",
+          "indicators": [
+            "Response length changed significantly: baseline=21 mutated=2662",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 500,
+            "length": 21,
+            "body_sample": "Internal Server Error"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2662,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a id='lab-link' class='button' href='/"
+          }
+        },
+        {
+          "payload_type": "ruby_marshal",
+          "chain": "Marshal.dump helper",
+          "payload": "BAhvOgtPYmplY3QGOglAY21kSSINaG9zdG5hbWUGOgZFVA==",
+          "signal": "weak",
+          "indicators": [
+            "Response length changed significantly: baseline=21 mutated=2664",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 500,
+            "length": 21,
+            "body_sample": "Internal Server Error"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2664,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a id='lab-link' class='button' href='/"
+          }
+        }
+      ]
+    },
+    {
+      "url": "https://0a5b00630341893481d96bca00130032.web-security-academy.net/my-account?id=wiener",
+      "method": "GET",
+      "location": "cookie",
+      "name": "session",
+      "type": "Ruby",
+      "subtype": null,
+      "confidence": "Medium",
+      "exploit_type": "Ruby Marshal Deserialization",
+      "suggested_probe": "ruby_marshal",
+      "severity": "Medium",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "Marshal deserialization confirmed by Fingerprint stage | Try Marshal-based gadget chain (e.g. via a ruby -e helper script)",
+      "normalized": [
+        "\u0004\bo:\tUser\u0007:\u000e@usernameI\"\u000bwiener\u0006:\u0006EF:\u0012@access_tokenI\"%gogqb0gie6pdiqf5orw42x98zrshg0d4\u0006;\u0007F"
+      ],
+      "mutations_count": 3,
+      "indicators": [
+        "Status code changed: baseline=200 mutated=500",
+        "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.96) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+      ],
+      "attempts": [
+        {
+          "payload_type": "ruby_marshal",
+          "chain": "Marshal.dump helper",
+          "payload": "BAhvOgtPYmplY3QGOglAY21kSSIHaWQGOgZFVA==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.96) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3320,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a class=link-back href='htt"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2658,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a id='lab-link' class='button' href='/"
+          }
+        },
+        {
+          "payload_type": "ruby_marshal",
+          "chain": "Marshal.dump helper",
+          "payload": "BAhvOgtPYmplY3QGOglAY21kSSILd2hvYW1pBjoGRVQ=",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3320,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a class=link-back href='htt"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2662,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a id='lab-link' class='button' href='/"
+          }
+        },
+        {
+          "payload_type": "ruby_marshal",
+          "chain": "Marshal.dump helper",
+          "payload": "BAhvOgtPYmplY3QGOglAY21kSSINaG9zdG5hbWUGOgZFVA==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3320,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a class=link-back href='htt"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2664,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a id='lab-link' class='button' href='/"
+          }
+        }
+      ]
+    },
+    {
+      "url": "https://0a5b00630341893481d96bca00130032.web-security-academy.net/",
+      "method": "GET",
+      "location": "cookie",
+      "name": "session",
+      "type": "Ruby",
+      "subtype": null,
+      "confidence": "Medium",
+      "exploit_type": "Ruby Marshal Deserialization",
+      "suggested_probe": "ruby_marshal",
+      "severity": "Medium",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "Marshal deserialization confirmed by Fingerprint stage | Try Marshal-based gadget chain (e.g. via a ruby -e helper script)",
+      "normalized": [
+        "\u0004\bo:\tUser\u0007:\u000e@usernameI\"\u000bwiener\u0006:\u0006EF:\u0012@access_tokenI\"%gogqb0gie6pdiqf5orw42x98zrshg0d4\u0006;\u0007F"
+      ],
+      "mutations_count": 3,
+      "indicators": [
+        "Status code changed: baseline=200 mutated=500",
+        "Response length changed significantly: baseline=10868 mutated=2560",
+        "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+      ],
+      "attempts": [
+        {
+          "payload_type": "ruby_marshal",
+          "chain": "Marshal.dump helper",
+          "payload": "BAhvOgtPYmplY3QGOglAY21kSSIHaWQGOgZFVA==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10868 mutated=2560",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 10868,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a class=link-back "
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2560,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a class=link-back href='https://portsw"
+          }
+        },
+        {
+          "payload_type": "ruby_marshal",
+          "chain": "Marshal.dump helper",
+          "payload": "BAhvOgtPYmplY3QGOglAY21kSSILd2hvYW1pBjoGRVQ=",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10868 mutated=2564",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 10868,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a class=link-back "
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2564,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a class=link-back href='https://portsw"
+          }
+        },
+        {
+          "payload_type": "ruby_marshal",
+          "chain": "Marshal.dump helper",
+          "payload": "BAhvOgtPYmplY3QGOglAY21kSSINaG9zdG5hbWUGOgZFVA==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10868 mutated=2566",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 10868,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a class=link-back "
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2566,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a class=link-back href='https://portsw"
+          }
+        }
+      ]
+    },
+    {
+      "url": "https://0a5b00630341893481d96bca00130032.web-security-academy.net/my-account?id=wiener",
+      "method": "GET",
+      "location": "cookie",
+      "name": "session",
+      "type": "Ruby",
+      "subtype": null,
+      "confidence": "Medium",
+      "exploit_type": "Ruby Marshal Deserialization",
+      "suggested_probe": "ruby_marshal",
+      "severity": "Medium",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "Marshal deserialization confirmed by Fingerprint stage | Try Marshal-based gadget chain (e.g. via a ruby -e helper script)",
+      "normalized": [
+        "\u0004\bo:\tUser\u0007:\u000e@usernameI\"\u000bwiener\u0006:\u0006EF:\u0012@access_tokenI\"%gogqb0gie6pdiqf5orw42x98zrshg0d4\u0006;\u0007F"
+      ],
+      "mutations_count": 3,
+      "indicators": [
+        "Status code changed: baseline=200 mutated=500",
+        "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.96) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+      ],
+      "attempts": [
+        {
+          "payload_type": "ruby_marshal",
+          "chain": "Marshal.dump helper",
+          "payload": "BAhvOgtPYmplY3QGOglAY21kSSIHaWQGOgZFVA==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.96) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3320,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a class=link-back href='htt"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2658,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a id='lab-link' class='button' href='/"
+          }
+        },
+        {
+          "payload_type": "ruby_marshal",
+          "chain": "Marshal.dump helper",
+          "payload": "BAhvOgtPYmplY3QGOglAY21kSSILd2hvYW1pBjoGRVQ=",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3320,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a class=link-back href='htt"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2662,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a id='lab-link' class='button' href='/"
+          }
+        },
+        {
+          "payload_type": "ruby_marshal",
+          "chain": "Marshal.dump helper",
+          "payload": "BAhvOgtPYmplY3QGOglAY21kSSINaG9zdG5hbWUGOgZFVA==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 3320,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a class=link-back href='htt"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2664,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a id='lab-link' class='button' href='/"
+          }
+        }
+      ]
+    },
+    {
+      "url": "https://0a5b00630341893481d96bca00130032.web-security-academy.net/",
+      "method": "GET",
+      "location": "cookie",
+      "name": "session",
+      "type": "Ruby",
+      "subtype": null,
+      "confidence": "Medium",
+      "exploit_type": "Ruby Marshal Deserialization",
+      "suggested_probe": "ruby_marshal",
+      "severity": "Medium",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "Marshal deserialization confirmed by Fingerprint stage | Try Marshal-based gadget chain (e.g. via a ruby -e helper script)",
+      "normalized": [
+        "\u0004\bo:\tUser\u0007:\u000e@usernameI\"\u000bwiener\u0006:\u0006EF:\u0012@access_tokenI\"%gogqb0gie6pdiqf5orw42x98zrshg0d4\u0006;\u0007F"
+      ],
+      "mutations_count": 3,
+      "indicators": [
+        "Status code changed: baseline=200 mutated=500",
+        "Response length changed significantly: baseline=10868 mutated=2560",
+        "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+      ],
+      "attempts": [
+        {
+          "payload_type": "ruby_marshal",
+          "chain": "Marshal.dump helper",
+          "payload": "BAhvOgtPYmplY3QGOglAY21kSSIHaWQGOgZFVA==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10868 mutated=2560",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 10868,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a class=link-back "
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2560,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a class=link-back href='https://portsw"
+          }
+        },
+        {
+          "payload_type": "ruby_marshal",
+          "chain": "Marshal.dump helper",
+          "payload": "BAhvOgtPYmplY3QGOglAY21kSSILd2hvYW1pBjoGRVQ=",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10868 mutated=2564",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 10868,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a class=link-back "
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2564,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a class=link-back href='https://portsw"
+          }
+        },
+        {
+          "payload_type": "ruby_marshal",
+          "chain": "Marshal.dump helper",
+          "payload": "BAhvOgtPYmplY3QGOglAY21kSSINaG9zdG5hbWUGOgZFVA==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=10868 mutated=2566",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 10868,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a class=link-back "
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2566,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a class=link-back href='https://portsw"
+          }
+        }
+      ]
+    },
+    {
+      "url": "https://0a5b00630341893481d96bca00130032.web-security-academy.net/product?productId=1",
+      "method": "GET",
+      "location": "cookie",
+      "name": "session",
+      "type": "Ruby",
+      "subtype": null,
+      "confidence": "Medium",
+      "exploit_type": "Ruby Marshal Deserialization",
+      "suggested_probe": "ruby_marshal",
+      "severity": "Medium",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "Marshal deserialization confirmed by Fingerprint stage | Try Marshal-based gadget chain (e.g. via a ruby -e helper script)",
+      "normalized": [
+        "\u0004\bo:\tUser\u0007:\u000e@usernameI\"\u000bwiener\u0006:\u0006EF:\u0012@access_tokenI\"%gogqb0gie6pdiqf5orw42x98zrshg0d4\u0006;\u0007F"
+      ],
+      "mutations_count": 3,
+      "indicators": [
+        "Status code changed: baseline=200 mutated=500",
+        "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.96) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+      ],
+      "attempts": [
+        {
+          "payload_type": "ruby_marshal",
+          "chain": "Marshal.dump helper",
+          "payload": "BAhvOgtPYmplY3QGOglAY21kSSIHaWQGOgZFVA==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.96) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 4379,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a class=link-back "
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2658,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a id='lab-link' class='button' href='/"
+          }
+        },
+        {
+          "payload_type": "ruby_marshal",
+          "chain": "Marshal.dump helper",
+          "payload": "BAhvOgtPYmplY3QGOglAY21kSSILd2hvYW1pBjoGRVQ=",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 4379,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a class=link-back "
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2662,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a id='lab-link' class='button' href='/"
+          }
+        },
+        {
+          "payload_type": "ruby_marshal",
+          "chain": "Marshal.dump helper",
+          "payload": "BAhvOgtPYmplY3QGOglAY21kSSINaG9zdG5hbWUGOgZFVA==",
+          "signal": "weak",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Control probe (non-serialized junk) returned the same status 500 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 4379,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labsEcommerce.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n    <body>\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a class=link-back "
+          },
+          "mutated": {
+            "status": 500,
+            "length": 2664,
+            "body_sample": "<!DOCTYPE html>\n<html>\n<!--LAB_HEAD_START-->\n    <head>\n        <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>\n        <link href=/resources/css/labs.css rel=stylesheet>\n        <title>Exploiting Ruby deserialization using a documented gadget chain</title>\n    </head>\n<!--LAB_HEAD_END-->\n        <script src=\"/resources/labheader/js/labHeader.js\"></script>\n        <!--LAB_HEADER_START-->\n        <div id=\"academyLabHeader\">\n            <section class='academyLabBanner'>\n                <div class=container>\n                    <div class=logo></div>\n                        <div class=title-container>\n                            <h2>Exploiting Ruby deserialization using a documented gadget chain</h2>\n                            <a id='lab-link' class='button' href='/"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -108,6 +108,7 @@ def run_pipeline(har_data: dict, do_replay: bool = True, oob_domain: str | None 
             "method": entry["vector"].get("method"),
             "location": entry["vector"].get("location"),
             "name": entry["vector"].get("name"),
+            "occurrences": entry["vector"].get("occurrences", 1),
             "type": fp.get("type"),
             "subtype": fp.get("subtype"),
             "confidence": fp.get("confidence"),

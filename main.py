@@ -94,6 +94,7 @@ def _analyze_one(vector: dict) -> dict:
             "location": vector.get("location"),
             "name": vector.get("name"),
             "original_value": vector.get("original_value"),
+            "occurrences": vector.get("occurrences", 1),
         },
         "normalized": value_normalize,
         "fingerprint": fingerprint,

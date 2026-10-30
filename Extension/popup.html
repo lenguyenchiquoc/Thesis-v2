@@ -72,7 +72,19 @@
       For blind confirmation (URLDNS / SSRF canary). Leave empty to use config.json.
     </div>
 
+    <div class="row" style="margin-top:10px;">
+      <label style="display:flex; align-items:center; gap:7px; cursor:pointer;">
+        <input id="replayToggle" type="checkbox" checked>
+        <span>Send payloads (active replay)</span>
+      </label>
+    </div>
+    <div class="muted" style="margin-top:4px;">
+      Off = detect-only, nothing is sent to the target. On = sends test payloads —
+      authorized targets only.
+    </div>
+
     <div id="summary" class="sum" style="display:none;"></div>
+    <div id="timing" class="muted" style="display:none; margin:2px 0 6px;"></div>
     <div id="reportRow" class="row" style="display:none; margin:6px 0 2px;">
       <button id="reportBtn" class="ghost">View full report</button>
       <button id="downloadBtn" class="ghost">Download JSON</button>

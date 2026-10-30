@@ -128,9 +128,9 @@ function stopPoll() { if (pollTimer) { clearInterval(pollTimer); pollTimer = nul
 async function tick() {
   const { scan } = await chrome.storage.local.get("scan");
   if (!scan) { stopPoll(); return; }
-  if (scan.status === "empty") { stopPoll(); say("No requests captured for this app. Click Start, use the site, then Complete — on the SAME tab."); return; }
-  if (scan.status === "error") { stopPoll(); say("Scan failed: " + scan.error + " — is the server running?"); return; }
-  if (scan.status === "done") { stopPoll(); renderResults(scan.data); return; }
+  if (scan.status === "empty") { stopPoll(); stopElapsed(); say("No requests captured for this app. Click Start, use the site, then Complete — on the SAME tab."); return; }
+  if (scan.status === "error") { stopPoll(); stopElapsed(); showFinalElapsed("Failed"); say("Scan failed: " + scan.error + " — is the server running?"); return; }
+  if (scan.status === "done") { stopPoll(); stopElapsed(); showFinalElapsed("Completed"); renderResults(scan.data); return; }
   if (scan.status === "scanning") {
     if (!scan.job) { say(scan.phase || "Preparing…"); return; }   // still building HAR / POSTing
     say(scan.phase || "Scanning…");
@@ -155,13 +155,38 @@ async function tick() {
 function startPoll() { stopPoll(); tick(); pollTimer = setInterval(tick, 1000); }
 function applyScanState() { tick(); }
 
+// ---- elapsed-time display: from clicking Complete until the report shows ----
+let elapsedTimer = null;
+const fmtSecs = (ms) => (ms / 1000).toFixed(1) + "s";
+function startElapsed(startedAt) {
+  stopElapsed();
+  $("timing").style.display = "block";
+  const tickTime = () => { $("timing").textContent = "Elapsed: " + fmtSecs(Date.now() - startedAt); };
+  tickTime();
+  elapsedTimer = setInterval(tickTime, 100);
+}
+function stopElapsed() { if (elapsedTimer) { clearInterval(elapsedTimer); elapsedTimer = null; } }
+async function showFinalElapsed(label) {
+  try {
+    const { scanStartedAt } = await chrome.storage.local.get("scanStartedAt");
+    if (scanStartedAt) {
+      $("timing").style.display = "block";
+      $("timing").textContent = (label || "Completed") + " in " + fmtSecs(Date.now() - scanStartedAt);
+    }
+  } catch (_) {}
+}
+
 async function onComplete() {
   $("completeBtn").disabled = true;
   setCapturing(false);
+  const startedAt = Date.now();
+  await chrome.storage.local.set({ scanStartedAt: startedAt });
+  startElapsed(startedAt);
   say("Building HAR…");
   const oob = ($("oobInput").value || "").trim();
-  const res = await send({ cmd: "scan", tabId, server: SERVER, oob });
-  if (!res || !res.ok) { say("Could not start scan: " + (res ? res.error : "no response")); return; }
+  const replay = $("replayToggle").checked;
+  const res = await send({ cmd: "scan", tabId, server: SERVER, oob, replay });
+  if (!res || !res.ok) { stopElapsed(); say("Could not start scan: " + (res ? res.error : "no response")); return; }
   startPoll();
 }
 
@@ -173,16 +198,24 @@ async function init() {
   setCapturing(st && st.capturing, st && st.count);
 
   try {
-    const { oobDomain } = await chrome.storage.local.get("oobDomain");
+    const { oobDomain, replayOn } = await chrome.storage.local.get(["oobDomain", "replayOn"]);
     if (oobDomain) $("oobInput").value = oobDomain;
+    $("replayToggle").checked = replayOn !== false;   // default ON
   } catch (_) {}
   $("oobInput").onchange = () => {
     chrome.storage.local.set({ oobDomain: ($("oobInput").value || "").trim() });
   };
+  $("replayToggle").onchange = () => {
+    chrome.storage.local.set({ replayOn: $("replayToggle").checked });
+  };
 
   // If a scan is running or finished (popup was closed during it), resume it.
   const { scan } = await chrome.storage.local.get("scan");
-  if (scan && scan.status === "scanning") startPoll();
+  if (scan && scan.status === "scanning") {
+    const { scanStartedAt } = await chrome.storage.local.get("scanStartedAt");
+    if (scanStartedAt) startElapsed(scanStartedAt);   // keep the timer ticking across popup reopen
+    startPoll();
+  }
   else if (scan && (scan.status === "done" || scan.status === "error" || scan.status === "empty")) tick();
 
   $("startBtn").onclick = async () => {

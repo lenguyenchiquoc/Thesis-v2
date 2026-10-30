@@ -469,6 +469,13 @@ class PayloadMutation:
         "passthru",
         "unlink"
     }
+
+    # Blind phpggc gadgets: the embedded command never echoes into the
+    # response (black-box oracle only sees status + body diff), so id/whoami/
+    # hostname would produce identical 500s — 3x the subprocess+replay cost for
+    # zero extra signal. One canary command is enough. (PHP-only; the shared
+    # TEST_COMMANDS still drives Java/Pickle/etc.)
+    PHP_TEST_COMMANDS = ["whoami"]
     
     
     def _get_php_version(self) -> str:
@@ -493,7 +500,7 @@ class PayloadMutation:
             }] 
         for chain in chains:
             for ptype in self.PHP_TYPE:
-                for cmd in self.TEST_COMMANDS:
+                for cmd in self.PHP_TEST_COMMANDS:
                     result = self._run_phpggc(chain, ptype, cmd)
                     if result:
                         results.append(self._make_payload("php_object", chain, cmd, result))

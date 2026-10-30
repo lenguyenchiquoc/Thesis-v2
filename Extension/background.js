@@ -153,13 +153,13 @@ async function setScan(state) { await chrome.storage.local.set({ scan: state });
 // in its OWN thread and returns a job id immediately. The popup then polls the
 // server for the result — so neither the service worker nor the popup needs to
 // stay alive through a long scan.
-async function runScan(tabId, server, oob) {
+async function runScan(tabId, server, oob, replay) {
   await setScan({ status: "scanning", phase: "Building HAR…", server });
   const har = await stopCapture(tabId);
   const count = har.log.entries.length;
   if (!count) { await setScan({ status: "empty" }); return; }
   try {
-    const body = { har, replay: true };
+    const body = { har, replay: replay !== false };   // detect-only when the popup toggle is off
     if (oob) body.oob_domain = oob;
     const r = await fetch(`${server}/scan`, {
       method: "POST", headers: { "Content-Type": "application/json" },
@@ -184,7 +184,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         sendResponse({ ok: true, capturing: true });
       } else if (msg.cmd === "scan") {
         // Fire-and-forget: run in background, popup polls chrome.storage for result.
-        runScan(msg.tabId, msg.server, msg.oob);
+        runScan(msg.tabId, msg.server, msg.oob, msg.replay);
         sendResponse({ ok: true, started: true });
       } else if (msg.cmd === "status") {
         const d = await read(msg.tabId);

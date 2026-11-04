@@ -67,8 +67,10 @@ function render(data) {
   for (const f of data.findings) {
     const div = document.createElement("div");
     div.className = "finding" + (f.evidence === "dynamic-strong" ? " vuln" : "");
-    let h = `<div class="ftop"><div><b>${esc(f.type)}</b> · ${esc(f.subtype || f.exploit_type || "-")}</div>${evPill(f.evidence)}</div>`;
-    h += `<div class="ep">${esc(f.method)} ${esc(f.url)} &nbsp;[${esc(f.location)}/${esc(f.name)}]</div>`;
+    const oobPill = f.oob_confirmed ? `<span class="pill ev-oob">OOB confirmed ✓</span>` : "";
+    let h = `<div class="ftop"><div><b>${esc(f.type)}</b> · ${esc(f.subtype || f.exploit_type || "-")}</div><div>${evPill(f.evidence)}${oobPill}</div></div>`;
+    const occ = Number(f.occurrences) > 1 ? ` <span class="pill occ">captured ${f.occurrences}×, tested once</span>` : "";
+    h += `<div class="ep">${esc(f.method)} ${esc(f.url)} &nbsp;[${esc(f.location)}/${esc(f.name)}]${occ}</div>`;
     h += `<div class="meta">` +
          `<span class="label">Severity</span>${sevPill(f.severity)}` +
          `<span class="label">confidence</span>${confPill(f.confidence)}` +

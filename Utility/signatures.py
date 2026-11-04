@@ -191,11 +191,6 @@ def _decoded_bytes_look_serialized(raw: bytes, _depth: int = 0) -> bool:
                               "gadget", "objectdataprovider", "system.windows",
                               "system.data"]):
         return True
-    # Not recognized yet — if the decoded text is itself another base64/hex layer,
-    # peel one more and re-check (bounded depth). Covers payloads wrapped in several
-    # encoding layers; random tokens stop quickly because their decoded bytes are not
-    # valid base64/hex again. normalize() does the full unwrap later; this only has to
-    # keep the vector from being dropped at the Stage-2 gate.
     if _depth < 5:
         stripped = txt.strip()
         clean = stripped.replace('-', '+').replace('_', '/').rstrip('=')

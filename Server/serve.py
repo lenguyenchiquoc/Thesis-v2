@@ -9,8 +9,10 @@ so it runs identically on Windows / macOS / Linux.
 
 import json
 import threading
+import time
 import uuid
 import urllib.parse
+import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from Scanner.har_loader import HarLoader
@@ -18,7 +20,56 @@ from Analyze.postfiltered import VectorFiltering
 from Analyze.cleanfilter import cleanfilter
 from Replay.replay_request import ReplayRequest
 from main import _analyze_one, _apply_replay_confirmation, _escalate_severity
-from tool_config import set_oob_override
+from tool_config import (set_oob_override, get_oob_domain,
+                         get_oob_collector_url, get_oob_wait_seconds)
+
+
+def _collector_alive(collector_url: str) -> bool:
+    try:
+        with urllib.request.urlopen(f"{collector_url.rstrip('/')}/_health", timeout=2) as r:
+            return r.status == 200
+    except Exception:
+        return False
+
+
+def _poll_oob(collector_url: str, token: str) -> int:
+    """Return how many OOB callbacks the collector logged for this token."""
+    try:
+        url = f"{collector_url.rstrip('/')}/_hits?token={urllib.parse.quote(token)}"
+        with urllib.request.urlopen(url, timeout=3) as r:
+            return int(json.loads(r.read().decode("utf-8")).get("count", 0))
+    except Exception:
+        return 0
+
+
+def _oob_confirm(findings: list, token_by_idx: dict, base_domain: str):
+    """After replay, poll the self-hosted collector and elevate any finding whose
+    unique per-vector token received an out-of-band callback (DNS/HTTP) to
+    dynamic-strong — this is the only path that reaches 'strong' on blind labs where
+    the in-band control probe downgrades everything. No-op (and silent) when OOB is
+    not configured or the collector is unreachable, so detect-only runs are unaffected."""
+    collector_url = get_oob_collector_url()
+    if not (base_domain and token_by_idx and collector_url):
+        return
+    if not _collector_alive(collector_url):
+        print(f"    [oob] collector {collector_url} unreachable — skipping OOB confirmation")
+        return
+    wait = get_oob_wait_seconds()
+    if wait > 0:
+        print(f"    [oob] waiting {wait:.0f}s for out-of-band callbacks…")
+        time.sleep(wait)
+    for idx, token in token_by_idx.items():
+        hits = _poll_oob(collector_url, token)
+        if hits > 0:
+            f = findings[idx]
+            f["evidence"] = "dynamic-strong"
+            f["oob_confirmed"] = True
+            f["indicators"] = [
+                f"OOB callback received ({hits} hit(s)) on token {token} — confirmed "
+                f"out-of-band interaction: the payload was deserialized and executed"
+            ] + list(f.get("indicators", []))
+            print(f"    [oob] CONFIRMED strong: {f.get('location')}/{f.get('name')} "
+                  f"{f.get('url')} ({hits} hit(s))")
 
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8099
@@ -51,9 +102,16 @@ def run_pipeline(har_data: dict, do_replay: bool = True, oob_domain: str | None 
     filtered = VectorFiltering({"vectors": vectors}).filter()
     cleaned = cleanfilter(filtered)._clean_all()
 
+    base_oob = get_oob_domain()
+    token_by_idx: dict[int, str] = {}
     replayer = ReplayRequest() if do_replay else None
     findings = []
     for vector in cleaned:
+        oob_token = None
+        if base_oob and replayer:
+            # Unique per-vector OOB token so a callback maps back to THIS finding.
+            oob_token = uuid.uuid4().hex[:12]
+            set_oob_override(f"{oob_token}.{base_oob}")
         entry = _analyze_one(vector)
         fp = entry["fingerprint"]
         ex = entry["exploit_analysis"]
@@ -109,6 +167,7 @@ def run_pipeline(har_data: dict, do_replay: bool = True, oob_domain: str | None 
             "location": entry["vector"].get("location"),
             "name": entry["vector"].get("name"),
             "occurrences": entry["vector"].get("occurrences", 1),
+            "oob_token": oob_token,
             "type": fp.get("type"),
             "subtype": fp.get("subtype"),
             "confidence": fp.get("confidence"),
@@ -123,6 +182,10 @@ def run_pipeline(har_data: dict, do_replay: bool = True, oob_domain: str | None 
             "indicators": indicators,
             "attempts": attempts,
         })
+        if oob_token:
+            token_by_idx[len(findings) - 1] = oob_token
+
+    _oob_confirm(findings, token_by_idx, base_oob)
 
     _rank = {"dynamic-strong": 0, "dynamic-weak": 1, "static-only": 2}
     findings.sort(key=lambda f: (_rank.get(f["evidence"], 3), f["type"] == "Unknown"))

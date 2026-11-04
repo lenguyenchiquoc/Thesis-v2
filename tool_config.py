@@ -66,3 +66,27 @@ def get_oob_domain() -> str:
     raw = _load_raw_config()
     value = raw.get("oob_domain")
     return value if isinstance(value, str) else ""
+
+
+def get_oob_collector_url() -> str:
+    """Where the scanner polls for OOB hits (the self-hosted collector's HTTP API).
+    Separate from the embedded OOB *domain*: the domain is what the target calls back
+    to (may be a public host / ngrok / VPS), while this is where WE read the hit log —
+    often http://127.0.0.1:9000 even when the domain is public, if the collector runs
+    locally. Empty disables OOB auto-confirmation."""
+    env_value = os.environ.get("ETHICALQUOC_OOB_COLLECTOR")
+    if env_value:
+        return env_value
+    raw = _load_raw_config()
+    value = raw.get("oob_collector_url")
+    return value if isinstance(value, str) else ""
+
+
+def get_oob_wait_seconds() -> float:
+    """Seconds to wait after replay before polling the collector — OOB callbacks are
+    asynchronous and can lag the request that triggered them."""
+    raw = _load_raw_config()
+    try:
+        return float(raw.get("oob_wait_seconds", 6))
+    except (TypeError, ValueError):
+        return 6.0

@@ -56,12 +56,13 @@ function renderResults(data) {
   for (const f of data.findings || []) {
     const div = document.createElement("div");
     div.className = "finding" + (f.evidence === "dynamic-strong" ? " vuln" : "");
-    const badge = evBadge(f.evidence);
+    const badge = evBadge(f.evidence) + (f.oob_confirmed ? ` <span class="badge vuln">OOB ✓</span>` : "");
     const label = f.subtype || f.exploit_type || f.type || "?";
+    const occ = Number(f.occurrences) > 1 ? ` <span class="muted">·${f.occurrences}×</span>` : "";
     div.innerHTML =
       `<div class="top"><span class="tag"><b>${f.type}</b> · ${label} ` +
       `<span class="muted">(click for detail)</span></span>${badge}</div>` +
-      `<div class="ep">${f.method} ${f.url} <span class="muted">[${f.location}/${f.name}]</span></div>` +
+      `<div class="ep">${f.method} ${f.url} <span class="muted">[${f.location}/${f.name}]</span>${occ}</div>` +
       (f.indicators && f.indicators.length
         ? `<div class="muted" style="margin-top:4px;">${esc(f.indicators[0])}</div>` : "") +
       `<div class="detail" style="display:none;"></div>`;

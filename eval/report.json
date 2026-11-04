@@ -1,0 +1,40 @@
+{
+  "locname": {
+    "tool": {
+      "tp": 7,
+      "fp": 2,
+      "fn": 0
+    },
+    "base": {
+      "tp": 7,
+      "fp": 325,
+      "fn": 0
+    },
+    "dup_folded": 7
+  },
+  "url": {
+    "tool": {
+      "tp": 34,
+      "fp": 9,
+      "fn": 0
+    },
+    "base": {
+      "tp": 34,
+      "fp": 3397,
+      "fn": 0
+    },
+    "dup_folded": 7
+  },
+  "type_accuracy": 1.0,
+  "type_confusion": {
+    "PHP": {
+      "PHP": 4
+    },
+    "Java": {
+      "Java": 2
+    },
+    "Ruby": {
+      "Ruby": 1
+    }
+  }
+}

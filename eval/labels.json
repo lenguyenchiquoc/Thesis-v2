@@ -1,0 +1,14 @@
+{
+  "_README": "Ground-truth labels for evaluation — INDEPENDENT of the tool's own output. Each key is a HAR filename in the --har-dir. 'deser_sinks' lists the vectors that ARE genuine insecure-deserialization sinks (determined from the serialization format's magic bytes, per spec: O:/a: = PHP, 0xACED = Java, 0x0408 = Ruby Marshal). Everything the tool flags that is NOT in deser_sinks counts as a false positive. A negative HAR (a normal, non-deser capture) has deser_sinks: [] — every flag on it is a false positive. Match is on (location, name); URL is ignored so the same sink on several pages is one logical positive.",
+  "pair1": {"lang": "PHP",  "deser_sinks": [{"location": "cookie", "name": "session", "type": "PHP"}]},
+  "pair2": {"lang": "PHP",  "deser_sinks": [{"location": "cookie", "name": "session", "type": "PHP"}]},
+  "pair3": {"lang": "PHP",  "deser_sinks": [{"location": "cookie", "name": "session", "type": "PHP"}]},
+  "pair4": {"lang": "Java", "deser_sinks": [{"location": "cookie", "name": "session", "type": "Java"}]},
+  "pair5": {"lang": "PHP",  "deser_sinks": [{"location": "cookie", "name": "session", "type": "PHP"}]},
+  "pair6": {"lang": "Ruby", "deser_sinks": [{"location": "cookie", "name": "session", "type": "Ruby"}]},
+  "pair7": {"lang": "Java", "deser_sinks": [{"location": "cookie", "name": "session", "type": "Java"}]},
+
+  "SRC1.json": {"lang": "None", "note": "real capture truyenmoi.app — no deserialization", "deser_sinks": []},
+  "src2.json": {"lang": "None", "note": "real capture fundingchoicesmessages.google.com — no deserialization", "deser_sinks": []},
+  "src3.json": {"lang": "None", "note": "real capture truyenqq.link — no deserialization", "deser_sinks": []}
+}

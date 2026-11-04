@@ -1,5 +1,85 @@
 # Ghi chú tiến độ — EthicalQuoc
 
+**[2026-11-04 — KHUNG ĐÁNH GIÁ (framing cho luận văn) — chốt cách định nghĩa, tránh mâu thuẫn "Suspected".]**
+- **Bài toán = phân loại nhị phân (binary classification)**, nhưng 2 lớp KHÔNG phải `vulnerable/safe`. Hai lớp là
+  **FLAG / BỎ QUA** = "vector này có đáng nêu là dữ liệu serialized không". → giữ đúng [[project-tool-detect-not-exploit]]:
+  tool không tự khẳng định lỗ (mọi finding "Suspected"); eval KHÔNG đo "đoán lỗ đúng không" mà đo **độ chính xác của bước
+  PHÁT HIỆN serialized data**.
+- **Ground truth = KHÁCH QUAN**: positive = "vector mang dữ liệu serialized" (verify bằng **magic byte** theo spec, không
+  cần biết khai thác được hay không). KHÔNG dùng "có RCE/exploit được" làm nhãn (cái đó mới cần confirm tay). → "đúng/sai"
+  nằm ở: flag trúng serialized = TP; flag nhầm thứ-không-serialized = FP; bỏ sót serialized = FN; bỏ qua đúng = TN.
+- **Chỉ gán nhãn vị trí + type** (đều khách quan). **severity/confidence/evidence KHÔNG gán nhãn đúng/sai** vì là *phán
+  đoán của chính tool*, không có "đáp án chuẩn" độc lập → nếu muốn đánh giá thì dùng **calibration** ("confidence=High thì
+  đúng bao nhiêu %"), KHÔNG nhét vào precision/recall.
+- **Precision/recall KHÔNG phải của riêng ML**: chúng đánh giá KẾT QUẢ của *bất kỳ* bộ phát hiện (IR, antivirus theo chữ
+  ký, Burp/Nessus/sqlmap — đều rule-based như tool này). Tool rule-based deterministic nên mỗi FP/FN **giải thích được tận
+  gốc** (còn mạnh hơn ML hộp đen). Dùng **precision/recall/F1, KHÔNG dùng accuracy** vì dataset **cực imbalanced** (~190
+  vector/HAR chỉ 1 positive → classifier lười "luôn nói không" cũng ~99.5% accuracy, vô dụng).
+- **Ground truth negative đã verify ĐỘC LẬP** (deep scan tự viết, KHÔNG dùng signatures.py của tool — chỉ dùng HarLoader để
+  moi value; phần quyết-định-serialized là code riêng): quét PHP/Java/Ruby/Pickle/.NET/YAML/typed-JSON qua url+base64+gzip+
+  zlib+json tới 4 lớp. Kết quả: 7 lab → tìm đúng sink đã biết (positive control PASS); SRC1/src2/src3 → **0 serialized, mọi
+  format mọi lớp** → nhãn `deser_sinks:[]` vững. Script ở scratchpad (`deep_deser_scan.py`), chưa persist vào repo.
+- **Câu viết luận văn (gợi ý)**: "Công cụ không tự khẳng định lỗ hổng (finding = Suspected). Đánh giá do đó không đo độ đúng
+  của một kết luận khai thác, mà là bài toán phân loại nhị phân FLAG/BỎ QUA: công cụ có nhận diện đúng các vector mang dữ
+  liệu serialized (ground truth khách quan từ magic byte) và tránh báo nhầm trên dữ liệu không-serialized hay không — đo
+  bằng precision/recall/F1, chuẩn đánh giá mọi hệ thống phát hiện, với accuracy bị loại do mất cân bằng lớp."
+
+**[2026-11-03 — ĐÃ LÀM: Evaluation harness (precision/recall) — detection, có baseline.]**
+- **Mục đích**: ra bảng số cho chương "Đánh giá" luận văn. Nhãn **độc lập** (không dùng output tool — tránh tự chấm tự),
+  xác định type từ magic byte serialized theo spec (`O:`/`a:`=PHP, `0xACED`=Java, `0x0408`=Ruby).
+- **File**: [eval/labels.json](eval/labels.json) (nhãn tay: 7 lab, `deser_sinks` = sink thật; negative HAR thì `[]`),
+  [eval/evaluate.py](eval/evaluate.py) chạy **detection stages** (Scan→filter→clean→normalize→fingerprint, **KHÔNG replay/
+  phpggc** → nhanh, deterministic), match flag↔sink theo `(location,name)` (bỏ URL → cùng cookie nhiều trang = 1 sink).
+- **Kết quả 7 lab**: TOOL **P=1.000 R=1.000 F1=1.000**, type 7/7 đúng. **Baseline** (regex "token dài base64-ish") **P=0.127**
+  (48 FP) R=1.000 → chứng minh filter `looks_like_serialized` ([Utility/signatures.py](Utility/signatures.py)) hơn hẳn đoán mò.
+- **Known-issue honest**: `header/Cookie` mang cùng cookie serialized → bị flag trùng `cookie/session` (plan
+  `cheerful-munching-shore.md`, deferred). Eval **gộp** cặp này (đếm riêng "dup folded: 7", KHÔNG tính FP oan) → P=1.0 phản
+  ánh đúng chất lượng detect; nếu không gộp thì P=0.5 (phạt dup).
+- **Stress-test với negative THẬT (2026-11-03)**: user capture 3 HAR site thật không-deser — SRC1 (truyenmoi.app, 1449v),
+  src2 (google fundingchoices, 15933v), src3 (truyenqq, 2126v), nhãn `deser_sinks:[]`. Kết quả: **TOOL P=0.778 R=1.000
+  F1=0.875** (2 FP) vs **BASELINE P=0.021** (325 FP) → tool hơn ~37×. Recall vẫn 1.0 (không mất lab nào).
+- **2 FP tìm được (đều `type=Unknown`, đều KHỚP quyết định cũ — KHÔNG phải bug mới)**:
+  (1) SRC1 `header/x-csrf-token` (token random 40 ký tự) — flag vì `x-csrf-token ∈ Suspicious_header`; đúng FP mà note:351
+  đã lường trước ("chưa bắt CSRF/nonce, follow-up nếu thấy FP"). (2) src2 `raw_body/payload` bắt đầu `\x1f\x8b` = **magic
+  gzip**; gate cố tình nhận gzip/zlib (note:468) vì payload serialized hay bị gzip bọc → flag gzip body là theo thiết kế.
+  → Cả 2 là **limitation đo được** (ghi vào chương Đánh giá), không sửa vội. Hướng giảm FP nếu muốn (chưa làm, cần user
+  quyết): tách Unknown-type ra tier "info" (không tính là finding deser) → headline precision chỉ đếm type cụ thể.
+- **2 khóa so khớp (2026-11-03, user yêu cầu thêm URL)**: evaluate.py giờ in CẢ 2:
+  (a) **`(location,name)`** — cookie trên nhiều trang = 1 lỗ logic (đúng cho deser cookie xử lý chung): **P=0.778 R=1.0
+  F1=0.875**; (b) **`(url,location,name)`** — mỗi request 1 đơn vị (phân biệt param dính-endpoint-này-không-endpoint-kia):
+  **P=0.791 R=1.0 F1=0.883** (TP=34, FP=9 = csrf×8trang + gzip×1). Baseline tương ứng P=0.021 / 0.010. **FN=0 cả hai.**
+  Nhãn URL-less tự mở rộng sang mọi request mang `(loc,name)` CÓ GIÁ TRỊ (bỏ cookie rỗng ở /logout — nếu không sẽ FN oan).
+  Chọn khóa tùy loại lỗ: deser-cookie → `(loc,name)`; param-theo-endpoint → `(url,loc,name)`.
+- **Chạy**: `python -I eval/evaluate.py --json-out eval/report.json`. Thêm negative = bỏ HAR vào `results/` + 1 dòng
+  `"<har>": {"deser_sinks": []}` trong [eval/labels.json](eval/labels.json) (sink có thể thêm `"url_contains"` để ghim endpoint).
+
+**[2026-11-03 — ĐÃ LÀM: OOB auto-confirm (self-hosted collector) → nâng weak→STRONG.]**
+- **Vì sao**: `dynamic_strong=0` ở MỌI lab thật (control probe hạ hết về weak) → tầng "strong" chưa bao giờ kích hoạt. OOB
+  callback là con đường DUY NHẤT lên strong trên lab blind. Interactsh/oast.fun không poll callback về được → **tự dựng
+  collector**.
+- **Collector** [Server/oob_collector.py](Server/oob_collector.py): stdlib thuần (không pip). HTTP listener + **DNS
+  responder tự craft gói A** (bắt URLDNS + để `*.base` resolve về IP collector). Log hit theo **token**; token đọc từ
+  **nhãn trái nhất của Host/DNS** (`<token>.<base>`, kiểu public/ngrok/VPS) hoặc **segment path đầu** (fallback cho
+  IP/localhost HTTP). Endpoint `GET /_hits?token=` để tool poll, `/_health`, `/_all`. Chạy: `python -m Server.oob_collector`
+  (HTTP :9000 + DNS :5353). Smoke-test 3 kiểu bắt token (HTTP path / HTTP Host-subdomain / DNS) đều PASS, DNS trả đúng A.
+- **Token riêng mỗi vector** [Server/serve.py](Server/serve.py): trong vòng lặp `run_pipeline`, mỗi vector sinh
+  `uuid4().hex[:12]` → `set_oob_override(f"{token}.{base}")` trước `_analyze_one` → payload (URLDNS/curl-RCE/gopher/
+  snakeyaml) nhúng đúng subdomain token của vector đó → hit map ngược về đúng finding.
+- **Poll + elevate** (`_oob_confirm`): sau replay, health-check collector → chờ `oob_wait_seconds` (mặc định 6s, callback
+  async) → poll `/_hits` từng token → có hit thì finding `evidence="dynamic-strong"` + `oob_confirmed=True` + indicator
+  "OOB callback received…". KHÔNG cấu hình OOB / collector chết → **no-op im lặng**, detect-only không đổi.
+- **Config** [tool_config.py](tool_config.py): `oob_domain` (base nhúng — hoặc gõ ở ô OOB extension), `oob_collector_url`
+  (nơi tool poll, tách biệt — thường `http://127.0.0.1:9000` kể cả khi domain public), `oob_wait_seconds`. Env tương ứng
+  `ETHICALQUOC_OOB_DOMAIN` / `_OOB_COLLECTOR`.
+- **3 kịch bản reachability**: (a) VPS+domain → NS trỏ về box, DNS :53 (bắt cả URLDNS); (b) ngrok → HTTP-only, token qua
+  Host; (c) **localhost Web_vul_env** → collector + DNS answer-ip=127.0.0.1, lấy ca "strong" sạch cho eval.
+- **Test**: 124/124 unit OK (không vỡ import); integration test poll/elevate PASS (chỉ finding có callback lên strong, cái
+  kia giữ weak); detect-only no-OOB → `oob_token=None`, no-op.
+- **UI (ĐÃ LÀM)**: [results.js](Extension/results.js)+[results.html](Extension/results.html) hiện pill **`OOB confirmed ✓`**
+  (đỏ đậm `ev-oob`) cạnh evidence khi `oob_confirmed`, + pill **`captured N×, tested once`** (occurrences) — bản HTML export
+  (`toHtml`) tái dùng DOM nên tự có. [popup.js](Extension/popup.js) thêm badge `OOB ✓` + `·N×`. Smoke-render node PASS.
+- **CHƯA**: demo end-to-end với target thật (cần Web_vul_env hoặc ngrok 1 lab) để thấy 1 ca thật lên `dynamic-strong`.
+
 **[2026-10-30 — ĐÃ LÀM: Dedup vector trùng ở loader + field `occurrences`.]**
 - **Đổi quyết định so với entry dưới**: entry 2026-10-30 trước ghi "KHÔNG làm dedup". Sau khi chốt lại ĐÚNG định nghĩa
   "trùng" = y chang CẢ `(url, method, location, name, value)` (URL bắt buộc), user yêu cầu làm. Khác hẳn kiểu dedup bỏ URL

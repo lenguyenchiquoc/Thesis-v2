@@ -17,6 +17,7 @@ class Fingerprint:
     PICKLE_MAGIC_BYTES = signatures.PICKLE_MAGIC_BYTES
     PICKLE_TEXT_INDICATORS = signatures.PICKLE_TEXT_INDICATORS
     PICKLE_GADGET = signatures.PICKLE_GADGET
+    JSONPICKLE_PATTERNS = signatures.JSONPICKLE_PATTERNS
 
     YAML_STRONG = signatures.YAML_STRONG
     YAML_MEDIUM = signatures.YAML_MEDIUM
@@ -32,6 +33,8 @@ class Fingerprint:
 
     RUBY_PATTERNS = signatures.RUBY_PATTERNS
     RUBY_MAGIC_BYTES = signatures.RUBY_MAGIC_BYTES
+    OJ_PATTERNS = signatures.OJ_PATTERNS
+    RUBY_YAML_PATTERNS = signatures.RUBY_YAML_PATTERNS
 
     WRAPPER_DANGEROUS = signatures.WRAPPER_DANGEROUS
     WRAPPER_MODERATE = signatures.WRAPPER_MODERATE
@@ -173,7 +176,12 @@ class Fingerprint:
             if gadget in lower:
                 score += 3
 
-        return {"score": score, "risk_level": "Critical", "subtype": None}
+        subtype = None
+        if any(re.search(p, raw) for p in self.JSONPICKLE_PATTERNS):
+            score  += 5
+            subtype = "jsonpickle Object Injection"
+
+        return {"score": score, "risk_level": "Critical", "subtype": subtype}
 
     def _detect_yaml(self, raw: str, lower: str) -> dict:
         score   = 0
@@ -185,6 +193,8 @@ class Fingerprint:
             (r'!!python/module\s*:',         "YAML Python Module Load"),
             (r'!!(java\.|javax\.|com\.sun)', "YAML Java Class Injection"),
             (r'!!javax\.script',             "YAML Java ScriptEngine RCE"),
+            (r'!ruby/object:',               "YAML Ruby Object Injection"),
+            (r'!ruby/(hash|struct|array|string|marshalable)', "YAML Ruby Object Injection"),
         ]
         for pattern, label in YAML_SUBTYPES:
             if re.search(pattern, raw, re.IGNORECASE):
@@ -239,7 +249,8 @@ class Fingerprint:
         return {"score": score, "risk_level": "High", "subtype": subtype}
 
     def _detect_ruby(self, raw: str, lower: str, bin_data: bytes) -> dict:
-        score = 0
+        score   = 0
+        subtype = None
 
         for magic in self.RUBY_MAGIC_BYTES:
             if magic in bin_data:
@@ -249,7 +260,11 @@ class Fingerprint:
             if re.search(p, raw):
                 score += 4
 
-        return {"score": score, "risk_level": "High", "subtype": None}
+        if any(re.search(p, raw) for p in self.OJ_PATTERNS):
+            score  += 5
+            subtype = "Oj Object Deserialization"
+
+        return {"score": score, "risk_level": "High", "subtype": subtype}
 
     def _detect_wrapper(self, lower: str) -> dict:
         score   = 0

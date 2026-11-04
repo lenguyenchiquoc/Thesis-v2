@@ -20,7 +20,7 @@ from Analyze.postfiltered import VectorFiltering
 from Analyze.cleanfilter import cleanfilter
 from Replay.replay_request import ReplayRequest
 from main import _analyze_one, _apply_replay_confirmation, _escalate_severity
-from tool_config import (set_oob_override, get_oob_domain,
+from tool_config import (set_oob_override, get_oob_domain, format_oob_token,
                          get_oob_collector_url, get_oob_wait_seconds)
 
 
@@ -111,7 +111,7 @@ def run_pipeline(har_data: dict, do_replay: bool = True, oob_domain: str | None 
         if base_oob and replayer:
             # Unique per-vector OOB token so a callback maps back to THIS finding.
             oob_token = uuid.uuid4().hex[:12]
-            set_oob_override(f"{oob_token}.{base_oob}")
+            set_oob_override(format_oob_token(base_oob, oob_token))
         entry = _analyze_one(vector)
         fp = entry["fingerprint"]
         ex = entry["exploit_analysis"]

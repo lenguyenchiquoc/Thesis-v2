@@ -65,11 +65,12 @@
 
     <div class="row" style="margin-top:10px;">
       <input id="oobInput" type="text" autocomplete="off" spellcheck="false"
-             placeholder="OOB domain (optional) — e.g. abc123.oastify.com"
+             placeholder="OOB domain (optional) — empty = internal collector"
              style="flex:1; padding:7px 9px; border:1px solid var(--line); border-radius:7px; font:inherit; color:var(--fg); background:var(--bg);">
     </div>
     <div class="muted" style="margin-top:4px;">
-      For blind confirmation (URLDNS / SSRF canary). Leave empty to use config.json.
+      For blind confirmation (URLDNS / SSRF canary). Leave empty → the built-in
+      collector on localhost (run start-oob.bat). Set a domain to use your own.
     </div>
 
     <div class="row" style="margin-top:10px;">

@@ -187,10 +187,21 @@ class TestYamlMutationRespectsJavaVsPython(unittest.TestCase):
         self.assertNotIn("!!python/", payload, "Khong duoc gui cu phap Python cho target Java")
 
     def test_python_exploit_type_still_gets_python_payload(self):
-        results = mutate("!!python/object/apply:os.system ['id']", "yaml_exec", "YAML Python RCE")
-        self.assertEqual(len(results), 3)  # 1 cho moi TEST_COMMANDS
-        for payload in decoded_payloads(results):
+        import tool_config
+        tool_config.set_oob_override("oob.test.local")   # make OOB variant deterministic
+        try:
+            results = mutate("!!python/object/apply:os.system ['id']", "yaml_exec", "YAML Python RCE")
+        finally:
+            tool_config.set_oob_override(None)
+        rce = [r for r in results if r.get("type") == "yaml_rce"]
+        self.assertEqual(len(rce), 3)  # 1 cho moi TEST_COMMANDS
+        for payload in decoded_payloads(rce):
             self.assertIn("!!python/object/apply:os.system", payload)
+        # blind OOB variant: pure-Python urllib callback (no local command)
+        oob = [r for r in results if r.get("type") == "yaml_oob"]
+        self.assertEqual(len(oob), 1)
+        self.assertIn("urllib.request.urlopen", decoded_payloads(oob)[0])
+        self.assertIn("oob.test.local", decoded_payloads(oob)[0])
 
     def test_java_class_injection_subtype_also_routes_to_java_payload(self):
         results = mutate("!!java.lang.Runtime [...]", "yaml_exec", "YAML Java Class")
@@ -278,6 +289,31 @@ class TestPhpTypeJuggling(unittest.TestCase):
                    'O:10:"DefaultMap":1:{s:8:"callback";s:4:"exec";}}')
         results = mutate(payload, "modify_string")
         self.assertFalse(any(r["type"].startswith("type_juggle") for r in results))
+
+
+class TestPythonBlindOobVariants(unittest.TestCase):
+    """The pickle/YAML Python probes gain a blind-confirmation variant that makes the
+    target call the OOB collector (urllib) — for sinks whose result never shows in the
+    response. Only emitted when an OOB domain is configured."""
+
+    def test_pickle_exec_adds_oob_callback_variant(self):
+        import tool_config
+        tool_config.set_oob_override("oob.test.local/tok1")
+        try:
+            results = mutate("gASV...", "pickle_exec", "Python Pickle")
+        finally:
+            tool_config.set_oob_override(None)
+        oob = [r for r in results if r.get("type") == "pickle_oob"]
+        self.assertEqual(len(oob), 1)
+        raw = base64.b64decode(oob[0]["payload"])
+        self.assertIn(b"urllib.request", raw)
+        self.assertIn(b"http://oob.test.local/tok1/", raw)
+
+    def test_no_oob_variant_when_oob_not_configured(self):
+        # payloadMutation imported get_oob_domain by name, so patch it there.
+        with patch("Analyze.payloadMutation.get_oob_domain", return_value=""):
+            results = mutate("gASV...", "pickle_exec", "Python Pickle")
+        self.assertFalse(any(r.get("type") == "pickle_oob" for r in results))
 
 
 if __name__ == "__main__":

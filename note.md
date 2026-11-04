@@ -1,5 +1,136 @@
 # Ghi chú tiến độ — EthicalQuoc
 
+**[2026-11-04 — ĐÃ LÀM: Vá GAP "blind deser" — thêm biến thể OOB cho Python pickle+YAML + sink blind + demo end-to-end OOB ✓.]**
+- **Gap phát hiện**: payload pickle/YAML của Python chỉ chạy lệnh LOCAL (`TEST_COMMANDS=["id","whoami","hostname"]`,
+  `os.system`) → chỉ bắt được qua in-band oracle (response đổi). Sink **blind** (deserialize trong worker, response không đổi)
+  → tool MÙ hoàn toàn, không có đường confirm. Java/.NET có probe OOB nhưng Python/Ruby thì KHÔNG.
+- **Vá** ([payloadMutation.py](Analyze/payloadMutation.py)): thêm class `_PickleOOB` (`__reduce__` → `urllib.request.urlopen`
+  — pure-Python, KHÔNG cần curl/wget trên target) + `_mutate_pickle_oob()` + `_mutate_yaml_python_oob()`
+  (`!!python/object/apply:urllib.request.urlopen`). Gắn vào dispatch: `pickle_exec` → `_mutate_pickle()+_mutate_pickle_oob()`;
+  `_mutate_yaml_python()` append OOB variant. Chỉ phát khi có `oob_domain` (gated như Java). URL = `http://{oob}/` → scanner
+  đã ghép sẵn `{token}` vào base qua `format_oob_token` nên callback mang đúng token mỗi vector.
+- **Sink blind để test** ([python-app/app.py](../Web%20vul%20env/python-app/app.py)): thêm **SINK 5** `POST /api/import-async`
+  = `pickle.loads` nhưng **luôn trả `{"queued":true}`** bất kể benign/lỗi/exec (nuốt exception) → in-band oracle mù, CHỈ OOB
+  confirm được. Thêm nút UI "Queue backup (async)" (dashboard). python-app-secure: `/api/import-async` → `json.loads` (an toàn,
+  không callback kể cả blind). Cả 2 dashboard thêm box + wireImport.
+- **Fix collector** ([oob_collector.py](Server/oob_collector.py)): `host.docker.internal` (container gọi host) có leftmost label
+  `host` → collector trích nhầm token = "host". Thêm `_NON_TOKEN_HOSTS={localhost,host.docker.internal,gateway.docker.internal}`
+  để `_token_from_host` trả "" cho mấy host này → dùng PATH token. Verify không hỏng case domain thật (`abc.oast.fun`→`abc`).
+- **DEMO END-TO-END THẬT (lần đầu OOB ✓ cháy)**: rebuild python-vuln (Docker), chạy collector host `:9001`, bắn payload
+  `pickle_oob` (urllib → `http://host.docker.internal:9001/<token>/`) vào `/api/import-async`:
+  - response benign == response payload == `{"queued":true}` → **in-band oracle MÙ** (đúng bản chất blind).
+  - collector log **1 hit đúng token** `ok...` → OOB confirm thành công. Container→host qua `host.docker.internal` OK (bind 0.0.0.0).
+- **Lưu ý Docker**: target trong container phải gọi `host.docker.internal:<port>` (KHÔNG phải 127.0.0.1 = chính container).
+  Mặc định internal là `127.0.0.1:9000` chỉ đúng khi target chạy trực tiếp trên host; với Web_vul_env (Docker) đặt oob domain =
+  `host.docker.internal:9000`.
+- **Verify regression**: 73 test (payload_mutation + exploitability) OK (+2 test OOB mới: pickle_oob có/không khi set OOB;
+  sửa 1 test yaml python đếm 3→lọc theo type). **Ruby OOB CHƯA làm** — Python có sẵn `object/apply`/`__reduce__` gọi hàm 1 dòng;
+  Ruby Marshal/Psych cần gadget chain thật (version-specific) nên để sau, không bịa payload không cháy.
+- **CÒN**: 1 collector cũ (pre-fix) còn chiếm `:9000` (taskkill bị chặn) — reboot hoặc tắt qua Task Manager; lần sau chạy
+  `.\start-oob.bat` là bản đã fix.
+
+**[2026-11-04 — ĐÃ LÀM: OOB mặc định dùng INTERNAL collector (user không set → internal, có set → dùng của user).]**
+- **Yêu cầu**: user không điền OOB trên UI → mặc định gọi về **collector nội bộ** (self-hosted); có điền → dùng domain user set.
+- **config.json**: `oob_domain` đổi từ `...oast.fun` (public Interactsh) → **`""`** (rỗng); thêm `oob_collector_url:
+  "http://127.0.0.1:9000"` + `oob_wait_seconds: 6`.
+- **tool_config.py**: `get_oob_domain()` precedence = UI override > env > config `oob_domain` > **internal base** (lấy host:port
+  từ collector url khi rỗng). `get_oob_collector_url()` giờ **mặc định internal** `http://127.0.0.1:9000` khi key vắng (đặt
+  `""` tường minh để tắt hẳn OOB). Thêm `format_oob_token(base, token)`: **domain thật** (`abc.oast.fun`) → subdomain
+  `<token>.<base>`; **IP/host:port** (`127.0.0.1:9000`) → path `<base>/<token>` (IP không gắn subdomain được; collector đọc
+  token ở path segment đầu cho callback HTTP-only localhost). Thêm helper `_looks_like_ip_or_hostport`.
+- **serve.py**: dòng inject per-vector token đổi `f"{token}.{base}"` → `format_oob_token(base_oob, oob_token)` (import thêm).
+- **start-oob.bat** (mới, ở `Thesis/`): chạy `python -m Server.oob_collector --http-port 9000 --no-dns`, kèm chú thích cách
+  bật DNS. Extension popup: placeholder + hint đổi thành "empty = internal collector / run start-oob.bat".
+- **Verify**: precedence đúng (nothing→`127.0.0.1:9000/abc123` path-form; set `xyz.oast.fun`→`abc123.xyz.oast.fun` subdomain-form);
+  collector `/_health` ok + callback path-token `http://127.0.0.1:9000/<token>/x` log đúng token; `import Server.serve` OK;
+  48 test exploitability OK. **Lưu ý**: callback chỉ thật sự cháy khi replay payload có gadget SSRF/RCE nhắm vào collector
+  (bước active-testing) — plumbing đã thông, chưa chạy full end-to-end với target thật.
+
+**[2026-11-04 — ĐÃ LÀM: Test end-to-end Docker (python+ruby, vuln+secure) + control-panel 2 nút vuln/secure + wire java-secure.]**
+- **Test thật trên Docker** (user đã bật Docker): cả 4 app python/ruby chạy, **mọi sink fire đúng**. Python vuln: pickle cookie →
+  `/api/profile` ra user; `/api/import-config` `yaml.load` → dựng `<Settings object>`; `/api/restore-prefs` jsonpickle →
+  `<Preferences object>`. Ruby vuln: Marshal cookie OK; `YAML.unsafe_load` → `#<OpenStruct ...>`; `Oj.load(mode: :object)` →
+  `#<OpenStruct ...>` (xác nhận `gem 'oj'` + `build-essential` build native ext OK — Ruby lần đầu chạy thật được). Secure cả 2:
+  cookie = signed-JSON (HMAC), `yaml.safe_load`/`YAML.safe_load` **từ chối** tag object, `json.loads`/`JSON.parse` coi marker là
+  string trơ. → tương phản vuln/secure đúng 2 chiều.
+- **control-panel/index.html**: thay 1 nút "Open backend" bằng **2 nút** mỗi ngôn ngữ — `⚠ Vulnerable` (đỏ) + `🔒 Secure`
+  (xanh), hiện kèm port. backends giờ có `vulnPort`/`securePort`. Nút Secure **tự disable** (xám, n/a) khi ngôn ngữ chưa có bản
+  secure. Ports: Java 8081/**8087**, PHP 8082/**(chưa có secure)**, Python 8083/8084, Ruby 8085/8086.
+- **java-app-secure**: trước đây config `server.port=8083` → **đụng port với python-vuln** (nên container bị stop). Fix: map host
+  **8087→8083** (không đổi app, chỉ đổi `-p`). Build image `java-app-secure` + `docker run -p 8087:8083`, verify HTTP 200.
+  Wire vào `start-all.bat` (build + run java-secure 8087, thêm vào danh sách `docker rm -f` + echo URL).
+- **Verify liveness**: cả 7 port (8081/8087/8082/8083/8084/8085/8086) đều HTTP 200.
+- **GAP còn lại**: **PHP chưa có bản secure** (chỉ có `php-app`, không có `php-app-secure`) — nút Secure của PHP đang disable.
+  Nếu muốn đồng bộ đủ (mọi ngôn ngữ vuln+secure) thì cần dựng `php-app-secure` (vd session = HMAC-signed JSON thay unserialize).
+
+**[2026-11-04 — ĐÃ LÀM: Vá GAP Ruby (Oj + Psych) + enrich ruby-app/ruby-app-secure (đủ 4 sink như python).]**
+- **ĐÃ VÁ Oj (Ruby)**: thêm `OJ_PATTERNS` (`"^o":`/`"^c":`/`"^u":`) ở [Utility/signatures.py](Utility/signatures.py) (qua
+  filter `looks_like_serialized`) + rule trong `_detect_ruby` ([Analyze/finderprint.py](Analyze/finderprint.py#L263-L265)):
+  `+5 điểm, subtype="Oj Object Deserialization"`. **ĐÃ VÁ Psych/YAML (Ruby)**: thêm `RUBY_YAML_PATTERNS`
+  (`!ruby/object:`/`!ruby/hash|struct|array|string|marshalable`) ở signatures + 2 dòng vào `YAML_SUBTYPES` trong
+  `_detect_yaml` ([finderprint.py:196-197](Analyze/finderprint.py#L196-L197)) → `subtype="YAML Ruby Object Injection"`.
+  Trước đó tool bắt Python `!!python/object` nhưng mù Ruby `!ruby/object` (bất đối xứng) — nay cân bằng.
+- **Verify**: `129 unit test OK` (+5 test mới: jsonpickle×2, Oj×2, Psych×1 — kể cả FP-guard benign `{"^note":1}` KHÔNG flag).
+  **evaluate.py FP KHÔNG đổi** (vẫn 2/9 trên SRC1/2/3, không FP mới trên site thật). Verify payload prefill của ruby-app:
+  Psych `--- !ruby/object:OpenStruct` → `YAML / YAML Ruby Object Injection` conf=Medium; Oj `{"^o":"OpenStruct",...}` →
+  `Ruby / Oj Object Deserialization` conf=Medium.
+- **Enrich ruby-app** (port 8085, giờ đủ **4 sink** như python-app, đều UI-trigger): SINK 1 cookie `Marshal.load`; SINK 2
+  `/api/import` `Marshal.load` (CVE-2026-41316 + `require 'erb'`); **SINK 3** `/api/import-config` → `YAML.unsafe_load`
+  (Psych object injection); **SINK 4** `/api/restore-prefs` → `Oj.load(mode: :object)`. Gemfile thêm `gem 'oj'`; Dockerfile
+  thêm `build-essential` (oj là native ext cần compiler). dashboard.html thêm 2 box mới (Import config YAML + Restore prefs
+  JSON) + refactor JS dùng helper `wireImport(btnId,inputId,outId,url)`.
+- **ruby-app-secure** (8086): thêm `/api/import-config` → `YAML.safe_load` (từ chối `!ruby/object:`) + `/api/restore-prefs`
+  → `JSON.parse` (không Oj). KHÔNG thêm `gem 'oj'` (secure không cần). dashboard prefill benign (YAML phẳng + JSON phẳng).
+- **CÒN LẠI**: chưa build Docker thật (cần Docker Desktop) → chưa `ruby -c`/chạy end-to-end được; capture HAR python/ruby
+  → thêm vào eval làm positive; nhân bản .NET + Node.
+
+**[2026-11-04 — ĐÃ LÀM: Dùng Web_vul_env dò GAP tool (như Jackson) → vá jsonpickle + enrich python-app.]**
+- **Mục đích (user chỉnh framing)**: app vuln KHÔNG chỉ để làm detection-target — mà để **tái hiện nhiều biến thể deser →
+  tìm chỗ tool MISS → vá** (đúng cách đã thêm Jackson). Viết probe bắn các biến thể Python/Ruby qua tool.
+- **3 GAP tìm được** (đều bị `looks_like_serialized` LOẠI TỪ ĐẦU, tool mù hoàn toàn, đều là RCE thật):
+  (1) **jsonpickle** `py/object`/`py/newargs` (tool bắt `py/reduce` nhưng miss `py/object`); (2) **Ruby Oj** object-mode
+  `{"^o":..}`/`{"^c":..}`; (3) **Ruby Psych/YAML** `!ruby/object:`/`!ruby/hash:`. (Tool bắt Python `!!python/object` YAML
+  nhưng KHÔNG bắt Ruby `!ruby/object` → bất đối xứng.)
+- **ĐÃ VÁ jsonpickle** (scope user chọn): thêm `JSONPICKLE_PATTERNS` ([Utility/signatures.py](Utility/signatures.py)) để
+  qua filter + rule trong `_detect_pickle` ([Analyze/finderprint.py](Analyze/finderprint.py)) gán `type="Python Pickle"`,
+  `subtype="jsonpickle Object Injection"`. Token rất đặc trưng (`"py/object":`) → FP thấp. Verify: py/object MISS→DETECT;
+  JSON lành (`{"theme":"dark"}`, cả `{"happy/object":1}`) KHÔNG bị flag. **126 unit test OK** (+2 test mới), **evaluate.py
+  FP KHÔNG đổi** (2/9 trên SRC1/2/3 — không FP mới). **Oj + Psych (Ruby) ĐÃ vá luôn** — xem mục kế dưới.
+- **Enrich python-app** (4 sink, đều UI-trigger): thêm **SINK 3** `POST /api/import-config` → `yaml.load(Loader=yaml.Loader)`
+  (**CVE-2026-24009** PyYAML — library-version CVE thật, pin được) + **SINK 4** `POST /api/restore-prefs` →
+  `jsonpickle.decode`. requirements thêm `PyYAML==6.0.1`, `jsonpickle==3.0.4`. UI prefill dùng **object-form** (export của
+  class `Settings`/`Preferences`) vì sink text-format (YAML/jsonpickle) **chỉ lộ khi payload mang marker object** — benign
+  dict không bị flag (đã verify). python-app-secure: `yaml.safe_load` + `json.loads`.
+- **Nhận thức quan trọng (cho luận văn)**: sink **native** (pickle/Marshal/Java) lộ ngay cả với traffic LÀNH (cookie luôn
+  là blob serialized); sink **text-format** (YAML/jsonpickle/Oj) chỉ lộ khi traffic chứa **payload có marker nguy hiểm** →
+  giới hạn của passive/traffic-based detection. py_compile 2 app OK; control-panel cập nhật mô tả sink.
+
+**[2026-11-04 — ĐÃ LÀM: Web_vul_env — python-app (vuln) + python-app-secure, nhúng CVE 2026.]**
+- **Bối cảnh**: mở rộng Web_vul_env (`D:\Thesis\Web vul env`) cho các ngôn ngữ còn thiếu. Mỗi ngôn ngữ làm **2 bản
+  (vuln + secure)** như java-app/java-app-secure, + nhúng **1-2 CVE ~2026 về insecure deser** (user yêu cầu). CVE đã
+  **verify qua web search** (không bịa — [[feedback-search-for-latest-knowledge]]): Python CVE-2026-25874 (LeRobot pickle),
+  CVE-2026-26215 (manga-translator pickle); Ruby CVE-2026-41316 (Marshal+erb gadget); .NET CVE-2026-26918 (BinaryFormatter);
+  Node CVE-2026-2265 (Replicator), CVE-2026-23737 (seroval). Cách nhúng = **mô phỏng ĐÚNG lớp lỗ của CVE** (không kéo nguyên
+  sản phẩm), trích dẫn CVE trong README/comment.
+- **python-app** (Flask, port 8083) — mirror php-app/java-app: web thật login→dashboard→profile, user wiener/peter. **2 sink
+  deser, đều có nút UI** (để HAR bắt): (1) cookie `session` = `base64(pickle.dumps(User))` → `pickle.loads` ở /api/profile,
+  /api/dashboard; (2) **POST /api/import** ("Restore preferences") → `pickle.loads(body)` = pattern CVE-2026-25874/26215,
+  dashboard có nút Restore gửi base64-pickle.
+- **python-app-secure** (port 8084) — vá: session = **signed JSON** (`base64(json).hmac-sha256`, verify constant-time rồi
+  json.loads, không pickle); /api/import = `json.loads` only. → đúng fix CVE (không đưa untrusted vào pickle).
+- **Verify detection** (không cần Docker): cookie vuln → Fingerprint ra **`Python Pickle` conf=High** (cả 2 sink); session
+  secure (signed JSON) → **`Unknown` Low** (KHÔNG flag) → tương phản đúng. `py_compile` cả 2 app OK.
+- **Nối hạ tầng**: `control-panel/index.html` thêm nút **Python** (switch 2→3, thumb động); `start-all.bat` build+run
+  python-vuln (8083) + python-secure (8084).
+- **ruby-app** (Sinatra, port 8085) + **ruby-app-secure** (8086) — ĐÃ LÀM, mirror y hệt: (1) cookie `session` =
+  `Base64(Marshal.dump(User))` → `Marshal.load`; (2) **POST /api/import** → `Marshal.load(body)` với `require 'erb'` =
+  pattern **CVE-2026-41316** (Marshal+ERB gadget chain bypass). Secure = signed JSON (HMAC) + `JSON.parse` import.
+  Verify detector: vuln session/import → **Ruby**; secure signed-JSON → **Unknown**. Nối control-panel (nút Ruby) +
+  start-all.bat (8085/8086). (Ruby không cài local → chưa `ruby -c` được, test thật khi build Docker.)
+- **Lưu ý eval**: Fingerprint trả `type="Python Pickle"`/`"Ruby"` → khi thêm HAR vào eval/labels.json nhớ để type khớp.
+  **CÒN LẠI**: capture HAR python/ruby-app → thêm vào eval làm positive; nhân bản **.NET** (CVE-2026-26918) + **Node**
+  (CVE-2026-2265/23737) mỗi cái vuln+secure. Chưa build Docker thật (cần Docker Desktop chạy) → test end-to-end + OOB-strong.
+
 **[2026-11-04 — KHUNG ĐÁNH GIÁ (framing cho luận văn) — chốt cách định nghĩa, tránh mâu thuẫn "Suspected".]**
 - **Bài toán = phân loại nhị phân (binary classification)**, nhưng 2 lớp KHÔNG phải `vulnerable/safe`. Hai lớp là
   **FLAG / BỎ QUA** = "vector này có đáng nêu là dữ liệu serialized không". → giữ đúng [[project-tool-detect-not-exploit]]:

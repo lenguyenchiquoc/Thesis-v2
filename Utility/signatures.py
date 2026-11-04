@@ -53,6 +53,16 @@ PICKLE_GADGET = [
     'os.system', 'subprocess.check_output',
     'eval', 'exec', '__import__',
 ]
+# jsonpickle encodes Python objects as JSON using distinctive "py/..." keys; decoding
+# such JSON reconstructs arbitrary objects (invoking __reduce__ / constructors) -> RCE.
+# Very jsonpickle-specific tokens, so low false-positive risk on ordinary JSON.
+JSONPICKLE_PATTERNS = [
+    r'"py/object"\s*:',
+    r'"py/reduce"\s*:',
+    r'"py/type"\s*:',
+    r'"py/function"\s*:',
+    r'"py/newargs(?:ex)?"\s*:',
+]
 
 YAML_STRONG = [
     r'!!python/object/apply',
@@ -125,6 +135,23 @@ RUBY_PATTERNS = [
 ]
 RUBY_MAGIC_BYTES = [
     b'\x04\x08',
+]
+# Oj (Ruby's fast JSON lib) object-mode encodes Ruby objects with "^o"/"^c"/"^u" keys;
+# Oj.load(json, mode: :object) on untrusted input reconstructs arbitrary objects -> RCE.
+OJ_PATTERNS = [
+    r'"\^o"\s*:',
+    r'"\^c"\s*:',
+    r'"\^u"\s*:',
+]
+# Psych (Ruby's YAML) object tags; YAML.unsafe_load / Psych.load of untrusted data
+# instantiates arbitrary Ruby objects (classic Ruby YAML deserialization -> RCE).
+RUBY_YAML_PATTERNS = [
+    r'!ruby/object:',
+    r'!ruby/hash',
+    r'!ruby/struct',
+    r'!ruby/array',
+    r'!ruby/string',
+    r'!ruby/marshalable',
 ]
 
 WRAPPER_DANGEROUS = [
@@ -244,12 +271,19 @@ def looks_like_serialized(value: str) -> bool:
     if any(p in decoded_value for p in PICKLE_TEXT_INDICATORS):
         return True
 
+    if any(re.search(p, value) or re.search(p, decoded_value) for p in JSONPICKLE_PATTERNS):
+        return True
+
     if any(re.search(p, value) or re.search(p, decoded_value) for p in DOTNET_VIEWSTATE):
         return True
     if any(re.search(p, value, re.IGNORECASE) or re.search(p, decoded_value, re.IGNORECASE) for p in DOTNET_PATTERNS):
         return True
 
     if any(re.search(p, value) or re.search(p, decoded_value) for p in RUBY_PATTERNS):
+        return True
+    if any(re.search(p, value) or re.search(p, decoded_value) for p in OJ_PATTERNS):
+        return True
+    if any(re.search(p, value) or re.search(p, decoded_value) for p in RUBY_YAML_PATTERNS):
         return True
 
     if is_nodejs_prototype_pollution(decoded_lower):

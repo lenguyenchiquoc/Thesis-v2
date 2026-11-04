@@ -1,5 +1,6 @@
 import json
 import os
+from urllib.parse import urlsplit
 
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_CONFIG_PATH = os.path.join(PROJECT_ROOT, "config.json")
@@ -55,7 +56,18 @@ def set_oob_override(domain) -> None:
     _oob_override = domain.strip() if isinstance(domain, str) and domain.strip() else None
 
 
+# Built-in fallback collector when the user configures nothing. Keeps OOB working
+# out of the box against the bundled self-hosted collector (python -m Server.oob_collector).
+_INTERNAL_COLLECTOR_URL = "http://127.0.0.1:9000"
+
+
 def get_oob_domain() -> str:
+    """The OOB callback base the scanner embeds in payloads.
+
+    Precedence: UI override (set_oob_override) > env > config.json 'oob_domain' >
+    the INTERNAL self-hosted collector (derived from the collector URL). So if the user
+    sets an OOB domain it is used; if they set nothing, callbacks go to our own
+    collector on localhost instead of any external service."""
     if _oob_override:
         return _oob_override
 
@@ -65,7 +77,20 @@ def get_oob_domain() -> str:
 
     raw = _load_raw_config()
     value = raw.get("oob_domain")
-    return value if isinstance(value, str) else ""
+    if isinstance(value, str) and value.strip():
+        return value.strip()
+
+    # Nothing set by the user -> default to the internal collector's host:port.
+    return _internal_oob_base()
+
+
+def _internal_oob_base() -> str:
+    """host:port of the configured collector (used as the default OOB base)."""
+    collector = get_oob_collector_url()
+    if not collector:
+        return ""
+    netloc = urlsplit(collector).netloc
+    return netloc
 
 
 def get_oob_collector_url() -> str:
@@ -73,13 +98,39 @@ def get_oob_collector_url() -> str:
     Separate from the embedded OOB *domain*: the domain is what the target calls back
     to (may be a public host / ngrok / VPS), while this is where WE read the hit log —
     often http://127.0.0.1:9000 even when the domain is public, if the collector runs
-    locally. Empty disables OOB auto-confirmation."""
+    locally. Defaults to the internal collector; set to empty in config.json to disable
+    OOB auto-confirmation entirely."""
     env_value = os.environ.get("ETHICALQUOC_OOB_COLLECTOR")
     if env_value:
         return env_value
     raw = _load_raw_config()
     value = raw.get("oob_collector_url")
-    return value if isinstance(value, str) else ""
+    if isinstance(value, str):
+        return value.strip()           # explicit "" in config disables OOB
+    return _INTERNAL_COLLECTOR_URL     # key absent -> internal default
+
+
+def format_oob_token(base: str, token: str) -> str:
+    """Per-vector OOB callback address embedded in a payload, given the base and a
+    unique token. Picks the form the collector can actually read the token from:
+      - real domain (has a dot, no port, e.g. abc.oast.fun) -> SUBDOMAIN form
+        '<token>.<base>' (collector reads the leftmost DNS label);
+      - IP or host:port (internal localhost collector, e.g. 127.0.0.1:9000) -> PATH form
+        '<base>/<token>' (an IP takes no subdomain; collector falls back to the first
+        path segment for HTTP-only callbacks)."""
+    base = base.strip().rstrip('/')
+    if not base:
+        return token
+    if _looks_like_ip_or_hostport(base):
+        return f"{base}/{token}"
+    return f"{token}.{base}"
+
+
+def _looks_like_ip_or_hostport(base: str) -> bool:
+    if ':' in base:                    # host:port
+        return True
+    labels = base.split('.')
+    return len(labels) == 4 and all(lbl.isdigit() for lbl in labels)  # IPv4
 
 
 def get_oob_wait_seconds() -> float:

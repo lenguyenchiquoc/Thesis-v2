@@ -5,5 +5,7 @@
         "ysonet": "tools/dotnet/ysonet.exe",
         "gopherus": "tools/gopherus/gopherus.py"
     },
-    "oob_domain": "nzsmzmtyfhznkssyysew50lx5siyor63r.oast.fun"
+    "oob_domain": "",
+    "oob_collector_url": "http://127.0.0.1:9000",
+    "oob_wait_seconds": 6
 }

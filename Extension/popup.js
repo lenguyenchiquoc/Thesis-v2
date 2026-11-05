@@ -45,10 +45,16 @@ function renderResults(data) {
   const s = data.stats || {};
   $("summary").style.display = "block";
   $("reportRow").style.display = "flex";
+  const oob = s.oob || null;
+  let oobTxt = "";
+  if (oob && oob.status === "ran")
+    oobTxt = ` · <span style="color:${oob.confirmed ? "#dc2626" : "#6b7280"}">OOB ${oob.confirmed}✓</span>`;
+  else if (oob && oob.status === "collector_unreachable")
+    oobTxt = ` · <span style="color:#b45309">OOB collector down</span>`;
   $("summary").innerHTML =
     `Target <b>${data.target || "?"}</b> — ${s.findings} findings, ` +
     `<span style="color:${s.dynamic_strong ? "#dc2626" : "#059669"}">` +
-    `${s.dynamic_strong || 0} strong dynamic signal</span> ` +
+    `${s.dynamic_strong || 0} strong dynamic signal</span>${oobTxt} ` +
     `<span class="muted">(${s.vectors_scanned} vectors scanned)</span>`;
 
   const box = $("results");

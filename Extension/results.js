@@ -52,12 +52,25 @@ function sigBadge(sig) {
   return "";
 }
 
+function oobLine(oob) {
+  if (!oob) return "";
+  if (oob.status === "ran") {
+    const col = oob.confirmed ? "#dc2626" : "#6b7280";
+    return `<div class="kv" style="margin-top:4px">OOB: <b style="color:${col}">${oob.confirmed} confirmed</b> ` +
+           `/ ${oob.tokens_polled} polled · collector ${esc(oob.collector)} reachable</div>`;
+  }
+  if (oob.status === "collector_unreachable")
+    return `<div class="kv" style="margin-top:4px;color:#b45309">OOB: collector unreachable — ${esc(oob.detail || "")}</div>`;
+  return `<div class="kv" style="margin-top:4px;color:#6b7280">OOB: not configured (detect-only)</div>`;
+}
+
 function render(data) {
   const s = data.stats || {};
   document.getElementById("sub").innerHTML =
     `Target <b>${esc(data.target)}</b> · ${s.findings} findings · ` +
     `<span style="color:${s.dynamic_strong ? "#dc2626" : "#059669"}">${s.dynamic_strong || 0} with strong dynamic signal</span> · ` +
     `${s.vectors_scanned} vectors scanned · generated ${new Date().toLocaleString()}` +
+    oobLine(s.oob) +
     (data.disclaimer ? `<div class="kv" style="margin-top:6px">${esc(data.disclaimer)}</div>` : "");
 
   const box = document.getElementById("findings");

@@ -1,5 +1,97 @@
 # Ghi chú tiến độ — EthicalQuoc
 
+**[2026-11-05 — FIX #3: XÁC ĐỊNH ĐÚNG topo — serve chạy TRONG WSL2 (qua ethicalquoc.ps1), collector trên Windows.]**
+- **Chốt nguyên nhân**: `ethicalquoc.ps1` = `wsl -d Ubuntu -- python3 main.py @args` → **serve chạy trong WSL2 Ubuntu**, KHÔNG
+  phải Windows. Collector chạy trên Windows (start-oob.bat/PowerShell). Verify từ WSL2: `127.0.0.1:9000` refused,
+  `host.docker.internal` KHÔNG resolve (distro Ubuntu thường không có, chỉ Docker-backend mới có). Nhưng Windows host reachable
+  qua **default-route gateway** của WSL2 → `172.27.32.1:9000/_health` = OK.
+- **Fix** ([serve.py](Server/serve.py)): thêm `_wsl_host_collector_urls(port)` — nếu chạy trong WSL (`/proc/version` chứa
+  `microsoft`), lấy IP Windows host từ `ip route show default` (gateway) + `/etc/resolv.conf` nameserver, trả
+  `http://<ip>:<port>`. Thêm các URL này vào danh sách candidate poll. Gateway động nên resolve FRESH mỗi lần, không hard-code.
+- **Thứ tự candidate serve thử**: `127.0.0.1:9000` (serve=collector cùng host) → `host.docker.internal:9000` → **WSL gateway IP**
+  (serve-WSL2 + collector-Windows) → resolv nameserver. Dùng cái đầu tiên reachable.
+- **Verify từ WSL2 thật** (python3 trong Ubuntu): candidates = `['http://172.27.32.1:9000','http://10.255.255.254:9000']`;
+  probe: 127.0.0.1=refused, host.docker.internal=name-res-fail, **172.27.32.1=alive** → chọn đúng. serve import OK, 76 test OK.
+- **User**: restart serve (`.\ethicalquoc.ps1 serve`) → scan lại → serve sẽ tự tìm Windows collector qua gateway → confirmed.
+
+**[2026-11-05 — FIX #2: OOB poll fallback qua base_domain + báo lỗi chi tiết (serve ở WSL2 ≠ collector ở Windows).]**
+- **Tình huống**: sau fix proxy vẫn `collector_unreachable`. Nhận ra topo thật nhiều khả năng: **serve chạy trong WSL2**
+  (để drive Docker) còn **collector chạy trên Windows** (user paste `PS D:\Thesis\thesis>`). Khi đó serve poll `127.0.0.1:9000`
+  = localhost của WSL2 (không có collector) → fail; nhưng container callback `host.docker.internal:9000` → Windows collector →
+  OK. Replay cũng OK (WSL2→Docker). Khớp hoàn toàn triệu chứng (callback thành công, poll trượt).
+- **Fix** ([serve.py](Server/serve.py)): `_oob_confirm` giờ thử **nhiều địa chỉ**: primary `oob_collector_url` (127.0.0.1:9000)
+  → fallback `http://{base_domain}` (chính địa chỉ container gọi về, vd `host.docker.internal:9000`). Dùng cái nào reachable.
+  → serve ở Windows thì 127.0.0.1 chạy; serve ở WSL2 thì host.docker.internal chạy (Docker Desktop cấu hình resolve được).
+- **Chẩn đoán**: tách `_collector_probe()` trả `(ok, error_reason)`; khi unreachable, `stats.oob` giờ có `error` (vd
+  `URLError: [WinError 10061] ... refused`) + `tried` (danh sách URL đã thử) → report tự nói ĐÚNG lý do, hết đoán mò.
+- **Giữ fix proxy** (session trước): `_LOCAL_OPENER = build_opener(ProxyHandler({}))` cho mọi call tới collector.
+- **Verify**: normal path `status=ran confirmed=5`; probe chết → `(False, 'URLError: ...refused')`. 76 test OK.
+- **User cần**: restart serve → scan lại. Nếu vẫn fail, `stats.oob.error` sẽ chỉ rõ nguyên nhân thật.
+
+**[2026-11-05 — FIX: OOB poll bỏ qua system proxy (bug "collector_unreachable" dù collector CHẠY ĐÚNG).]**
+- **Triệu chứng**: user chạy collector trên Windows, log ĐÚNG mọi token (paste cho thấy de6b72ff7948, c7dd05d21723… = đúng
+  token report 03:45). Nhưng `stats.oob` = `collector_unreachable`. Tức callback (từ container, urllib không proxy) THÀNH CÔNG,
+  còn serve poll `127.0.0.1:9000` lại FAIL.
+- **Root cause**: `urllib.request.urlopen` trong serve **đi qua system proxy** (HTTP_PROXY/VPN). Replay nhắm `localhost:8083`
+  (hostname `localhost` thường có trong `no_proxy` → bypass → replay OK) nhưng collector poll nhắm `127.0.0.1` (KHÔNG trong
+  no_proxy → qua proxy → fail). Giải thích đúng vì sao replay chạy mà poll trượt.
+- **Fix** ([serve.py](Server/serve.py)): thêm `_LOCAL_OPENER = build_opener(ProxyHandler({}))` (bỏ qua MỌI proxy) dùng cho
+  `_collector_alive` + `_poll_oob` — collector luôn là local/self-hosted nên không bao giờ nên qua proxy.
+- **Verify**: set `HTTP_PROXY=http://10.255.255.1:3128` → `urllib.urlopen('127.0.0.1:9000')` FAIL (URLError), còn
+  `_collector_alive` (proxy-free) = True. Pipeline sạch: `stats.oob status=ran confirmed=5`, oob_confirmed=5. 76 test OK.
+- **User cần**: **restart serve** để nạp fix → scan lại (collector giữ nguyên) → sẽ ra `confirmed:5` + `oob_confirmed:true`.
+
+**[2026-11-05 — ĐÃ LÀM: verify OOB confirm end-to-end + thêm `stats.oob` vào report (báo rõ confirm chạy/skip).]**
+- **Verify OOB end-to-end thật**: chạy `run_pipeline(src4.har)` với collector bật suốt → **5/5 `oob_confirmed`** (dashboard,
+  import, import-config, restore-prefs, profile) — log `[oob] CONFIRMED strong`. Logic confirm CHẠY ĐÚNG. Report 03:20 user
+  thiếu `oob_confirmed` là do **vận hành** (collector không reachable từ serve đúng lúc poll — nó đợi 6s sau replay rồi poll),
+  KHÔNG phải bug code.
+- **Thêm `stats.oob`** ([serve.py](Server/serve.py)): `_oob_confirm` giờ TRẢ VỀ status dict → nhét vào `stats.oob` của report.
+  3 trạng thái: `not_configured` / `collector_unreachable` (kèm detail "bật collector trước & giữ suốt scan") /
+  `ran` (kèm `collector`, `base_domain`, `tokens_polled`, `confirmed`). Verify: UP → `{"status":"ran",...,"confirmed":5}`;
+  DOWN (port chết) → `{"status":"collector_unreachable",...}`.
+- **UI**: [results.js](Extension/results.js) thêm `oobLine()` (dòng "OOB: N confirmed / M polled · collector ... reachable"
+  hoặc cảnh báo unreachable); [popup.js](Extension/popup.js) thêm badge `OOB N✓` / `OOB collector down` ở summary.
+- **Verify**: serve import OK, 76 test OK.
+- **Nhắc vận hành** (để ra `oob_confirmed`): (1) bật `.\start-oob.bat` TRƯỚC khi scan, giữ chạy suốt (gồm ~6s sau replay);
+  (2) chỉ 1 collector trên 9000 (collector cũ pre-fix phải chết); (3) base callback = `host.docker.internal:9000` (Docker).
+
+**[2026-11-05 — FIX GAP: jsonpickle sink nhận payload JSON py/reduce (không phải pickle nhị phân).]**
+- **Triệu chứng** (user gửi lỗi): scan `/api/restore-prefs` (sink `jsonpickle.decode`) ra
+  `failed to restore prefs via jsonpickle.decode(): 'utf-8' codec can't decode byte 0x80` — tool gửi **pickle NHỊ PHÂN**
+  (`pickle_exec`) vào sink jsonpickle (ăn **JSON text**) → chết ở utf-8 TRƯỚC khi dựng object. Finding chấm dynamic-strong
+  nhưng là **"strong nhờ crash"**, không phải RCE thật; và OOB không confirm được jsonpickle blind (sai format).
+- **Verify payload đúng trên sink thật**: `{"py/reduce":[{"py/function":"os.system"},{"py/tuple":["id"]}]}` →
+  `{"restored":"0"}` = **`id` CHẠY THẬT**. OOB: `py/reduce` + `urllib.request.urlopen` → server cố mở kết nối (chứng minh exec).
+- **Fix**:
+  - [ExploitabilityAnalysis.py](Analyze/ExploitabilityAnalysis.py) `_analyze_pickle`: nếu `subtype=="jsonpickle Object
+    Injection"` → trả probe **`jsonpickle_exec`** (thay `pickle_exec`), exploit_type "jsonpickle Object Injection RCE".
+  - [payloadMutation.py](Analyze/payloadMutation.py): thêm `_mutate_jsonpickle()` sinh JSON `py/reduce` (os.system ×3
+    local + urllib OOB khi có oob_domain) + helper `_jsonpickle_reduce()`; route `jsonpickle_exec` ở dispatch. Giữ
+    `pickle_exec` cho pickle nhị phân thật (cookie/session, /api/import).
+- **Verify**: 76 test OK (+3: emit JSON py/reduce, có OOB variant, route probe đúng); **eval FP KHÔNG đổi** (P=0.778/0.791,
+  R=1.0, type-acc 7/7). Payload RCE verify chạy thật trên container.
+- **LƯU Ý**: phải **restart serve.py** để pipeline nạp module mới (bug stale-module đã biết) trước khi scan lại thấy
+  `jsonpickle_rce`/`jsonpickle_oob`.
+
+**[2026-11-05 — FIX: OOB base mặc định = host.docker.internal:9000 (callback) TÁCH khỏi collector-poll 127.0.0.1:9000.]**
+- **Triệu chứng** (report 02:55 user gửi, scan python-vuln 8083): mọi `pickle_oob`/`yaml_oob` gọi `http://127.0.0.1:9000/<token>/`
+  → **toàn bộ `Connection refused`** → 0 `oob_confirmed`. Nguyên nhân: target chạy TRONG Docker, `127.0.0.1` = chính container,
+  KHÔNG phải host collector. (Đã cảnh báo trước nhưng default vẫn 127.0.0.1.)
+- **Phân biệt 2 hướng** (mấu chốt): `oob_domain` = địa chỉ **nhúng vào payload**, target(Docker)→collector(host) ⇒ phải
+  `host.docker.internal:9000`. `oob_collector_url` = nơi **scanner(host) poll** ⇒ vẫn `127.0.0.1:9000`. Fix: `config.json`
+  `oob_domain: "host.docker.internal:9000"` (trước để rỗng → derive ra 127.0.0.1 = sai cho Docker). **Tradeoff**: nếu target
+  chạy THẲNG trên host (không Docker) thì đổi lại `127.0.0.1:9000`; cross-platform OK vì Docker Desktop (cả Mac) đều resolve
+  `host.docker.internal`.
+- **Tác dụng phụ THÚ VỊ** (ghi luận văn): payload `pickle_oob`/`yaml_oob` dù callback FAIL vẫn làm `urllib.urlopen` raise →
+  endpoint trả **500** → in-band oracle thấy `200→500` = **strong**. Nhờ vậy `/api/import` từ weak(trước)→**strong**;
+  `dynamic_strong` 4→5. Tức biến thể OOB kiêm luôn 1 "liveness probe" in-band (chứng minh pickle ĐÃ chạy, dù OOB chưa thông).
+- **Verify end-to-end** (collector :9002, base host.docker.internal): blind `/api/import-async` trả `{"queued":true}` cho cả
+  benign lẫn payload (in-band MÙ) nhưng collector log **đúng 1 hit đúng token** → OOB bắt được ca blind. 73 test OK.
+- **BLOCKER cho user**: 1 collector **pre-fix còn chiếm :9000** (bug Host-label, sẽ log nhầm token="host"). Phải kill
+  (Task Manager → python.exe) hoặc reboot TRƯỚC khi chạy `.\start-oob.bat`. Sau đó scan lại → blind endpoint sẽ lên
+  dynamic-strong + `oob_confirmed`.
+
 **[2026-11-04 — ĐÃ LÀM: Vá GAP "blind deser" — thêm biến thể OOB cho Python pickle+YAML + sink blind + demo end-to-end OOB ✓.]**
 - **Gap phát hiện**: payload pickle/YAML của Python chỉ chạy lệnh LOCAL (`TEST_COMMANDS=["id","whoami","hostname"]`,
   `os.system`) → chỉ bắt được qua in-band oracle (response đổi). Sink **blind** (deserialize trong worker, response không đổi)

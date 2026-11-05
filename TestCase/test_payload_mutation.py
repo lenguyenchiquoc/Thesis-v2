@@ -316,5 +316,33 @@ class TestPythonBlindOobVariants(unittest.TestCase):
         self.assertFalse(any(r.get("type") == "pickle_oob" for r in results))
 
 
+class TestJsonpickleMutations(unittest.TestCase):
+    """jsonpickle sinks must get JSON py/reduce payloads, NOT binary pickle (which only
+    makes jsonpickle.decode() crash on utf-8). Verified: py/reduce os.system runs on the
+    live sink."""
+
+    def test_jsonpickle_exec_emits_json_py_reduce(self):
+        with patch("Analyze.payloadMutation.get_oob_domain", return_value=""):
+            results = mutate('{"py/object":"x"}', "jsonpickle_exec", "jsonpickle Object Injection RCE")
+        self.assertEqual([r["type"] for r in results], ["jsonpickle_rce"] * 3)
+        for payload in decoded_payloads(results):
+            self.assertIn('"py/reduce"', payload)
+            self.assertIn("os.system", payload)
+            self.assertNotIn("gASV", payload)  # not a binary pickle
+
+    def test_jsonpickle_exec_adds_oob_variant_when_configured(self):
+        import tool_config
+        tool_config.set_oob_override("oob.test.local/tk")
+        try:
+            results = mutate('{"py/object":"x"}', "jsonpickle_exec", "jsonpickle Object Injection RCE")
+        finally:
+            tool_config.set_oob_override(None)
+        oob = [r for r in results if r.get("type") == "jsonpickle_oob"]
+        self.assertEqual(len(oob), 1)
+        raw = decoded_payloads(oob)[0]
+        self.assertIn("urllib.request.urlopen", raw)
+        self.assertIn("oob.test.local/tk", raw)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

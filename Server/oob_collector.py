@@ -68,9 +68,6 @@ class HitStore:
             return list(self._recent)[-n:]
 
 
-# Hosts that are a routing alias, not a <token>.<base> callback domain: their leftmost
-# label ("host", "gateway", "localhost") is not a token, so the token must come from the
-# URL path instead. host.docker.internal is how a container reaches the host collector.
 _NON_TOKEN_HOSTS = {"localhost", "host.docker.internal", "gateway.docker.internal"}
 
 
@@ -113,7 +110,6 @@ def make_http_handler(store: HitStore):
                 return self._send(200, {"token": token, "count": len(hits), "hits": hits})
             if parsed.path == "/_all":
                 return self._send(200, {"recent": store.recent()})
-            # Any other request is treated as an interaction callback.
             host = self.headers.get("Host", "")
             token = _token_from_host(host) or _token_from_path(self.path)
             src = self.client_address[0]
@@ -126,12 +122,11 @@ def make_http_handler(store: HitStore):
         do_HEAD = _handle
 
         def log_message(self, fmt, *args):
-            pass  # we print our own hit lines
+            pass
 
     return Handler
 
 
-# ---- minimal DNS responder (A records), pure stdlib ----
 
 def _parse_qname(data: bytes, offset: int):
     labels = []
@@ -163,7 +158,6 @@ def make_dns_handler(store: HitStore, answer_ip: str):
                 qname = ".".join(labels)
                 token = labels[0].lower() if len(labels) >= 2 else ""
                 store.record(token, "dns", self.client_address[0], qname)
-                # Build a response: answer with our A record (point everything at us).
                 question = data[12:end + 4]
                 header = tid + b"\x81\x80" + qdcount.to_bytes(2, "big") + \
                     b"\x00\x01" + b"\x00\x00" + b"\x00\x00"

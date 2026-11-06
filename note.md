@@ -1,5 +1,144 @@
 # Ghi chú tiến độ — EthicalQuoc
 
+**[2026-11-06 — ĐÃ DỰNG: 2 ngôn ngữ cuối — Node.js + .NET (mỗi cái vuln+secure). Khép ma trận 6 ngôn ngữ.]**
+- Mirror đúng kiến trúc ruby/python app (login→cookie session serialized · /api/profile,/api/dashboard deser session · raw_body /api/import, /api/import-config, /api/restore-prefs · /api/logout · 3 trang UI trigger · data/{users,notifications}.json). KHÔNG seed ref_tag (giống python/ruby — cookie `localhost` dùng chung từ php/java).
+- **SỬA THIẾU (user bắt)**: lần đầu mirror ruby (4 sink) nên QUÊN **SINK 5 `/api/import-async`** mà python-app có (note ~242: sink BLIND — response luôn `{"queued":true}`, in-band oracle mù, CHỈ OOB confirm). Đã bổ sung `/api/import-async` cho cả 4 app (vuln: fire-and-forget node-serialize/TypeNameHandling; secure: JSON.parse/JsonDocument an toàn) + box UI "Queue backup (async)" + wireImport ở cả 4 dashboard. Giờ đủ **5 sink như python** (bài học: ĐỌC KỸ note mục kiến trúc app TRƯỚC khi dựng, không chỉ grep).
+- **node-app (vuln :8088)**: `node-serialize.unserialize()` trên cookie `session` (hàm-prop → marker `_$$ND_FUNC$$_`) + POST /api/import & /api/restore-prefs (node-serialize RCE, CVE-2017-5941 class); /api/import-config = **prototype pollution** (merge không guard `__proto__`). **node-app-secure (:8089)**: session HMAC-signed JSON + JSON.parse; import = JSON.parse; import-config = merge có guard `__proto__/constructor/prototype`. Deps: express 4.19.2, cookie-parser 1.4.6, node-serialize 0.0.4. node:20-slim.
+- **dotnet-app (vuln :8090)**: ASP.NET Core minimal API (.NET 8) + **Newtonsoft.Json `TypeNameHandling.All`** → `$type` trên cookie `session` + 3 endpoint import (Json.NET TypeNameHandling RCE class). Model global-namespace `User`/`Preferences` → `$type="User, dotnet-app"`. **dotnet-app-secure (:8091)**: session HMAC-signed JSON + **System.Text.Json** (không honor `$type`). Dockerfile multi-stage sdk8→aspnet8, cross-platform (chạy được trên Mac graders).
+- **Wire**: start-all.bat (build+run+echo 8088-8091, rm thêm 4 container) + control-panel (tab Node + .NET, ports/sink). Fingerprint payload mặc định trong textarea: Node `_$$ND_FUNC$$_`+`__proto__`; .NET `$type`.
+- **Verify offline** (chưa có Docker ở phiên này): `node --check` 2 app.js OK; mọi JSON (data/package.json) + payload JSON hợp lệ; .NET review tay (chưa compile — cần SDK). **Fix 1 bug lúc review**: dotnet vuln dashboard đọc notifications bằng System.Text.Json (không để Newtonsoft JArray lọt vào Results.Json → serialize sai).
+- **CVE (đã verify web, không bịa) — trích như "lớp lỗ hổng tái hiện" (giống ruby cite CVE-2026-41316 pattern-class), KHÔNG đổi code sink**:
+  - Node: sink `node-serialize` = **CVE-2017-5941** (IIFE RCE, CWE-502, CVSS 9.8, đúng package 0.0.4) — không có bản 2025-26 (package bỏ hoang). Ghi kèm **CVE-2025-55182** (React2Shell, 3/12/2025, CVSS 10) làm ca deser-RCE hệ Node 2025 cùng CWE-502 (cơ chế RSC khác, chỉ cite làm class). Proto-pollution = CWE-1321.
+  - .NET: sink Newtonsoft `TypeNameHandling.All` = CWE-502, KHÔNG có CVE số riêng → cite **CVE-2025-59287** (WSUS, 24/10/2025, CVSS 9.8, BinaryFormatter+ysoserial.net — verify mạnh) và **CVE-2026-26918** (.NET 8 BinaryFormatter) làm lớp ".NET deser→RCE qua ysoserial.net". (Chúng dùng BinaryFormatter; sink mình dùng Newtonsoft — cùng CWE-502, cite là class.)
+  - LƯU Ý: `CVE-2026-0145` (4/2026) là của **System.Text.Json** = thư viện bản SECURE đang dùng, KHÔNG phải Newtonsoft → đừng nhầm làm CVE cho dotnet-app vuln.
+- **CẦN LÀM (user, hôm sau)**: `docker`/`start-all.bat` build+run 4 image mới → quét tổng thể 4 app (Node 8088/8089, .NET 8090/8091) để verify động + bổ sung indicator `#<...>` chưa có cho .NET/Node (chỉ Ruby/Python đã làm; nếu Node/.NET sink tuột weak thì cân nhắc thêm pattern repr .NET/Node vào oracle).
+
+**[CHORE 2026-11-06 — Xóa lại toàn bộ `#` comment trong code Python của tool (comment do phiên fix GAP thêm vào).]**
+- Lặp lại CHORE 2026-10-19: script `tokenize`-based ([C:\Users\lequo\AppData\Local\Temp\claude_strip_comments.py]) chỉ xóa token COMMENT — KHÔNG đụng `#` trong string (`#1f2937`, regex, `rstrip`…). **GIỮ docstring** (string literal, không phải comment). **Bỏ qua `tools/`** (phpggc/gopherus third-party). `ast.parse` trước+sau mỗi file, hỏng thì skip.
+- **14 file đổi**: tool_config, Analyze/{ExploitabilityAnalysis,payloadMutation}, eval/evaluate, Replay/replay_request, Server/{oob_collector,serve}, Utility/signatures, TestCase/{generate_comprehensive_har,test_exploitability_analysis,test_normalize,test_payload_mutation,test_replay_request,test_transforms}. 12 file không có comment → không đụng. **0 skip**.
+- Backup: `C:\Users\lequo\AppData\Local\Temp\claude_comment_backup_20261106_203031` (repo không phải git).
+- **Verify đủ ngôn ngữ** (theo quy tắc test-all-languages): unit **140/140**; eval 7/7 pair detected `P=0.778/0.791 R=1.0` type acc 7/7; pair regression chỉ còn 23 diff `severity` cũ (PHP stale + Ruby chủ đích), KHÔNG phát sinh diff mới → xóa comment không đổi logic.
+
+**[2026-11-06 — FIX: (1) oracle indicator "object dựng lại" Ruby/Python; (2) severity Ruby native → High.]**
+- **(1) GAP#1 — indicator reconstructed-object** ([replay_request.py](Replay/replay_request.py) `_compare`): thêm `OBJECT_REPR_PATTERNS` (Ruby `#<Class..`, Python `<mod.Class object at 0x..>`) + `_new_object_classes()`. Nếu response-sau lộ **class object KHÔNG có trong baseline** (server dựng type attacker từ payload) → `strong` + indicator "reconstructed object...". Vá đúng cái khe: thay đổi "vừa" (length <50%, similarity <0.8) trước đây tuột xuống weak. Dẫn chứng report `:8085`: `/api/import` Marshal (`{...=>..}`→`#<Object @cmd="id">`) và Oj `/api/restore-prefs` (`#<OpenStruct..>`→`#<Object..>`) trước weak, nay strong. Vẫn qua `_is_mere_reflection` (loại echo) + control-probe (hạ nếu junk cũng tạo repr). Secure `:8084/:8086` trả dict JSON thuần (không `#<`) → không FP.
+- **(2) severity Ruby native → High** ([ExploitabilityAnalysis.py](Analyze/ExploitabilityAnalysis.py) `_analyze_ruby`): base `3→6`. Marshal + Oj nay **High (6)** — khớp Java-native (6/High) và Python-YAML (7/High); xoá bất nhất "YAML-Ruby High nhưng Marshal/Oj Medium" do fix trước tạo ra. Lý do: severity = worst-case-if-real (độc lập việc tool có gadget hay không); note:203 chỉ cấm *bịa payload*, không cấm nâng severity. **Side effect**: biến thể có keyword Rails (`hits` +4) nay 6+4=10 = **Critical** (trước 7/High) — hợp lý (Rails session gadget).
+- **Verify**: unit **140/140** (thêm 4 test oracle: new-class Ruby/Oj/Python → strong, same-class → không bắn indicator). eval 7/7 pair detected, `P=0.778/0.791 R=1.0`, type acc 7/7 — **detection không hồi quy**. Pair regression: chỉ field `severity` đổi; **pair6 (Ruby) Medium→High = đúng chủ đích** (baseline `pair6-6.json` giờ cũng lạc hậu như 3 pair PHP — cần re-baseline chung nếu muốn 0 diff). KHÔNG diff ở type/subtype/exploit_type/probe.
+- Chưa verify động indicator mới trên app thật (cần Docker up); sẽ xác nhận khi tiện.
+
+
+**[2026-11-06 — VERIFY LIVE (đối chứng): report ruby-app-SECURE `:8086` — khép cặp Ruby vuln/secure.]**
+- **`dynamic_strong: 0`, `oob.confirmed: 0`**; 10 finding TOÀN BỘ là decoy `ref_tag` (PHP, dynamic-weak). Không có gì exploit được — đúng bản secure.
+- **Fix Oj/YAML-Ruby KHÔNG gây false positive trên secure**: KHÔNG có finding `session`(Ruby Marshal) / Oj / YAML-Ruby nào, vì secure dùng signed-JSON + `JSON.parse`/`safe_load` → bề mặt không lộ input serialized (chỉ còn cookie decoy luôn seed). Bằng chứng safe-parse: `/api/import`+`/api/restore-prefs` baseline `{"restored":{"theme":"dark","lang":"en"}}` (dict JSON thuần) — khác hẳn vuln `:8085` (`#<OpenStruct>`/`#<Object>`).
+- GAP A ổn: `/api/login` cookie ref_tag chạy bình thường (200, `{"success":true,"username":"wiener"}`), không skipped/crash. Decoy toàn weak.
+- Quan sát app (không phải lỗi tool): `dashboard.html` title "Acme Portal **Ruby**" đúng, nhưng `profile.html`/`login.html` còn "Acme Portal **Python**" — copy-paste artifact trong web app secure, cosmetic.
+- **MA TRẬN đối chứng (3 cặp vuln/secure + PHP vuln)**: Java `:8081`(6s/3oob)↔`:8087`(0/0) · Python `:8083`(6s/6oob)↔`:8084`(0/0) · **Ruby `:8085`(3s/0oob)↔`:8086`(0/0)** · PHP `:8082`(2s) ↔ *(secure chưa có)*. Oracle phân biệt đúng vuln/secure trên cả 3 ngôn ngữ, thuần động.
+
+**[2026-11-06 — VERIFY LIVE: report ruby-app `:8085` SAU fix — cả 3 GAP xác nhận động OK.]**
+- **GAP A hết crash**: `cookie/ref_tag @ /api/login` chạy đủ 12 attempt (`status 200`, body `{"success":true,"username":"wiener"}`), KHÔNG còn `skipped`/latin-1 error — chữ `ẻ` trong body đi qua UTF-8 bình thường.
+- **GAP C thành SINK CONFIRM STRONG**: `raw_body @ /api/import-config` → `YAML / "YAML Ruby Object Injection"`, probe `yaml_exec`, **severity High, evidence dynamic-strong**. Payload `--- !ruby/object:OpenStruct\n  :cmd: id`; baseline `#<OpenStruct theme="dark", lang="en">` → mutated `#<OpenStruct cmd="id">` (server dựng lại OpenStruct attacker qua `YAML.unsafe_load`, sim 0.81, 69→52B). Trước fix: Low/static-only/0 payload.
+- **GAP B Oj nhận đúng payload, hết 500**: `raw_body @ /api/restore-prefs` → `subtype/exploit_type "Oj Object Deserialization"`, probe `oj_object`. Payload `{"^o":"Object","@cmd":"id"}`; baseline `#<OpenStruct ...>` → mutated `#<Object:0x...>` (Oj dựng Object). Không còn parse-500/control-probe downgrade; evidence dynamic-weak (−13B, bảo thủ, đúng).
+- Không hồi quy/không FP: decoy `ref_tag` toàn weak; 2 Marshal session sink (`/api/profile`,`/api/dashboard`) vẫn strong. `stats.dynamic_strong` 2→**3** (thêm YAML-Ruby). `oob.confirmed 0` đúng thiết kế (không bịa gadget Ruby).
+- Cosmetic (chưa sửa): finding Oj vẫn mang note nền Marshal ("Try Marshal-based gadget chain") do `_analyze_ruby` append thay vì replace — gây hơi lệch chữ, không sai logic.
+
+**[2026-11-06 — FIX: 3 GAP lộ từ report ruby-app `:8085`. Suite 136/136, eval không hồi quy.]**
+- **GAP A — crash latin-1 trong replay** ([replay_request.py:171](Replay/replay_request.py#L171), [:194-195](Replay/replay_request.py#L194)): body-context đổi `encode/decode("latin-1")` → **UTF-8** (đối xứng với har_loader đọc HAR bằng UTF-8). GIỮ latin-1 cho đường payload serialized ([:200](Replay/replay_request.py#L200) raw_body + helper [:140-156](Replay/replay_request.py#L140)) — byte thô (NUL/0x80-0xFF) vẫn faithful. Nguyên nhân gốc: bất đối xứng decode(UTF-8)/encode(latin-1); chữ Việt `ẻ`(U+1EBB) trong body `/api/login` ghi lại làm ném `UnicodeEncodeError` ở offset 38 → cả 12 attempt `skipped`. KHÔNG phải do Ruby — bất kỳ app nào có ký tự non-Latin-1 trong traffic đều dính. Test mới `TestSendEncodesContextBodyAsUtf8` (patch `urllib.request.urlopen`, assert `req.data==body.encode("utf-8")`, không skip).
+- **GAP B — SINK Oj không exercise đúng** ([ExploitabilityAnalysis.py](Analyze/ExploitabilityAnalysis.py) `_analyze_ruby`, [payloadMutation.py](Analyze/payloadMutation.py)): `_analyze_ruby` nay dò `"^o"`/`"^c"` → `exploit_type="Oj Object Deserialization"`, `probe="oj_object"` (trước: mọi Ruby đều `ruby_marshal` → gửi Marshal nhị phân cho Oj → parse lỗi 500 → control-probe downgrade). Thêm dispatch `oj_object`→`_mutate_oj()` sinh Oj object-mode `{"^o":"Object","@cmd":<cmd>}` (JSON text hợp lệ, không cần `ruby` trên PATH). Score giữ 3 (Medium) — nhất quán tier Ruby bảo thủ. Marshal cookie sink không `^o` → vẫn `ruby_marshal` (không hồi quy).
+- **GAP C — scorer YAML mù `!ruby/object:`** ([ExploitabilityAnalysis.py:376](Analyze/ExploitabilityAnalysis.py#L376) `YAML_RISK_MAP`): thêm `(!ruby/object:, "YAML Ruby Object Injection", 7)` + `(!ruby/(hash|struct|array|string|marshalable):, 6)`. Nay `/api/import-config` YAML `!ruby/object:OpenStruct` → score 7, **High**, exploitable, probe `yaml_exec` (trước: Low/static-only/0, "No dangerous YAML tags"). Thêm nhánh `_mutate_yaml` → `_mutate_yaml_ruby()` sinh `--- !ruby/object:OpenStruct\ntable:\n  :cmd: <cmd>` (trước nếu chấm điểm mà thiếu nhánh sẽ "có probe nhưng rỗng payload"). Note YAML cuối đổi sang generic "yaml.load / YAML.unsafe_load / Psych".
+- **Triết lý giữ nguyên** (note ~203): GAP B/C đều dừng ở **object-injection probe** (OpenStruct/@cmd marker → đổi hành vi echo cho oracle thấy), KHÔNG bịa gadget RCE version-specific không cháy; note mỗi payload ghi rõ "replace with a version-specific Ruby/Gem gadget for RCE".
+- **Verify**: `_analyze`/`_mutate` end-to-end đúng định dạng (Oj ra `^o`, không Marshal; YAML ra `!ruby/object:`); unit **136/136**; eval 7/7 pair detected, `P=0.778/0.791 R=1.0`, type acc 7/7 — **không hồi quy**. Chưa quét lại live `:8085` sau fix (cần Docker up + bridge) — nên verify động trên app thật khi tiện.
+- **Regression pair (step-7 `_analyze_one`, diff static-fields vs `pairN-N.json`)**: pair1/4/6/7 **identical** (pair6 Ruby identical vì sink Marshal cookie, không chạm nhánh Oj/ruby-yaml mới → xác nhận fix KHÔNG hồi quy). pair2/3/5 (PHP) có 16 diff **chỉ ở field `severity` Medium→High** — KHÔNG do fix hôm nay (fix không đụng PHP); đây là **baseline `pairN-N.json` PHP cũ lạc hậu**, sinh trước khi thêm floor native-PHP→High ([ExploitabilityAnalysis.py:207-218](Analyze/ExploitabilityAnalysis.py#L207)). Zero diff ở type/subtype/exploit_type/suggested_probe mọi pair. Chưa re-baseline (field động Stage-8 cần lab PortSwigger đã chết).
+
+**[2026-11-05 — VERIFY LIVE: report ruby-app VULN `:8085` — fix reflection OK, nhưng LỘ 3 GAP THẬT (chưa sửa, chờ quyết định).]**
+- **Phần ĐÚNG**: `dynamic_strong: 2` = 2 sink Marshal thật `session @ /api/profile` + `@ /api/dashboard` (`username:wiener`→`unknown`, object bị thay = giá trị dẫn xuất, không phải echo) → strong, severity Medium (Marshal nền 3). `oob.confirmed: 0` **ĐÚNG THIẾT KẾ** (note ~203: Ruby Marshal/Psych cần gadget version-specific, cố ý KHÔNG bịa payload không cháy). Decoy `ref_tag` mọi nơi weak. Reflection fix không hồi quy.
+- **GAP A — BUG replay crash latin-1** ([Replay/replay_request.py](Replay/replay_request.py) `_send`): vector `cookie/ref_tag @ /api/login` có **cả 12 attempt `skipped`**, reason `Request failed: 'latin-1' codec can't encode character 'ẻ' in position 38` → `evidence: static-only`. Ký tự Việt `ẻ` (U+1EBB) trong request-context làm bộ gửi (encode latin-1) ném lỗi → mất sạch dynamic coverage của vector đó. Cần: encode UTF-8/percent-encode hoặc bắt lỗi per-attempt thay vì để throw.
+- **GAP B — SINK 4 Oj không exercise đúng** `raw_body @ /api/restore-prefs`: fingerprint `subtype: "Oj Object Deserialization"` ĐÚNG (`{"^o":"OpenStruct",...}`), nhưng mutation gửi payload `ruby_marshal` (nhị phân Marshal) → `Oj.load(mode: :object)` parse lỗi → `500` → control-probe **downgrade đúng** ("reacts the same to any invalid value ... NOT deserialization-specific"). Hệ quả: SINK 4 Oj thật KHÔNG confirm được động vì thiếu bộ sinh payload định dạng Oj `^o`. (Control-probe hoạt động tốt — không phải false positive; đây là thiếu mutation.)
+- **GAP C — scorer YAML mù `!ruby/object:`** `raw_body @ /api/import-config`: fingerprint gán `subtype: "YAML Ruby Object Injection"` (signatures ĐÃ vá, note ~244) NHƯNG `_analyze_yaml` ([ExploitabilityAnalysis.py:376](Analyze/ExploitabilityAnalysis.py#L376)) chấm **0** → `severity: Low, evidence: static-only, mutations_count: 0, notes: "No dangerous YAML tags detected"`. Bản vá Ruby-YAML dừng ở signatures/subtype, CHƯA mở sang bảng điểm `_analyze_yaml` (severity_tieu_chi 3.4 chỉ có `!!python`/`!!java`). SINK 3 `YAML.unsafe_load` bị under-score + không replay.
+- **Quan sát (không phải bug)**: `raw_body @ /api/import` Marshal — mutated lộ `"#<Object:0x... @cmd=\"id\">"` (bằng chứng `Marshal.load` dựng lại object attacker) nhưng oracle chấm weak vì length chỉ `+1..+7B`. Bảo thủ, chấp nhận được (vẫn là Suspected Ruby Marshal); đồng nhất với quyết định "object dựng nhưng không có gadget chạy → không strong".
+- **Ma trận**: Ruby vuln `:8085` = 2 strong (Marshal privesc) / 0 OOB (đúng thiết kế). Còn thiếu report ruby-secure `:8086` + php-secure để khép bảng.
+
+**[2026-11-05 — VERIFY LIVE (đối chứng): report python-app-SECURE `:8084` sau fix — khép cặp vuln/secure Python.]**
+- **`dynamic_strong: 0`, `oob.confirmed: 0`** (tokens_polled 11) — bản secure KHÔNG có gì exploit được, dù CÙNG bề mặt tấn công như `:8083` (payload `py/object`/`py/reduce`, cookie `session`).
+- **Vì sao secure**: sink jsonpickle ở `raw_body @ /api/restore-prefs` + `/api/import` + `/api/import-async` dùng **plain `json.loads` round-trip**, KHÔNG reconstruct object: baseline `{"restored":{"lang":"en","py/object":"__main__.Preferences","theme":"dark"},...}` → mutated echo nguyên `{"py/reduce":[...]}` dưới dạng dict literal, `os.system` KHÔNG chạy (không có `{"restored":"0"}`, không collapse về 32B như `:8083`). Tất cả attempt weak.
+- **Reflection fix tổng-quát-hoá sang Python/JSON** (không chỉ PHP Monolog): attempt `jsonpickle_oob` echo URL collector → `"Response length changed significantly: baseline=92 mutated=149 (response merely reflects the injected payload — weak)"`. Guard bắt đúng echo JSON thuần.
+- Các indicator length nhỏ (`+4`/`+6` bytes) trên attempt `os.system` → chỉ "possible behavioral change, verify manually" (dưới ngưỡng significant) → vẫn weak, không bị thổi thành strong.
+- Decoy `ref_tag`: 5 vị trí đều dynamic-weak (baseline==mutated). True negative.
+- **Điểm thesis**: secure vẫn giữ **11 Suspected finding** (static fingerprint khớp `py/object` → severity Critical/High tĩnh) nhưng `evidence: dynamic-weak` toàn bộ → severity(giả định xấu nhất) và evidence(quan sát động) tách bạch đúng như [severity_tieu_chi.md](severity_tieu_chi.md) mô tả. Oracle phân biệt secure/vuln **thuần động**.
+- **Cặp đối chứng Python**: vuln `:8083` = 6 strong/6 OOB (RCE thật) ↔ secure `:8084` = 0 strong/0 OOB (json.loads an toàn). Song song cặp Java: vuln `:8081` ↔ secure `:8087`.
+
+**[2026-11-05 — VERIFY LIVE (đối chứng): report python-app VULN `:8083` sau fix — report mạnh nhất bộ.]**
+- **`dynamic_strong: 6`, `oob.confirmed: 6` (6/6 strong đều OOB-confirmed)** — bằng chứng mạnh nhất trong cả 4 app: mỗi strong đều có callback out-of-band thật (`urllib.urlopen` qua `__reduce__` gọi về collector `172.27.32.1:9000`).
+- 6 sink THẬT, 0 false positive, phân biệt đúng subtype pickle/yaml/jsonpickle:
+  - `session @ /api/profile` + `@ /api/dashboard` (cookie, Python Pickle): `username:wiener`→`unknown` (giá trị DẪN XUẤT, object vỡ) + OOB → strong.
+  - `payload @ /api/import` (raw_body, Pickle): 4 attempt per-request chấm weak (length `62→32` + OOB-url `62→82`) NHƯNG finding **strong nhờ OOB confirm** — đúng thiết kế: OOB nâng cấp ở mức finding.
+  - `payload @ /api/import-config` (YAML `!!python/object:`, High): `73→30` + OOB.
+  - `payload @ /api/restore-prefs` (jsonpickle `py/reduce:os.system`, **Critical**): `78→32` + OOB.
+  - `payload @ /api/import-async` (Pickle, fire-and-forget): response không đổi (`{"queued":true}`) nhưng **OOB vẫn fire** → strong. Đây là ca mà CHỈ OOB mới bắt được (response-diff mù).
+- Decoy `ref_tag` (PHP serialized) trên app Python: mọi vị trí **dynamic-weak** — app Python không đọc/echo `ref_tag` nên baseline==mutated, không cần tới reflection guard vẫn weak. True negative sạch.
+- Control-probe chặn đúng ở `import-config`/`restore-prefs` (cookie location): body chứa địa chỉ bộ nhớ `<__main__.Settings object at 0x...>` đổi MỖI request (ngẫu nhiên, không do payload) → "server reacts the same to any invalid value ... NOT deserialization-specific (downgraded)" → weak. Guard địa-chỉ-bộ-nhớ hoạt động.
+- **Ma trận đối chứng thesis (đủ 4 app)**: Java vuln `:8081` = 6 strong/3 OOB; Java secure `:8087` = 0 strong/0 OOB; PHP vuln `:8082` = 2 strong/0 OOB (privesc); **Python vuln `:8083` = 6 strong/6 OOB (RCE thật)**. Oracle phân biệt đúng cả 3 lớp qua mọi ngôn ngữ: sink thật→strong, decoy→weak, endpoint nhiễu→weak.
+
+**[2026-11-05 — VERIFY LIVE (đối chứng): report php-app VULN `:8082` sau fix.]**
+- **`dynamic_strong: 2`, cả 2 là sink THẬT, 0 false positive**: `session @ /api/dashboard.php` (flip b:0→b:1 → `role:user`→`admin`) + `session @ /api/profile.php` (inject object lạ → `username:wiener`→`unknown`, giá trị DẪN XUẤT do server sinh, không phải echo). Đều là `unserialize()` CWE-502 thật.
+- Reflection fix đúng: `ref_tag` Monolog echo `177→588` ở profile.php → "response merely reflects the injected payload — weak"; mọi `ref_tag` khác weak.
+- Control-probe chặn đúng false-positive ở `/api/preview.php` (endpoint tải URL ngoài, length dao động ngẫu nhiên) → "NOT deserialization-specific (downgraded)" → weak.
+- `oob.confirmed: 0` hợp lý (PHP app không cài Monolog/Laravel nên gadget không execute).
+- **Bộ ba đối chứng thesis**: Java vuln :8081 = 6 strong (3 OOB); Java secure :8087 = 0 strong; PHP vuln :8082 = 2 strong (privesc thật). Oracle phân biệt đúng 3 lớp: sink thật→strong, decoy echo→weak (reflection), endpoint nhiễu→weak (control probe).
+
+**[2026-11-05 — VERIFY LIVE (đối chứng): report java-app-SECURE `:8087` sau fix.]**
+- **`dynamic_strong: 0`, `oob.confirmed: 0`** — bản secure KHÔNG còn false positive nào. Decoy `ref_tag @ /api/profile` echo Monolog 224→635 → "response merely reflects ... weak" (fix đúng cả trên secure).
+- Sink thật bị bản secure chặn đúng, tool chấm weak (không hồi quy ngược): `cookie/session` → **401 "Not authenticated"** (allow-list filter), `raw_body @ /api/integration/receive` → **400 "Unsupported message format"**, Jackson `@ /api/theme/import` → **400 "Invalid theme"** — tất cả `clean client rejection — weak`.
+- **Đối chứng thesis**: cùng payload/bề mặt → vuln `:8081` = 6 strong + 3 OOB confirm; secure `:8087` = **0 strong + 0 OOB**. Secure vẫn giữ 22 finding "Suspected" (bề mặt vẫn trông giống serialized) nhưng oracle phân biệt đúng không chỗ nào exploit được.
+
+**[2026-11-05 — VERIFY LIVE (sau fix reflection JSON-reencode): report thật java-vuln-app `:8081`.]**
+- `cookie/ref_tag @ /api/profile`: **dynamic-weak** (Monolog/Laravel echo 224→635 → gắn đúng "response merely reflects the injected payload — weak"); mọi vị trí `ref_tag` khác cũng weak. Decoy xử lý đúng.
+- Sink THẬT giữ nguyên strong, KHÔNG hồi quy: `session @ /api/profile` + `@ /api/dashboard` + `raw_body @ /api/integration/receive` đều **dynamic-strong, Critical, `oob_confirmed: true`** (3 token OOB xác nhận); Jackson `@ /api/webhook/config` + `/api/theme/import` **dynamic-strong, High**.
+- `stats`: `dynamic_strong: 6`, `oob.confirmed: 3`, `findings: 22`.
+- Điểm tinh tế (đúng thiết kế): finding Jackson cũng có indicator length bị gắn "merely reflects ... weak" (400 echo payload), NHƯNG vẫn strong nhờ **status 200→400 + lộ exception** — guard reflection chỉ vô hiệu hóa 1 indicator length-echo, không giết tín hiệu thật khác.
+
+**[2026-11-05 — FIX (tiếp): reflection guard sót khi payload bị JSON re-encode (`\u0000`/`\\`) — `ref_tag` decoy sống lại thành dynamic-strong.]**
+- **User nhớ "đã fix ref_tag từ lâu rồi"** — ĐÚNG: fix gốc là `_is_mere_reflection` ở mục FIX bên dưới (note cũ ~1568), từng
+  đưa `ref_tag` về 0 strong. Nhưng nó sống lại trong report java-app-secure `:8087` (2026-11-05T13-42-56): `cookie/ref_tag`
+  @ `/api/profile` = **dynamic-strong, severity High**. `stats.dynamic_strong=1` chính là nó (không phải sink thật).
+- **Vì sao sống lại — 2 thay đổi SAU fix gốc cộng lại**: (1) fix gốc gắn `_is_mere_reflection` CHỈ ở nhánh content-diff; hồi đó
+  `ref_tag` (probe `modify_string`, chỉ match `PHP_IDENTITY_FIELDS`) nhận payload nhỏ nên length không đổi. (2) **Fix A2
+  (2026-10-29, note ~455)** cho nhánh field-manipulation ([payloadMutation.py:76-77](Analyze/payloadMutation.py#L76-L77)) **cũng
+  append `_php_mutation()`** → `ref_tag` nay nhận gadget phpggc to (Monolog/Laravel, 633B). App Java `/api/profile` chỉ
+  `urlDecode()`+echo ([PortalApiController.java:55-67](../Web%20vul%20env/java-app/src/main/java/com/webvulenv/javaapp/controller/PortalApiController.java#L55)) → length `224→633` → nhánh length-change bắn strong.
+- **Vì sao guard (đã mở sang nhánh length hôm nay) VẪN sót**: payload echo nằm trong chuỗi JSON nên server escape lại: byte NUL
+  (`"\x00*\x00socket"` trong gadget Monolog) → `\u0000`, `"`→`\"`, `\`→`\\`. Guard cũ chỉ gỡ `\"` → chuỗi gốc (có NUL thật)
+  không còn là substring → trượt. Mô phỏng trên report thật: `_is_mere_reflection` trả False (không nhận ra echo).
+- **KHÔNG revert A2** (A2 là cố ý, vá false-negative thật: sink privesc cookie "lành" cần cũng thử gadget RCE). Fix đúng chỗ là
+  ở **oracle**, không ở mutation — để giữ nguyên gadget coverage của A2 cho sink thật.
+- **Fix** ([replay_request.py:255](Replay/replay_request.py#L255)): thêm `_reflection_normalize()` — gỡ `\uXXXX`, `\"`→`"`,
+  `\\`→`\`, rồi chiếu về chỉ-chữ-số; `_is_mere_reflection` thêm 1 nhánh so trên bản chuẩn-hoá đó (guard `len>=12` chống match vặt).
+  Sink thật KHÔNG bị ảnh hưởng: khi gadget chạy thật, response đổi status/lộ exception/sinh giá trị DẪN XUẤT khác input → không
+  phải echo nguyên văn → guard trả False → vẫn strong.
+- **Verify**: trên report thật `ref_tag` Monolog echo → `_is_mere_reflection=True` (về weak), baseline (không payload) → False.
+  Unit: **135/135 pass** (thêm `test_reflection_check_handles_json_unicode_escaped_control_bytes`;
+  `test_derived_value_not_matching_injected_payload_is_strong_signal` = session privesc thật vẫn strong, không hồi quy).
+  `eval/evaluate.py` KHÔNG đổi (P=0.778/0.791, R=1.0, 7/7 pair, type 7/7) — fix ở tầng oracle, không chạm tầng detection.
+- **Lưu ý diễn giải**: `severity: High` của `ref_tag` là nhãn TĨNH (format PHP `O:` + field identity → score≥6), ĐÚNG theo thiết kế
+  passive (decoy trông giống serialized phải bị flag "Suspected"); fix chỉ sửa `evidence` (dynamic-strong→weak), KHÔNG đụng severity.
+
+**[2026-11-05 — FIX: oracle chấm FALSE-STRONG trên endpoint phản chiếu (reflection) — phát hiện khi test secure + inject value vuln.]**
+- **Bối cảnh**: user nhét value serialized của bản vuln vào bản SECURE (8084). Tool flag 14 vector (đúng — traffic có dữ liệu
+  serialized do user đưa vào) nhưng tấn công FAIL toàn bộ: `/api/import` `/api/import-config` `/api/import-async` trả 400
+  (json.loads/yaml.safe_load từ chối); `/api/restore-prefs` trả 200 nhưng chỉ **echo lại dict trơ** (không exec). Chứng minh
+  "fix thật, không che giấu".
+- **BUG tìm được**: `/api/restore-prefs` secure bị chấm **dynamic-strong, Critical** — FALSE POSITIVE. Secure `json.loads`→
+  `jsonify` **echo lại** JSON gửi vào `restored`; payload OOB dài → response dài (`92→149`) → nhánh "length changed
+  significantly" ([replay_request.py:299](Replay/replay_request.py#L299)) chấm strong, NHƯNG nhánh này KHÔNG gọi
+  `_is_mere_reflection` (guard chỉ có ở nhánh diff-nhỏ, dòng cũ 324). → response dài ra chỉ vì **echo payload** bị hiểu nhầm RCE.
+- **Fix** ([replay_request.py](Replay/replay_request.py)): (1) nâng `_is_mere_reflection` thành **whitespace-insensitive**
+  (server parse→re-serialize payload ở dạng nén, so chuỗi thẳng trượt vì input có khoảng trắng; nay strip hết whitespace rồi
+  so, min-len 12 chống match vặt). (2) Thêm guard `reflected` vào nhánh length-change: `strong` chỉ bật khi
+  `not clean_rejection AND not reflected`. Endpoint chỉ-echo → "weak" + indicator "response merely reflects the injected payload".
+- **Verify** (dùng đúng body thật từ report): secure restore-prefs echo → **weak** (trước: strong); vuln import-config exec
+  `73→30` → **strong** (giữ); vuln jsonpickle exec `restored:0` → **strong** (giữ); exec HTTPResponse len-lớn không-echo →
+  **strong** (giữ). 76 unit test OK.
+- **Cho luận văn (Threats to Validity)**: oracle black-box dựa trên độ dài response có thể bị **endpoint phản chiếu** đánh lừa
+  → đã thêm guard reflection; vẫn là giới hạn cần nêu (reflection tinh vi/transform có thể lọt).
+
 **[2026-11-05 — FIX #3: XÁC ĐỊNH ĐÚNG topo — serve chạy TRONG WSL2 (qua ethicalquoc.ps1), collector trên Windows.]**
 - **Chốt nguyên nhân**: `ethicalquoc.ps1` = `wsl -d Ubuntu -- python3 main.py @args` → **serve chạy trong WSL2 Ubuntu**, KHÔNG
   phải Windows. Collector chạy trên Windows (start-oob.bat/PowerShell). Verify từ WSL2: `127.0.0.1:9000` refused,

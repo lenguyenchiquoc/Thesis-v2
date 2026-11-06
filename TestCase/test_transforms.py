@@ -54,7 +54,6 @@ class TestEachStepRoundTripsExactly(unittest.TestCase):
         return candidate, chain
 
     def test_base64url_without_padding_keeps_its_alphabet(self):
-        # Previously re-wrapped as standard base64 ("_" -> "/", "=" appended).
         slot = base64.urlsafe_b64encode(b'O:4:"User":1:{s:5:"admin";b:0;}???').decode().rstrip("=")
         self.assertIn("_", slot)
         _, chain = self.assert_identity(slot)
@@ -123,7 +122,6 @@ class TestMutationLandsExactlyWhereTheCandidateCameFrom(unittest.TestCase):
 class TestLossyStepsAreRefusedNotGuessed(unittest.TestCase):
 
     def test_base64_over_text_that_is_not_base64_is_flagged_and_refused(self):
-        # b64decode(validate=False) silently drops the '="' characters here.
         slot = 'filename="Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7fQ=="'
         step = transforms.base64_step(slot)
         child = transforms.forward(step, slot)

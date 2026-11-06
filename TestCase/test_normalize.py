@@ -33,17 +33,12 @@ class TestBasicBase64RFC4648(unittest.TestCase):
     OFFICIAL_VECTORS = ["Zg==", "Zm8=", "Zm9v", "Zm9vYg==", "Zm9vYmE=", "Zm9vYmFy"]
 
     def test_official_short_vectors_are_below_the_length_gate(self):
-        # Ca 6 vector chinh thuc cua RFC deu < 16 ky tu sau khi chuan hoa padding
-        # -> _generate_decodes() co nguong len(val) >= 16 nen se KHONG thu decode
-        # -> normalize() phai fallback tra nguyen ban goc, khong duoc bien mat/loi.
         for b64 in self.OFFICIAL_VECTORS:
             with self.subTest(b64=b64):
                 result = DataNormalizer(b64).normalize()
                 self.assertEqual(result, [b64])
 
     def test_longer_vector_decodes_to_the_exact_original_bytes(self):
-        # Cau pangram tieng Anh noi tieng (chua tat ca 26 chu cai) - de bat ky
-        # ai cung co the tu ma hoa lai bang tool base64 doc lap va doi chieu.
         plaintext = "The quick brown fox jumps over the lazy dog"
         encoded = base64.b64encode(plaintext.encode()).decode()
         self.assertGreaterEqual(len(encoded), 16)
@@ -51,8 +46,6 @@ class TestBasicBase64RFC4648(unittest.TestCase):
         self.assertIn(plaintext, [v for _, v in candidates])
 
     def test_base64url_variant_dash_underscore_decodes_correctly(self):
-        # RFC 4648 section 5: bien the "URL and Filename Safe" dung '-'/'_'
-        # thay cho '+'/'/'  va thuong bo padding.
         plaintext = b"\xfb\xff\xbf\x00\x01\x02\x03\x04\x05\x06\x07\x08"
         b64url = base64.urlsafe_b64encode(plaintext).decode().rstrip("=")
         candidates = DataNormalizer(b64url)._generate_decodes(b64url)
@@ -125,9 +118,6 @@ class TestAdvancedEncodingLayers(unittest.TestCase):
         self.assertIn(self.PAYLOAD, result)
 
     def test_jwt_alg_none_with_embedded_gadget_rfc7519(self):
-        # RFC 7519 dinh nghia "none" la mot alg hop le (Unsecured JWT) - JWT
-        # dang nay co chu ky RONG: "header.payload." - da duoc PortSwigger/
-        # Auth0/Invicti tai lieu hoa nhu 1 ky thuat tan cong that.
         header = base64.urlsafe_b64encode(b'{"alg":"none","typ":"JWT"}').decode().rstrip("=")
         payload_obj = {"sub": self.PAYLOAD}
         payload = base64.urlsafe_b64encode(json.dumps(payload_obj).encode()).decode().rstrip("=")
@@ -150,9 +140,6 @@ class TestBfsTraversalBehavior(unittest.TestCase):
         self.assertEqual(result, [""])
 
     def test_no_hard_cap_all_independent_gadgets_survive(self):
-        # Truoc day normalize() cat cung con [:2], lam mat cac candidate doc lap
-        # (vd 2 gadget PHP khac nhau nam trong 2 claim JWT khac nhau). Da bo cap,
-        # gio phai giu du ca 3 candidate doc lap, khong chi giu 2.
         def php_gadget(tag: str) -> str:
             return f'O:19:"Monolog\\Handler\\X":1:{{s:7:"Monolog";s:{len(tag)}:"{tag}";}}'
 
@@ -168,7 +155,6 @@ class TestBfsTraversalBehavior(unittest.TestCase):
         self.assertIn(php_gadget("payloadC"), result)
 
     def test_deep_chain_within_max_depth_still_resolves(self):
-        # Boc 5 lop base64 lien tiep - van trong gioi han max_depth mac dinh (12).
         value = 'O:4:"User":2:{s:8:"username";s:6:"wiener";s:5:"admin";b:1;}'
         for _ in range(5):
             value = base64.b64encode(value.encode()).decode()
@@ -184,14 +170,14 @@ class TestThresholdGapFixed(unittest.TestCase):
     len tro lai > 10 khien khoang trong tai xuat hien."""
 
     def test_11_byte_decoded_payload_is_no_longer_lost(self):
-        target = "i:12345678;"  # PHP serialize so nguyen, dung 11 ky tu
+        target = "i:12345678;"
         self.assertEqual(len(target), 11)
         encoded = base64.b64encode(target.encode()).decode()
         result = DataNormalizer(encoded).normalize()
         self.assertIn(target, result)
 
     def test_10_byte_boundary_also_recognized(self):
-        target = "i:1234567;"  # dung 10 ky tu - dung bien duoi cua Gate 1
+        target = "i:1234567;"
         self.assertEqual(len(target), 10)
         encoded = base64.b64encode(target.encode()).decode()
         result = DataNormalizer(encoded).normalize()

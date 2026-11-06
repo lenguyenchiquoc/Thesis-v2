@@ -41,9 +41,6 @@ class TestLikelyVulnerableWeighting(unittest.TestCase):
         self.assertFalse(strong)
 
     def test_weak_content_echo_alone_is_not_strong_signal(self):
-        # Dung dung case thuc te: /api/profile echo lai ref_tag, khong
-        # unserialize - status/length giu nguyen, chi noi dung thay doi nhe,
-        # va gia tri thay doi do CHINH LA gia tri da inject (echo thuan).
         baseline = sample(body_sample='{"referral_tag":"organic","username":"wiener"}')
         mutated = sample(body_sample='{"referral_tag":"admin","username":"wiener"}')
         indicators, strong = self.r._compare(baseline, mutated, injected_value="admin")
@@ -52,13 +49,6 @@ class TestLikelyVulnerableWeighting(unittest.TestCase):
         self.assertFalse(strong, "Echo thuan cua chinh gia tri da inject thi KHONG duoc tinh la likely_vulnerable")
 
     def test_derived_value_not_matching_injected_payload_is_strong_signal(self):
-        # Regression quan trong: phat hien khi review PHP - session cookie
-        # (PortSwigger-style privilege escalation that bang flip_boolean) cho
-        # ra dung 1 indicator weak giong het ref_tag ("role":"user"->"admin",
-        # status/length khong doi) - nhung day la processing THAT (server tu
-        # tinh role tu du lieu da bi tamper), khong phai echo, vi chuoi
-        # "admin" trong response KHONG nam trong payload da inject (payload la
-        # ca 1 object PHP serialize, khong phai chuoi "admin" don le).
         baseline = sample(body_sample='{"username":"wiener","role":"user"}')
         mutated = sample(body_sample='{"username":"wiener","role":"admin"}')
         injected = 'O:4:"User":2:{s:8:"username";s:6:"wiener";s:5:"admin";b:1;}'
@@ -66,14 +56,27 @@ class TestLikelyVulnerableWeighting(unittest.TestCase):
         self.assertTrue(strong, "Gia tri 'role':'admin' khong phai echo cua payload da gui -> phai la strong signal")
 
     def test_reflection_check_handles_json_escaped_quotes(self):
-        # Gia tri inject (PHP serialize) co dau nhay kep "..." - khi server
-        # echo lai trong 1 chuoi JSON, cac dau nhay do bi JSON tu escape thanh
-        # \" - _is_mere_reflection phai van nhan ra day la echo thuan.
         injected = 'O:3:"Tag":1:{s:4:"name";s:5:"admin";}'
         baseline = sample(body_sample='{"referral_tag":"O:3:\\"Tag\\":1:{s:4:\\"name\\";s:7:\\"organic\\";}"}')
         mutated = sample(body_sample='{"referral_tag":"O:3:\\"Tag\\":1:{s:4:\\"name\\";s:5:\\"admin\\";}"}')
         indicators, strong = self.r._compare(baseline, mutated, injected)
         self.assertFalse(strong, "Echo thuan van la echo du body JSON co escape dau nhay kep")
+
+    def test_reflection_check_handles_json_unicode_escaped_control_bytes(self):
+        injected = (
+            'O:32:"Monolog\\Handler\\SyslogUdpHandler":1:{s:9:"\x00*\x00socket";'
+            'O:29:"Monolog\\Handler\\BufferHandler":7:{s:10:"\x00*\x00handler";'
+            's:13:"\x00*\x00bufferSize";i:-1;s:6:"whoami";}}'
+        )
+        echoed = (
+            injected.replace("\\", "\\\\").replace('"', '\\"').replace("\x00", "\\u0000")
+        )
+        baseline = sample(length=224, body_sample='{"referral_tag":"O:3:\\"Tag\\":1:{s:4:\\"name\\";s:7:\\"organic\\";}"}')
+        mutated = sample(length=633, body_sample='{"referral_tag":"' + echoed + '"}')
+        indicators, strong = self.r._compare(baseline, mutated, injected)
+        self.assertTrue(any("length changed significantly" in i.lower() for i in indicators),
+                        "length tang >50% phai sinh indicator length")
+        self.assertFalse(strong, "Gadget to bi echo nguyen van (NUL->\\u0000) van la reflection -> KHONG strong")
 
     def test_status_code_change_is_strong_signal(self):
         baseline = sample(status=200)
@@ -83,8 +86,6 @@ class TestLikelyVulnerableWeighting(unittest.TestCase):
         self.assertTrue(strong)
 
     def test_error_disclosure_is_strong_signal(self):
-        # Dung dung case thuc te: SessionCookieFilter.java echo
-        # "...ObjectInputStream: ClassCastException..." vao body loi.
         baseline = sample(status=200, body_sample='{"role":"user"}')
         mutated = sample(
             status=500,
@@ -109,9 +110,6 @@ class TestLikelyVulnerableWeighting(unittest.TestCase):
         self.assertTrue(strong)
 
     def test_clean_4xx_rejection_without_exception_is_weak(self):
-        # java-app-secure: mot session cookie bi tamper -> SessionCookieFilter tu
-        # choi sach bang 401 "Not authenticated" (KHONG lo exception). Day la hanh
-        # vi phong thu dung, khong phai lo hong -> status doi nhung KHONG strong.
         baseline = sample(status=200, length=120, body_sample='{"username":"wiener","role":"user"}')
         mutated = sample(status=401, length=28, body_sample='{"error":"Not authenticated"}')
         indicators, strong = self.r._compare(baseline, mutated)
@@ -119,16 +117,12 @@ class TestLikelyVulnerableWeighting(unittest.TestCase):
         self.assertFalse(strong, "4xx sach (khong lo exception) la tu choi phong thu, khong phai strong signal")
 
     def test_clean_4xx_rejection_secure_theme_is_weak(self):
-        # java-app-secure theme: payload gadget khong khop kieu Map -> 400
-        # "Invalid theme" sach. Status + length doi nhung khong lo exception.
         baseline = sample(status=200, length=101, body_sample='{"success":true,"name":"custom","backgroundType":"x"}')
         mutated = sample(status=400, length=25, body_sample='{"error":"Invalid theme"}')
         indicators, strong = self.r._compare(baseline, mutated)
         self.assertFalse(strong)
 
     def test_4xx_that_leaks_exception_is_still_strong(self):
-        # Doi lap: webhook VULN tra 400 NHUNG lo InvalidTypeIdException ->
-        # error disclosure -> van phai strong (khong bi downgrade thanh clean).
         baseline = sample(status=200, length=100, body_sample='{"success":true}')
         mutated = sample(
             status=400, length=400,
@@ -139,9 +133,6 @@ class TestLikelyVulnerableWeighting(unittest.TestCase):
         self.assertTrue(strong, "4xx co lo exception/stacktrace thi van la strong")
 
     def test_timestamp_only_diff_is_not_flagged(self):
-        # False-positive that tren /favicon.ico: 2 response 404 giong het nhau
-        # tru truong "timestamp" cua trang loi Spring -> KHONG duoc coi la
-        # content diff co y nghia.
         baseline = sample(status=404, length=100,
                           body_sample='{"timestamp":"2026-10-15T08:05:58.094+00:00","status":404,"error":"Not Found","path":"/favicon.ico"}')
         mutated = sample(status=404, length=100,
@@ -151,10 +142,6 @@ class TestLikelyVulnerableWeighting(unittest.TestCase):
         self.assertFalse(strong)
 
     def test_minor_length_change_is_observation_not_strong(self):
-        # PortSwigger "Modifying serialized objects": flip b:0->b:1 adds a small admin
-        # element -> response a few dozen bytes longer, same 200. Must SURFACE as an
-        # observation for the human, but NOT auto-set likely_vulnerable (logic/access
-        # -control flaws are FP-prone when auto-decided).
         baseline = sample(status=200, length=3307, body_sample="A" * 100)
         mutated = sample(status=200, length=3376, body_sample="A" * 100)
         indicators, strong = self.r._compare(baseline, mutated)
@@ -162,10 +149,6 @@ class TestLikelyVulnerableWeighting(unittest.TestCase):
         self.assertFalse(strong, "Thay doi length nho + same status = observation, khong auto-confirm")
 
     def test_deep_content_diff_beyond_body_sample_is_detected(self):
-        # Regression: the admin content appears FAR down the page, past the first 2000
-        # chars (body_sample). Old code compared only body_sample[:2000] -> identical ->
-        # missed it. With body_compare (wider window) the derived (non-echo) diff must be
-        # caught as a strong signal.
         head = "X" * 2500
         base_body = head + "<p>My Account: wiener</p>"
         mut_body = head + "<p>My Account: wiener</p><a href=/admin>Admin panel</a>"
@@ -179,9 +162,6 @@ class TestLikelyVulnerableWeighting(unittest.TestCase):
         self.assertTrue(strong, "Diff sau 2000 ky tu (admin link) phai bat duoc qua body_compare")
 
     def test_control_probe_downgrades_generic_500(self):
-        # Server tra 500 cho moi cookie sai (xu ly loi au, dang le 400). Control rac
-        # (non-serialized) cho ra DUNG cung 500 + body giong het -> 500 KHONG dac thu
-        # deser -> ha cap, khong con likely_vulnerable.
         body500 = "<html><h1>Internal Server Error</h1></html>"
         baseline = sample(status=200, length=100, body_sample="<html>welcome</html>")
         mutated = sample(status=500, length=len(body500), body_sample=body500)
@@ -191,8 +171,6 @@ class TestLikelyVulnerableWeighting(unittest.TestCase):
         self.assertTrue(any("Control probe" in i for i in indicators))
 
     def test_control_probe_keeps_strong_when_deser_marker_present(self):
-        # Attack 500 co dau vet deserializer that (ObjectInputStream) -> bang chung
-        # cung, khong downgrade du control cung 500.
         baseline = sample(status=200, length=100, body_sample="<html>welcome</html>")
         mutated = sample(status=500, length=200,
                          body_sample="java.io.ObjectInputStream.readObject ClassCastException trace")
@@ -201,8 +179,6 @@ class TestLikelyVulnerableWeighting(unittest.TestCase):
         self.assertTrue(strong, "500 co ObjectInputStream = bang chung deser that -> giu strong")
 
     def test_control_probe_clean_reject_keeps_strong(self):
-        # Control rac bi tu choi SACH (401) nhung attack serialized ra 500 -> server
-        # phan ung KHAC voi bytes serialized -> khac biet co nghia -> giu strong.
         baseline = sample(status=200, length=100, body_sample="<html>welcome</html>")
         mutated = sample(status=500, length=120, body_sample="<html>oops page here</html>")
         control = sample(status=401, length=30, body_sample='{"msg":"unauthorized"}')
@@ -210,14 +186,74 @@ class TestLikelyVulnerableWeighting(unittest.TestCase):
         self.assertTrue(strong, "Control 401 sach vs attack 500 -> giu strong")
 
     def test_strong_and_weak_indicators_can_coexist(self):
-        # Neu CA error disclosure VA content-diff deu xay ra (hiem, nhung co
-        # the), strong_signal phai la True vi co it nhat 1 bang chung manh -
-        # khong bi weak indicator "pha" ket qua.
         baseline = sample(status=200, body_sample='{"role":"user"}')
         mutated = sample(status=500, body_sample='{"error":"exception: bad object"}')
         indicators, strong = self.r._compare(baseline, mutated)
         self.assertGreaterEqual(len(indicators), 1)
         self.assertTrue(strong)
+
+    def test_reconstructed_object_repr_new_class_is_strong_signal(self):
+        baseline = sample(length=69, body_sample='{"success":true,"restored":"{\\"theme\\"=>\\"dark\\"}"}')
+        mutated = sample(length=70, body_sample='{"success":true,"restored":"#<Object:0x000075118edeb6c8 @cmd=\\"id\\">"}')
+        indicators, strong = self.r._compare(baseline, mutated, injected_value=None)
+        self.assertTrue(strong)
+        self.assertTrue(any("reconstructed object" in i for i in indicators))
+
+    def test_reconstructed_object_class_swap_is_strong_signal(self):
+        baseline = sample(body_sample='{"restored":"#<OpenStruct theme=\\"dark\\", lang=\\"en\\">"}')
+        mutated = sample(body_sample='{"restored":"#<Object:0x000075118ed56500>"}')
+        indicators, strong = self.r._compare(baseline, mutated, injected_value=None)
+        self.assertTrue(strong)
+        self.assertTrue(any("reconstructed object" in i for i in indicators))
+
+    def test_reconstructed_object_repr_python_object(self):
+        baseline = sample(body_sample='{"restored":{"theme":"dark"}}')
+        mutated = sample(body_sample='{"restored":"<__main__.Preferences object at 0x7f0012ab34cd>"}')
+        indicators, strong = self.r._compare(baseline, mutated, injected_value=None)
+        self.assertTrue(strong)
+        self.assertTrue(any("reconstructed object" in i for i in indicators))
+
+    def test_same_object_class_does_not_trigger_reconstructed_indicator(self):
+        baseline = sample(body_sample='{"config":"#<OpenStruct theme=\\"dark\\">"}')
+        mutated = sample(body_sample='{"config":"#<OpenStruct theme=\\"light\\">"}')
+        indicators, _ = self.r._compare(baseline, mutated, injected_value=None)
+        self.assertFalse(any("reconstructed object" in i for i in indicators))
+
+
+class TestSendEncodesContextBodyAsUtf8(unittest.TestCase):
+    """GAP A regression: captured request body is UTF-8 text (har_loader reads the HAR as
+    UTF-8). Before the fix _send() re-encoded it with latin-1, so a genuine non-Latin-1 char
+    in the recorded body (e.g. "ẻ" / U+1EBB on ruby-vuln /api/login) raised UnicodeEncodeError
+    and every mutation on that vector was skipped. After the fix the body round-trips as UTF-8."""
+
+    def test_context_body_with_vietnamese_char_is_sent_as_utf8_not_skipped(self):
+        import urllib.request
+        from unittest import mock
+
+        captured = {}
+
+        class _FakeResp:
+            status = 200
+            def __enter__(self): return self
+            def __exit__(self, *a): return False
+            def read(self): return b"ok"
+
+        def _fake_urlopen(req, timeout=None):
+            captured["data"] = req.data
+            return _FakeResp()
+
+        body = '{"username":"nguyẻn","password":"x"}'
+        ctx = {"headers": {"Content-Type": "application/json"}, "cookies": {}, "body": body}
+
+        r = ReplayRequest()
+        with mock.patch.object(urllib.request, "urlopen", _fake_urlopen):
+            out = r._send(
+                "http://localhost/api/login", "POST", "cookie", "ref_tag",
+                "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo1OiJhZG1pbiI7fQ==", ctx,
+            )
+
+        self.assertEqual(out["status"], 200)
+        self.assertEqual(captured["data"], body.encode("utf-8"))
 
 
 if __name__ == "__main__":

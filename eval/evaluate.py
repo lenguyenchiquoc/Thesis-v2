@@ -42,7 +42,7 @@ from Analyze.normalize import DataNormalizer
 from Analyze.finderprint import Fingerprint
 
 DESER_TYPES = {"PHP", "Java", "Ruby", "Python", ".NET", "Jackson", "YAML"}
-BASELINE_RE = re.compile(r"^[A-Za-z0-9+/=_%.\-]{16,}$")   # "looks like a long encoded token"
+BASELINE_RE = re.compile(r"^[A-Za-z0-9+/=_%.\-]{16,}$")
 
 
 def analyze_har(har_path):
@@ -69,9 +69,6 @@ def analyze_har(har_path):
     baseline = set()
     for v in vectors:
         val = v.get("value", "")
-        # ground truth at per-URL granularity: a (loc,name) is a sink instance only on
-        # requests where it actually CARRIES a value — a cleared/empty cookie (e.g. on
-        # /logout) is not a deserialization instance, so don't count it as a missable sink.
         if isinstance(val, str) and val.strip():
             present.setdefault((v.get("location"), v.get("name")), set()).add(v.get("url"))
             if BASELINE_RE.match(val):
@@ -105,10 +102,8 @@ def build_sets(flags, present, baseline, label_sinks, keymode):
             tool.discard(("header", "Cookie")); dup = 1
         return tool, sinks, base, dup
 
-    # keymode == "url": every (url, location, name) is its own unit
     tool = set(flags.keys())
     base = set(baseline)
-    # expand each URL-less label sink to every request that carries that (loc,name)
     sinks = set()
     for (loc, name), meta in label_sinks.items():
         want = meta.get("url_contains")
@@ -142,7 +137,6 @@ def main():
         har = os.path.join(args.har_dir, name)
         if not os.path.exists(har):
             rows.append((name, "MISSING", "", "", "")); continue
-        # label sinks keyed by (loc,name), carrying optional url_contains + type
         label_sinks = {(s["location"], s["name"]): {"type": s.get("type"),
                        "url_contains": s.get("url_contains")} for s in lab.get("deser_sinks", [])}
         flags, present, baseline, nvec = analyze_har(har)
@@ -157,7 +151,6 @@ def main():
             agg[m]["dup"] += dup
             per[m] = (len(ttp), len(tfp), len(tfn))
 
-        # type accuracy from the locname TPs (stable, one per sink)
         tool_ln = {(loc, name) for (_u, loc, name) in flags} - ({("header", "Cookie")} if ("header", "Cookie") in flags else set())
         for key in (tool_ln & set(label_sinks)):
             type_tp += 1

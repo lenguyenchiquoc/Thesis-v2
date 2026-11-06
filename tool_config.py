@@ -56,8 +56,6 @@ def set_oob_override(domain) -> None:
     _oob_override = domain.strip() if isinstance(domain, str) and domain.strip() else None
 
 
-# Built-in fallback collector when the user configures nothing. Keeps OOB working
-# out of the box against the bundled self-hosted collector (python -m Server.oob_collector).
 _INTERNAL_COLLECTOR_URL = "http://127.0.0.1:9000"
 
 
@@ -80,7 +78,6 @@ def get_oob_domain() -> str:
     if isinstance(value, str) and value.strip():
         return value.strip()
 
-    # Nothing set by the user -> default to the internal collector's host:port.
     return _internal_oob_base()
 
 
@@ -106,8 +103,8 @@ def get_oob_collector_url() -> str:
     raw = _load_raw_config()
     value = raw.get("oob_collector_url")
     if isinstance(value, str):
-        return value.strip()           # explicit "" in config disables OOB
-    return _INTERNAL_COLLECTOR_URL     # key absent -> internal default
+        return value.strip()
+    return _INTERNAL_COLLECTOR_URL
 
 
 def format_oob_token(base: str, token: str) -> str:
@@ -127,10 +124,10 @@ def format_oob_token(base: str, token: str) -> str:
 
 
 def _looks_like_ip_or_hostport(base: str) -> bool:
-    if ':' in base:                    # host:port
+    if ':' in base:
         return True
     labels = base.split('.')
-    return len(labels) == 4 and all(lbl.isdigit() for lbl in labels)  # IPv4
+    return len(labels) == 4 and all(lbl.isdigit() for lbl in labels)
 
 
 def get_oob_wait_seconds() -> float:

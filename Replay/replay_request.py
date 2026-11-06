@@ -168,7 +168,7 @@ class ReplayRequest:
         headers.setdefault("User-Agent", "EthicalQuoc/replay")
         cookies = dict(request_context.get("cookies") or {})
         ctx_body = request_context.get("body")
-        body = ctx_body.encode("latin-1") if isinstance(ctx_body, str) else None
+        body = ctx_body.encode("utf-8") if isinstance(ctx_body, str) else None
         target_url = url
 
         if location == "cookie":
@@ -191,8 +191,8 @@ class ReplayRequest:
                 if "multipart/" in content_type.lower():
                     raise ValueError("multipart form bodies cannot be rebuilt faithfully yet")
                 encoded_value = urllib.parse.quote(value, safe="", encoding="latin-1")
-                original_body = body.decode("latin-1") if body else ""
-                body = self._replace_pair(original_body, name, encoded_value).encode("latin-1")
+                original_body = body.decode("utf-8") if body else ""
+                body = self._replace_pair(original_body, name, encoded_value).encode("utf-8")
                 if not content_type:
                     headers["Content-Type"] = "application/x-www-form-urlencoded"
         elif location == "raw_body":
@@ -252,12 +252,36 @@ class ReplayRequest:
             text = pattern.sub("<volatile>", text)
         return text
 
+    @staticmethod
+    def _reflection_normalize(s: str) -> str:
+        s = re.sub(r"\\u[0-9a-fA-F]{4}", "", s)
+        s = s.replace('\\"', '"').replace("\\\\", "\\")
+        return re.sub(r"[^A-Za-z0-9]", "", s)
+
     def _is_mere_reflection(self, mutated_body: str, injected_value: str | None) -> bool:
         if not injected_value:
             return False
-        if injected_value in mutated_body:
+        unescaped = mutated_body.replace('\\"', '"')
+        if injected_value in mutated_body or injected_value in unescaped:
             return True
-        return injected_value in mutated_body.replace('\\"', '"')
+        inj = re.sub(r"\s+", "", injected_value)
+        if len(inj) >= 12 and inj in re.sub(r"\s+", "", unescaped):
+            return True
+        norm_inj = self._reflection_normalize(injected_value)
+        if len(norm_inj) >= 12 and norm_inj in self._reflection_normalize(mutated_body):
+            return True
+        return False
+
+    OBJECT_REPR_PATTERNS = [
+        re.compile(r"#<([A-Z]\w*(?:::[A-Z]\w*)*)"),
+        re.compile(r"<([\w.]+) object at 0x[0-9a-f]+>"),
+    ]
+
+    @classmethod
+    def _new_object_classes(cls, base_text: str, mutated_text: str) -> set[str]:
+        def classes(t: str) -> set[str]:
+            return {m.group(1) for p in cls.OBJECT_REPR_PATTERNS for m in p.finditer(t)}
+        return classes(mutated_text) - classes(base_text)
 
     def _compare(
         self, baseline: HttpProbeSample, mutated: HttpProbeSample, injected_value: str | None = None,
@@ -289,11 +313,18 @@ class ReplayRequest:
         length_delta = abs(mutated["length"] - baseline["length"])
         length_changed_significantly = baseline["length"] > 0 and length_delta / baseline["length"] > 0.5
         if length_changed_significantly:
-            suffix = " (clean client rejection — weak)" if clean_rejection else ""
+            reflected = self._is_mere_reflection(
+                mutated.get("body_compare") or mutated["body_sample"], injected_value)
+            if clean_rejection:
+                suffix = " (clean client rejection — weak)"
+            elif reflected:
+                suffix = " (response merely reflects the injected payload — weak)"
+            else:
+                suffix = ""
             indicators.append(
                 f"Response length changed significantly: baseline={baseline['length']} mutated={mutated['length']}{suffix}"
             )
-            if not clean_rejection:
+            if not clean_rejection and not reflected:
                 strong_signal = True
         elif length_delta > 0 and mutated["status"] == baseline["status"] and not error_hits:
             indicators.append(
@@ -323,6 +354,15 @@ class ReplayRequest:
                 )
                 if not self._is_mere_reflection(mut_cmp, injected_value):
                     strong_signal = True
+
+        new_object_classes = self._new_object_classes(base_cmp, mut_cmp)
+        if new_object_classes and not self._is_mere_reflection(mut_cmp, injected_value):
+            indicators.append(
+                f"Response reveals a reconstructed object of type {sorted(new_object_classes)} "
+                f"not present in baseline — the server instantiated an attacker-named type "
+                f"(deserialization executed)"
+            )
+            strong_signal = True
 
         if control is not None and strong_signal:
             has_deser_marker = any(m in mutated_lower for m in self.DESER_SPECIFIC_MARKERS)

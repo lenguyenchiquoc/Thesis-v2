@@ -26,9 +26,6 @@ from tool_config import (set_oob_override, get_oob_domain, format_oob_token,
                          get_oob_collector_url, get_oob_wait_seconds)
 
 
-# The collector is always self-hosted/local, so NEVER route its requests through a
-# system proxy (a corporate/VPN HTTP_PROXY makes urllib fail to reach 127.0.0.1, which
-# looks like "collector unreachable" even though the collector is up and logging hits).
 _LOCAL_OPENER = urllib.request.build_opener(urllib.request.ProxyHandler({}))
 
 
@@ -109,17 +106,11 @@ def _oob_confirm(findings: list, token_by_idx: dict, base_domain: str) -> dict:
         return {"status": "not_configured",
                 "detail": "no OOB domain/collector configured — detect-only run"}
 
-    # Reach the collector the way that actually works. Primary: the configured poll URL
-    # (127.0.0.1:9000 — right when serve and the collector share a host). Fallback: the
-    # SAME host:port the container called back to (base_domain, e.g. host.docker.internal
-    # :9000) — this is what works when serve runs in WSL2/another namespace while the
-    # collector runs on the host, where serve's own 127.0.0.1 is a different localhost.
     port = urllib.parse.urlsplit(collector_url).port or 9000
     candidates = [collector_url]
     alt = f"http://{base_domain}"
     if alt.rstrip('/') != collector_url.rstrip('/'):
         candidates.append(alt)
-    # serve-in-WSL2, collector-on-Windows: reach the Windows host via the WSL gateway IP.
     for u in _wsl_host_collector_urls(port):
         if u.rstrip('/') not in [c.rstrip('/') for c in candidates]:
             candidates.append(u)
@@ -198,7 +189,6 @@ def run_pipeline(har_data: dict, do_replay: bool = True, oob_domain: str | None 
     for vector in cleaned:
         oob_token = None
         if base_oob and replayer:
-            # Unique per-vector OOB token so a callback maps back to THIS finding.
             oob_token = uuid.uuid4().hex[:12]
             set_oob_override(format_oob_token(base_oob, oob_token))
         entry = _analyze_one(vector)

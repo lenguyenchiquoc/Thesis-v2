@@ -317,5 +317,125 @@ class TestJsonpickleMutations(unittest.TestCase):
         self.assertIn("oob.test.local/tk", raw)
 
 
+class TestNodeBlindOobVariant(unittest.TestCase):
+    """node_serialize gains a blind-confirmation variant: a node-serialize IIFE that makes
+    the target perform an outbound HTTP GET to the OOB collector (pure 'http' module, no
+    shell). This is the only confirmation signal for the blind /api/import-async sink whose
+    response never reflects the result. Only emitted when an OOB domain is configured."""
+
+    def test_node_serialize_adds_oob_callback_variant(self):
+        import tool_config
+        tool_config.set_oob_override("oob.test.local/ndtok")
+        try:
+            results = mutate('{"x":"_$$ND_FUNC$$_function(){return 1;}"}', "node_serialize", "node-serialize RCE")
+        finally:
+            tool_config.set_oob_override(None)
+        rce = [r for r in results if r.get("type") == "node_serialize_rce"]
+        self.assertEqual(len(rce), 3, "van phai giu 3 bien the lenh local (id/whoami/hostname)")
+        oob = [r for r in results if r.get("type") == "node_serialize_oob"]
+        self.assertEqual(len(oob), 1)
+        raw = decoded_payloads(oob)[0]
+        self.assertIn("_$$ND_FUNC$$_", raw)
+        self.assertIn("require('http').get(", raw)
+        self.assertIn("http://oob.test.local/ndtok/", raw)
+
+    def test_no_node_oob_variant_when_oob_not_configured(self):
+        with patch("Analyze.payloadMutation.get_oob_domain", return_value=""):
+            results = mutate('{"x":"_$$ND_FUNC$$_function(){return 1;}"}', "node_serialize", "node-serialize RCE")
+        self.assertFalse(any(r.get("type") == "node_serialize_oob" for r in results))
+        self.assertEqual(len([r for r in results if r.get("type") == "node_serialize_rce"]), 3)
+
+    def test_bare_marker_candidate_emits_bare_marker_payloads(self):
+        # Real-scan case: scanner narrows the body to the sink field's VALUE, a BARE marker
+        # ("_$$ND_FUNC$$_function(){return 1;}"). rebuild() drops our payload into that slot,
+        # so payloads MUST be bare markers (NOT wrapped in {"rce":...}) or node-serialize never
+        # eval()s them. This is the fix for the Node OOB-never-confirms bug.
+        import tool_config
+        tool_config.set_oob_override("oob.test.local/baretok")
+        try:
+            results = mutate("_$$ND_FUNC$$_function(){return 1;}", "node_serialize", "node-serialize RCE")
+        finally:
+            tool_config.set_oob_override(None)
+        for r in [x for x in results if x.get("type") == "node_serialize_rce"]:
+            raw = base64.b64decode(r["payload"]).decode()
+            self.assertTrue(raw.startswith("_$$ND_FUNC$$_"), f"RCE payload phai la marker tran, khong boc: {raw}")
+            self.assertNotIn('{"rce"', raw)
+        oob = [r for r in results if r.get("type") == "node_serialize_oob"]
+        self.assertEqual(len(oob), 1)
+        raw = decoded_payloads(oob)[0]
+        self.assertTrue(raw.startswith("_$$ND_FUNC$$_"), f"OOB payload phai la marker tran: {raw}")
+        self.assertIn("require('http').get(", raw)
+        self.assertIn("oob.test.local/baretok", raw)
+
+    def test_whole_object_candidate_keeps_wrapper_shape(self):
+        # When the candidate IS a whole serialized object (e.g. a node-serialize cookie), the
+        # payload must stay wrapped so the object carries an eval-able field.
+        import tool_config
+        tool_config.set_oob_override("oob.test.local/wraptok")
+        try:
+            results = mutate('{"username":"wiener","admin":false}', "node_serialize", "node-serialize RCE")
+        finally:
+            tool_config.set_oob_override(None)
+        oob = [r for r in results if r.get("type") == "node_serialize_oob"]
+        self.assertEqual(len(oob), 1)
+        raw = decoded_payloads(oob)[0]
+        self.assertTrue(raw.startswith('{"oob"'), f"candidate object -> payload phai boc: {raw}")
+        self.assertIn("_$$ND_FUNC$$_", raw)
+
+    def test_proto_pollution_probe_gets_no_oob_canary(self):
+        import tool_config
+        tool_config.set_oob_override("oob.test.local/ptok")
+        try:
+            results = mutate('{"theme":"dark"}', "proto_pollution", "Prototype Pollution")
+        finally:
+            tool_config.set_oob_override(None)
+        self.assertFalse(any(r.get("type") == "node_serialize_oob" for r in results),
+                         "proto-pollution khong phai primitive goi-ve-nha, khong duoc sinh canary OOB")
+
+    def test_proto_payload_preserves_benign_fields(self):
+        # Must inject __proto__ WHILE keeping the original benign keys, so baseline vs mutated differ
+        # only in the dangerous element (apples-to-apples). Otherwise a bare {"__proto__":...} body
+        # drops theme/lang and the server's benign reshape fools the content-diff oracle into strong.
+        import json
+        results = mutate('{"theme":"dark","lang":"en","__proto__":{"note":"demo"}}', "proto_pollution", "Prototype Pollution")
+        p = [r for r in results if r.get("type") == "prototype_pollution"][0]
+        raw = base64.b64decode(p["payload"]).decode()
+        obj = json.loads(raw)
+        self.assertEqual(obj.get("theme"), "dark")   # benign field kept
+        self.assertEqual(obj.get("lang"), "en")      # benign field kept
+        self.assertEqual(obj.get("__proto__"), {"isAdmin": True, "polluted": True})  # dangerous swap
+
+    def test_proto_payload_falls_back_when_slot_not_json_object(self):
+        results = mutate("not-a-json-object", "proto_pollution", "Prototype Pollution")
+        p = [r for r in results if r.get("type") == "prototype_pollution"][0]
+        raw = base64.b64decode(p["payload"]).decode()
+        self.assertIn("__proto__", raw)
+        self.assertIn("isAdmin", raw)
+
+
+class TestDotnetBlindOobVariant(unittest.TestCase):
+    """.NET gains a blind-confirmation variant (Json.NET $type gadget whose command fetches the OOB
+    collector), mirroring Java/Node — so a blind .NET sink can be confirmed via callback. Only emitted
+    when an OOB domain is configured; local id/whoami commands alone can never confirm out-of-band."""
+
+    def test_jsonnet_adds_oob_callback_variant(self):
+        import tool_config
+        tool_config.set_oob_override("oob.test.local/dntok")
+        try:
+            results = mutate('{"$type":"System.Object, mscorlib"}', "jsonnet", "JSON.NET TypeNameHandling RCE")
+        finally:
+            tool_config.set_oob_override(None)
+        oob = [r for r in results if r.get("type") == "dotnet_jsonnet_oob"]
+        self.assertEqual(len(oob), 1)
+        raw = decoded_payloads(oob)[0]
+        self.assertIn("http://oob.test.local/dntok/", raw)
+        self.assertIn("ObjectDataProvider", raw)
+
+    def test_no_dotnet_oob_when_not_configured(self):
+        with patch("Analyze.payloadMutation.get_oob_domain", return_value=""):
+            results = mutate('{"$type":"System.Object, mscorlib"}', "jsonnet", "JSON.NET TypeNameHandling RCE")
+        self.assertFalse(any(r.get("type", "").startswith("dotnet_") and r.get("type", "").endswith("_oob") for r in results))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

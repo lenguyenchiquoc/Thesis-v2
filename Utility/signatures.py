@@ -83,6 +83,8 @@ DOTNET_PATTERNS = [
     r'<SOAP-ENV:Envelope',
     r'<System\.Runtime\.Serialization',
     r'__type.*System\.',
+    r'"\$type"\s*:\s*"',
+    r'AAEAAAD/////',
     r'"@class"\s*:\s*"[^"]*"',
     r'TypeObject.*mscorlib',
     r'BinaryFormatter',

@@ -135,6 +135,13 @@ RUBY_PATTERNS = [
 RUBY_MAGIC_BYTES = [
     b'\x04\x08',
 ]
+DOTNET_MAGIC_BYTES = [
+    # MS-NRBF SerializationHeaderRecord: RecordType 0x00 + RootId=1 + HeaderId=-1.
+    # Every default BinaryFormatter.Serialize stream (and all ysoserial.net/ysonet
+    # output) begins with these 9 bytes; base64("\x00\x01\x00\x00\x00\xff\xff\xff\xff")
+    # == "AAEAAAD/////", the string form already in DOTNET_PATTERNS.
+    b'\x00\x01\x00\x00\x00\xff\xff\xff\xff',
+]
 OJ_PATTERNS = [
     r'"\^o"\s*:',
     r'"\^c"\s*:',
@@ -246,7 +253,8 @@ def looks_like_serialized(value: str) -> bool:
         decoded_lower = value_lower
 
     bin_data = value.encode('latin-1', errors='ignore')
-    if any(bin_data.startswith(magic) for magic in JAVA_MAGIC_BYTES + PICKLE_MAGIC_BYTES + RUBY_MAGIC_BYTES):
+    if any(bin_data.startswith(magic) for magic in
+           JAVA_MAGIC_BYTES + PICKLE_MAGIC_BYTES + RUBY_MAGIC_BYTES + DOTNET_MAGIC_BYTES):
         return True
 
     if any(re.search(p, value) or re.search(p, decoded_value) for p in PHP_STRONG + PHP_WEAK):

@@ -59,7 +59,7 @@ class Fingerprint:
             "Java":          self._detect_java(raw_text, lower_text, bin_data),
             "Python Pickle": self._detect_pickle(raw_text, lower_text, bin_data),
             "YAML":          self._detect_yaml(raw_text, lower_text),
-            "DotNet":        self._detect_dotnet(raw_text, lower_text),
+            "DotNet":        self._detect_dotnet(raw_text, lower_text, bin_data),
             "NodeJS":        self._detect_nodejs(raw_text, lower_text),
             "Ruby":          self._detect_ruby(raw_text, lower_text, bin_data),
             "Wrapper":       self._detect_wrapper(lower_text),
@@ -211,9 +211,17 @@ class Fingerprint:
 
         return {"score": score, "risk_level": "High", "subtype": subtype}
 
-    def _detect_dotnet(self, raw: str, lower: str) -> dict:
+    def _detect_dotnet(self, raw: str, lower: str, bin_data: bytes = b"") -> dict:
         score   = 0
         subtype = None
+
+        # Decoded MS-NRBF stream (BinaryFormatter) — the raw binary, not the base64
+        # "AAEAAAD/////" string. normalize now descends base64->binary for .NET, so the
+        # candidate reaching here is the binary header; recognise it the same way the
+        # base64 string form is caught by DOTNET_PATTERNS.
+        if any(magic in bin_data for magic in signatures.DOTNET_MAGIC_BYTES):
+            score  += 9
+            subtype = subtype or "BinaryFormatter"
 
         for p in self.DOTNET_PATTERNS:
             if re.search(p, raw, re.IGNORECASE):

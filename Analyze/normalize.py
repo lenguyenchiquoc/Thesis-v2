@@ -199,7 +199,8 @@ class DataNormalizer:
 
         raw = value.encode('latin-1', errors='ignore')
         if any(raw.startswith(m) for m in
-               signatures.JAVA_MAGIC_BYTES + signatures.PICKLE_MAGIC_BYTES + signatures.RUBY_MAGIC_BYTES):
+               signatures.JAVA_MAGIC_BYTES + signatures.PICKLE_MAGIC_BYTES
+               + signatures.RUBY_MAGIC_BYTES + signatures.DOTNET_MAGIC_BYTES):
             score += 12
 
         if 'java.' in value or 'org.apache' in value:

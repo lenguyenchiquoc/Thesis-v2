@@ -30,6 +30,7 @@ class Fingerprint:
 
     JACKSON_PATTERNS = signatures.JACKSON_PATTERNS
     JACKSON_DANGEROUS_CLASSES = signatures.JACKSON_DANGEROUS_CLASSES
+    FASTJSON_PATTERNS = signatures.FASTJSON_PATTERNS
 
     RUBY_PATTERNS = signatures.RUBY_PATTERNS
     RUBY_MAGIC_BYTES = signatures.RUBY_MAGIC_BYTES
@@ -151,8 +152,17 @@ class Fingerprint:
             subtype = subtype or "Java Gadget Chain"
             score  += len(gadget_hits) * 2
 
-        jackson_hits = [p for p in self.JACKSON_PATTERNS if re.search(p, raw)]
-        if jackson_hits:
+        # Fastjson AutoType ({"@type":"com.X",...}) is checked BEFORE Jackson's structural
+        # patterns because a @type object also matches JACKSON_PATTERNS; the leading-"{" anchor
+        # in FASTJSON_PATTERNS picks the object form (Fastjson) over the array form (Jackson).
+        fastjson_hits = [p for p in self.FASTJSON_PATTERNS if re.search(p, raw)]
+        jackson_hits  = [p for p in self.JACKSON_PATTERNS if re.search(p, raw)]
+        if fastjson_hits:
+            subtype = "Fastjson AutoType"
+            score  += 5
+            if any(cls in lower for cls in self.JACKSON_DANGEROUS_CLASSES):
+                score += 4
+        elif jackson_hits:
             subtype = "Jackson Polymorphic Typing"
             score  += 5
             if any(cls in lower for cls in self.JACKSON_DANGEROUS_CLASSES):
@@ -188,6 +198,8 @@ class Fingerprint:
         subtype = None
 
         YAML_SUBTYPES = [
+            (r'!!js/(?:function|undefined|regexp)', "YAML JS Function RCE (js-yaml)"),
+            (r'!<tag:yaml\.org,2002:js/',           "YAML JS Function RCE (js-yaml)"),
             (r'!!python/object/apply\s*:',   "YAML Python RCE — object/apply"),
             (r'!!python/object\s*:',         "YAML Python Object Injection"),
             (r'!!python/module\s*:',         "YAML Python Module Load"),

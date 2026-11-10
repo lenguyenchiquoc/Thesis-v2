@@ -126,6 +126,15 @@ JACKSON_DANGEROUS_CLASSES = [
     "defaultbeanfactorypointcutadvisor",
 ]
 
+# Fastjson 1.x AutoType — a PLAIN JSON object whose first key is "@type" naming a Java class:
+# {"@type":"com.sun.rowset.JdbcRowSetImpl",...}. Distinct from Jackson default typing, which uses
+# WRAPPER_ARRAY ["com.X",{...}] or the "@class" marker. The leading "{" anchor keeps this from
+# matching Jackson's array form; _detect_java checks Fastjson BEFORE the Jackson structural
+# patterns so a @type object is labelled Fastjson AutoType, not Jackson.
+FASTJSON_PATTERNS = [
+    r'\{\s*"@type"\s*:\s*"(?:[a-z][\w$]*\.)+[A-Za-z_$][\w$.]*"',
+]
+
 RUBY_PATTERNS = [
     r'\\x04\\x08',
     r'BAhv',

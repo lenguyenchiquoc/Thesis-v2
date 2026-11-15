@@ -123,6 +123,42 @@ def format_oob_token(base: str, token: str) -> str:
     return f"{token}.{base}"
 
 
+def _oob_ldap_port() -> int:
+    """TCP port of the collector's raw-LDAP catcher (JNDI/fastjson callbacks). Must match the
+    collector's --ldap-port. Override via env ETHICALQUOC_OOB_LDAP_PORT or config 'oob_ldap_port'."""
+    env_value = os.environ.get("ETHICALQUOC_OOB_LDAP_PORT")
+    if env_value and env_value.strip().isdigit():
+        return int(env_value.strip())
+    value = _load_raw_config().get("oob_ldap_port")
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str) and value.strip().isdigit():
+        return int(value.strip())
+    return 1389
+
+
+def get_oob_ldap_target() -> str:
+    """JNDI/LDAP callback target for ldap:// gadgets (fastjson/Jackson). Same host + per-vector
+    token as get_oob_domain(), but on the collector's LDAP port instead of its HTTP port — the
+    raw-LDAP catcher listens there, so the lookup gets answered instead of hanging on the HTTP port:
+
+        host.docker.internal:9000/<token>  ->  host.docker.internal:1389/<token>
+        <token>.abc.oast.fun               ->  <token>.abc.oast.fun   (real OOB provider, ldap:389)
+    """
+    base = (get_oob_domain() or "").strip()
+    if not base:
+        return ""
+    if '/' in base:
+        hostport, tail = base.split('/', 1)
+        tail = '/' + tail
+    else:
+        hostport, tail = base, ''
+    if ':' in hostport:                      # internal host:port form -> swap the port
+        host = hostport.rsplit(':', 1)[0]
+        return f"{host}:{_oob_ldap_port()}{tail}"
+    return base                              # real-domain subdomain form -> leave as-is
+
+
 def _looks_like_ip_or_hostport(base: str) -> bool:
     if ':' in base:
         return True

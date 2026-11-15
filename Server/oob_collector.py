@@ -27,12 +27,13 @@ Reachability (the target must be able to reach this host):
 
 import argparse
 import json
+import re
 import socket
 import threading
 import time
 from collections import deque
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from socketserver import ThreadingUDPServer, BaseRequestHandler
+from socketserver import ThreadingTCPServer, ThreadingUDPServer, BaseRequestHandler
 from urllib.parse import urlsplit, parse_qs
 
 RESERVED_PATHS = {"/_hits", "/_health", "/_all"}
@@ -170,8 +171,65 @@ def make_dns_handler(store: HitStore, answer_ip: str):
     return DNSHandler
 
 
+_LDAP_TOKEN_RE = re.compile(rb'[0-9a-f]{8,32}')
+
+
+def _token_from_ldap(buf: bytes) -> str:
+    """The token is embedded as the LDAP baseDN (format_oob_token path form -> .../<token>/a),
+    so it shows up as an ASCII hex run inside the SearchRequest bytes."""
+    m = _LDAP_TOKEN_RE.search(buf)
+    return m.group(0).decode("latin-1") if m else ""
+
+
+def make_ldap_handler(store: HitStore):
+    """Minimal raw-LDAP catcher: answer the anonymous BindRequest so the JNDI client proceeds to
+    send its SearchRequest (which carries the baseDN token), log the token, close. This CONFIRMS a
+    JNDI/fastjson lookup reached us out-of-band; it does NOT serve a malicious Reference (no RCE)."""
+    class LDAPHandler(BaseRequestHandler):
+        def handle(self):
+            sock = self.request
+            sock.settimeout(4.0)
+            buf = b""
+            try:
+                data = sock.recv(4096)
+                if not data:
+                    return
+                buf += data
+                # Echo the BindRequest's messageID so the client accepts our BindResponse.
+                msgid = 1
+                try:
+                    if len(data) >= 5 and data[0] == 0x30 and data[2] == 0x02:
+                        ilen = data[3]
+                        msgid = data[3 + ilen]
+                except Exception:
+                    msgid = 1
+                bind_ok = bytes([0x30, 0x0c, 0x02, 0x01, msgid & 0xff,
+                                 0x61, 0x07, 0x0a, 0x01, 0x00, 0x04, 0x00, 0x04, 0x00])
+                try:
+                    sock.sendall(bind_ok)
+                except OSError:
+                    pass
+                try:
+                    more = sock.recv(4096)  # the SearchRequest (baseDN token), if not pipelined above
+                    if more:
+                        buf += more
+                except (socket.timeout, OSError):
+                    pass
+                token = _token_from_ldap(buf)
+                store.record(token, "ldap", self.client_address[0],
+                             f"JNDI/LDAP lookup ({len(buf)} bytes)")
+            except Exception as e:
+                print(f"    [oob] LDAP handler error: {e}")
+            finally:
+                try:
+                    sock.close()
+                except OSError:
+                    pass
+    return LDAPHandler
+
+
 def serve(http_port=9000, dns_port=5353, answer_ip="127.0.0.1",
-          host="0.0.0.0", enable_dns=True):
+          host="0.0.0.0", enable_dns=True, ldap_port=1389, enable_ldap=True):
     store = HitStore()
     http_srv = ThreadingHTTPServer((host, http_port), make_http_handler(store))
     threading.Thread(target=http_srv.serve_forever, daemon=True).start()
@@ -192,6 +250,17 @@ def serve(http_port=9000, dns_port=5353, answer_ip="127.0.0.1",
         except OSError as e:
             print(f"[!] Could not bind DNS on {dns_port}: {e}. Continuing HTTP-only.")
 
+    ldap_srv = None
+    if enable_ldap:
+        try:
+            ThreadingTCPServer.allow_reuse_address = True
+            ldap_srv = ThreadingTCPServer((host, ldap_port), make_ldap_handler(store))
+            threading.Thread(target=ldap_srv.serve_forever, daemon=True).start()
+            print(f"[+] OOB collector LDAP ready on tcp://{host}:{ldap_port} "
+                  f"(JNDI/fastjson callback confirm)")
+        except OSError as e:
+            print(f"[!] Could not bind LDAP on {ldap_port}: {e}. Continuing without LDAP.")
+
     print("    Bound; press Ctrl+C to stop.")
     try:
         while True:
@@ -201,18 +270,24 @@ def serve(http_port=9000, dns_port=5353, answer_ip="127.0.0.1",
         http_srv.shutdown()
         if dns_srv:
             dns_srv.shutdown()
+        if ldap_srv:
+            ldap_srv.shutdown()
 
 
 def main():
     ap = argparse.ArgumentParser(description="EthicalQuoc self-hosted OOB collector")
     ap.add_argument("--http-port", type=int, default=9000)
     ap.add_argument("--dns-port", type=int, default=5353)
+    ap.add_argument("--ldap-port", type=int, default=1389,
+                    help="TCP port for the raw-LDAP catcher (JNDI/fastjson callback confirm)")
     ap.add_argument("--answer-ip", default="127.0.0.1",
                     help="A-record IP returned for every DNS query (where callbacks should land)")
     ap.add_argument("--host", default="0.0.0.0")
     ap.add_argument("--no-dns", action="store_true", help="HTTP only (e.g. behind ngrok)")
+    ap.add_argument("--no-ldap", action="store_true", help="Disable the raw-LDAP catcher")
     args = ap.parse_args()
-    serve(args.http_port, args.dns_port, args.answer_ip, args.host, not args.no_dns)
+    serve(args.http_port, args.dns_port, args.answer_ip, args.host, not args.no_dns,
+          args.ldap_port, not args.no_ldap)
 
 
 if __name__ == "__main__":

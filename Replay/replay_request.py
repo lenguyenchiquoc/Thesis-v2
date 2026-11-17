@@ -291,7 +291,13 @@ class ReplayRequest:
         strong_signal = False
 
         mutated_lower = mutated["body_sample"].lower()
+        baseline_lower = baseline["body_sample"].lower()
         error_hits = [kw for kw in self.ERROR_KEYWORDS if kw in mutated_lower]
+        # Only error keywords that appear in the mutated response but NOT already in the
+        # baseline count as mutation-induced. A keyword present in BOTH is a constant
+        # endpoint error (e.g. a Java endpoint that always 500s with "objectinputstream"
+        # regardless of input) — the mutation changed nothing, so it must not raise strong.
+        new_error_hits = [kw for kw in error_hits if kw not in baseline_lower]
 
         clean_rejection = (400 <= mutated["status"] < 500) and not error_hits
 
@@ -334,8 +340,15 @@ class ReplayRequest:
             )
 
         if error_hits:
-            indicators.append(f"Error/exception disclosure in response: {error_hits}")
-            strong_signal = True
+            if new_error_hits:
+                indicators.append(f"Error/exception disclosure in response: {new_error_hits}")
+                strong_signal = True
+            else:
+                indicators.append(
+                    f"Error/exception keywords {error_hits} present in BOTH baseline and mutated "
+                    f"responses — a constant endpoint error, not triggered by this mutation "
+                    f"(no mutation-induced signal — weak)"
+                )
 
         base_cmp = baseline.get("body_compare") or baseline["body_sample"]
         mut_cmp = mutated.get("body_compare") or mutated["body_sample"]

@@ -132,6 +132,33 @@ class TestLikelyVulnerableWeighting(unittest.TestCase):
         self.assertTrue(any("Error/exception disclosure" in i for i in indicators))
         self.assertTrue(strong, "4xx co lo exception/stacktrace thi van la strong")
 
+    def test_constant_baseline_error_is_not_strong(self):
+        # Ca thuc te: cookie PHP `ref_tag` bi browser dinh len endpoint Java
+        # /api/integration/receive. Endpoint do LUON 500 kem "ObjectInputStream"
+        # (loi hang so cua endpoint, co san o baseline). Mutation ref_tag KHONG
+        # thay doi gi -> baseline == mutated -> KHONG duoc tinh la strong.
+        err = '{"error":"failed to read request via ObjectInputStream: StreamCorruptedException"}'
+        baseline = sample(status=500, length=len(err), body_sample=err)
+        mutated = sample(status=500, length=len(err), body_sample=err)
+        indicators, strong = self.r._compare(baseline, mutated)
+        self.assertFalse(strong, "Loi hang so co san o baseline KHONG phai tin hieu do mutation gay ra")
+        self.assertTrue(any("present in BOTH baseline and mutated" in i for i in indicators),
+                        "Phai ghi nhan la loi hang so (co o ca baseline lan mutated), khong phai disclosure moi")
+
+    def test_new_error_keyword_absent_in_baseline_is_strong(self):
+        # Doi chung: baseline da co MOT loi hang so (exception), nhung mutation
+        # lam bung them keyword deser-specific MOI (objectinputstream) chua tung
+        # co o baseline -> van la strong (loi moi do mutation gay ra).
+        baseline = sample(status=500, length=60, body_sample='{"error":"generic exception while routing"}')
+        mutated = sample(
+            status=500, length=90,
+            body_sample='{"error":"generic exception while routing: ObjectInputStream rejected type"}',
+        )
+        indicators, strong = self.r._compare(baseline, mutated)
+        self.assertTrue(strong, "Keyword deser MOI (objectinputstream) khong co o baseline -> strong")
+        self.assertTrue(any("Error/exception disclosure" in i and "objectinputstream" in i.lower()
+                            for i in indicators))
+
     def test_timestamp_only_diff_is_not_flagged(self):
         baseline = sample(status=404, length=100,
                           body_sample='{"timestamp":"2026-10-15T08:05:58.094+00:00","status":404,"error":"Not Found","path":"/favicon.ico"}')

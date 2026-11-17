@@ -235,8 +235,12 @@ def run_pipeline(har_data: dict, do_replay: bool = True, oob_domain: str | None 
 
         severity, severity_note = _escalate_severity(
             ex.get("severity"),
-            [(a.get("mutated") or {}).get("body_sample") or "" for a in attempts],
-            [ind for a in attempts for ind in a.get("indicators", [])],
+            [{
+                "body": (a.get("mutated") or {}).get("body_sample") or "",
+                "payload": a.get("payload") or "",
+                "signal": a.get("signal"),
+                "indicators": a.get("indicators") or [],
+            } for a in attempts],
         )
         sent_any = any(not a.get("skipped") for a in attempts)
         evidence = "dynamic-strong" if any_strong else ("dynamic-weak" if sent_any else "static-only")

@@ -147,6 +147,17 @@ class Fingerprint:
         if 'ldap://' in lower or 'rmi://' in lower:
             score += 2
 
+        # Content-Type: application/x-java-serialized-object is the MIME label that Spring
+        # Integration's SerializingHttpMessageConverter (CVE-2026-47864) and the JBoss
+        # HttpInvoker / JMXInvokerServlet (CVE-2015-7501) register for a raw
+        # java.io.ObjectInputStream HTTP body. When the candidate is the header VALUE itself it
+        # carries no serialized bytes, so the magic-byte / base64 checks above miss it and the
+        # candidate would fall through to Unknown. Classify it as Java here so a
+        # content-type-only signal fingerprints correctly instead of landing in _unknown_result.
+        if 'application/x-java-serialized-object' in lower:
+            score  += 5
+            subtype = subtype or "Java serialized HTTP body"
+
         gadget_hits = [kw for kw in self.JAVA_GADGET_CHAINS if kw in lower]
         if gadget_hits:
             subtype = subtype or "Java Gadget Chain"

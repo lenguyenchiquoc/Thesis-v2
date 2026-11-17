@@ -25,28 +25,48 @@ _RCE_MARKERS = ("functorexception", "invokertransformer", "java.lang.runtime", "
 _DESER_MARKERS = ("objectinputstream", "invalidclassexception", "streamcorruptedexception")
 
 
-def _escalate_severity(static_severity: str, mutated_bodies, indicators) -> tuple:
-    """Raise severity to match the strongest replay evidence seen in the mutated
-    response bodies/indicators. Never lowers; returns (severity, note|None) where note
-    is set only when actually raised. Reflects observed impact; it does NOT auto-confirm
-    (all findings remain Suspected)."""
-    body_blob = " ".join((b or "").lower() for b in mutated_bodies)
-    ind_blob = " ".join((i or "").lower() for i in indicators)
-    evidence_tier = None
-    reason = None
-    if any(m in body_blob for m in _RCE_MARKERS):
-        evidence_tier, reason = "Critical", "response leaked RCE evidence (gadget chain reached Runtime.exec)"
-    elif any(m in body_blob for m in _DESER_MARKERS):
-        evidence_tier, reason = "High", "response leaked deserialization evidence (ObjectInputStream processed attacker bytes)"
-    elif "receivedtype" in body_blob and "content differs" in ind_blob:
-        evidence_tier, reason = "High", "response shows deserialized type changed (receivedType), confirming the payload was deserialized"
+def _marker_is_genuine(marker: str, body: str, payload: str, strong: bool) -> bool:
+    """A severity marker counts as server-produced evidence only when the server actually
+    emitted it — i.e. the marker is NOT a substring of what we sent (so it cannot be a mere
+    echo), OR this same attempt independently produced a strong signal (reflection already
+    ruled out). Java/.NET gadget class names (InvokerTransformer, java.lang.Runtime) are
+    plaintext inside the serialized bytes, so an endpoint that reflects the raw payload would
+    otherwise be mis-escalated to Critical on its own echo."""
+    return marker in body and (marker not in payload or strong)
 
-    if evidence_tier and _SEVERITY_RANK[evidence_tier] > _SEVERITY_RANK.get(static_severity, 0):
-        return evidence_tier, f"raised from {static_severity} — {reason}"
+
+def _escalate_severity(static_severity: str, attempts) -> tuple:
+    """Raise severity to the strongest replay evidence across attempts. Never lowers; returns
+    (severity, note|None) with note set only when actually raised. Each attempt is judged with
+    its OWN payload/signal (see _marker_is_genuine) so a reflected gadget is not counted as RCE
+    evidence. Reflects observed impact; it does NOT auto-confirm (all findings remain Suspected).
+
+    attempts: list of {body, payload, signal, indicators}."""
+    best_tier = None
+    best_reason = None
+    for a in attempts:
+        body = (a.get("body") or "").lower()
+        payload = (a.get("payload") or "").lower()
+        strong = a.get("signal") == "strong"
+        ind_blob = " ".join((i or "").lower() for i in (a.get("indicators") or []))
+
+        tier = reason = None
+        if any(_marker_is_genuine(m, body, payload, strong) for m in _RCE_MARKERS):
+            tier, reason = "Critical", "response leaked RCE evidence (gadget chain reached Runtime.exec)"
+        elif any(_marker_is_genuine(m, body, payload, strong) for m in _DESER_MARKERS):
+            tier, reason = "High", "response leaked deserialization evidence (ObjectInputStream processed attacker bytes)"
+        elif "receivedtype" in body and "content differs" in ind_blob:
+            tier, reason = "High", "response shows deserialized type changed (receivedType), confirming the payload was deserialized"
+
+        if tier and (best_tier is None or _SEVERITY_RANK[tier] > _SEVERITY_RANK[best_tier]):
+            best_tier, best_reason = tier, reason
+
+    if best_tier and _SEVERITY_RANK[best_tier] > _SEVERITY_RANK.get(static_severity, 0):
+        return best_tier, f"raised from {static_severity} — {best_reason}"
     return static_severity, None
 
 
-def _apply_replay_confirmation(exploit_analysis: dict, replay_result: dict) -> dict:
+def _apply_replay_confirmation(exploit_analysis: dict, replay_result: dict, mutation: dict | None = None) -> dict:
     result = dict(exploit_analysis)
     static_severity = result.get("severity", "Low")
 
@@ -57,8 +77,15 @@ def _apply_replay_confirmation(exploit_analysis: dict, replay_result: dict) -> d
 
     mutated = replay_result.get("mutated") or {}
     indicators = replay_result.get("indicators", [])
+    mutation = mutation or {}
     severity, severity_note = _escalate_severity(
-        static_severity, [mutated.get("body_sample") or ""], indicators
+        static_severity,
+        [{
+            "body": mutated.get("body_sample") or "",
+            "payload": mutation.get("payload_raw") or mutation.get("payload") or "",
+            "signal": replay_result.get("signal"),
+            "indicators": indicators,
+        }],
     )
     result["severity"] = severity
     result["evidence"] = "dynamic-strong" if replay_result.get("signal") == "strong" else "dynamic-weak"
@@ -240,7 +267,7 @@ def handle_arg(args):
                     print(json.dumps(replay_result, indent=4, ensure_ascii=False, default=str))
 
                     exploit_analysis = _apply_replay_confirmation(
-                        entry.get("exploit_analysis") or {}, replay_result
+                        entry.get("exploit_analysis") or {}, replay_result, mutation
                     )
 
                     results.append({

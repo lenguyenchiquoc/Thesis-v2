@@ -437,5 +437,40 @@ class TestDotnetBlindOobVariant(unittest.TestCase):
         self.assertFalse(any(r.get("type", "").startswith("dotnet_") and r.get("type", "").endswith("_oob") for r in results))
 
 
+class TestRubyDetectionCallbackChain(unittest.TestCase):
+    """Ruby Oj/YAML detection (callback) gadget chain — Gem::Requirement -> RemoteFetcher
+    (s3) OOB variant, emitted ALONGSIDE the in-band object-injection payload. This is the
+    only path that lets a Ruby sink reach oob_confirmed. Re-implemented from GitHub Security
+    Lab ruby-unsafe-deserialization (MIT), detection-only (no RCE)."""
+
+    @patch("Analyze.payloadMutation.get_oob_domain", return_value="tok9.oast.fun")
+    def test_oj_adds_detection_chain_with_token(self, _m):
+        import json
+        results = mutate('{"^o":"Object"}', "oj_object", "Oj Object Deserialization")
+        det = [r for r in results if r.get("type") == "oj_detection_oob"]
+        self.assertEqual(len(det), 1, "Oj sink must emit exactly one detection-chain OOB payload")
+        chain = json.loads(det[0]["payload_raw"])  # must be valid Oj object-mode JSON
+        self.assertIn("tok9.oast.fun?", det[0]["payload_raw"], "callback host must carry the OOB token")
+        self.assertIn("Gem::Requirement", det[0]["payload_raw"])
+
+    @patch("Analyze.payloadMutation.get_oob_domain", return_value="tok9.oast.fun")
+    def test_yaml_ruby_adds_detection_chain_with_token(self, _m):
+        results = mutate("--- !ruby/object:OpenStruct", "yaml_exec", "YAML Ruby Object Injection")
+        det = [r for r in results if r.get("type") == "yaml_detection_oob"]
+        self.assertEqual(len(det), 1)
+        self.assertIn('host: "tok9.oast.fun?"', det[0]["payload_raw"])
+        self.assertIn("Gem::RequestSet::Lockfile", det[0]["payload_raw"])
+
+    @patch("Analyze.payloadMutation.get_oob_domain", return_value="")
+    def test_no_detection_chain_when_oob_absent_but_object_injection_stays(self, _m):
+        oj = mutate('{"^o":"Object"}', "oj_object", "Oj Object Deserialization")
+        yml = mutate("--- !ruby/object:OpenStruct", "yaml_exec", "YAML Ruby Object Injection")
+        self.assertFalse(any(r.get("type") == "oj_detection_oob" for r in oj))
+        self.assertFalse(any(r.get("type") == "yaml_detection_oob" for r in yml))
+        # the in-band object-injection markers must remain (detection without OOB still works)
+        self.assertTrue(any(r.get("type") == "oj_object" for r in oj))
+        self.assertTrue(any(r.get("type") == "yaml_ruby_object" for r in yml))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

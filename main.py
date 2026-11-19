@@ -1,5 +1,6 @@
 import argparse
 import io
+import os
 import platform
 import sys
 
@@ -7,17 +8,12 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
-from Scanner.har_loader import HarLoader
 from Output.save_output import save_output_file_type, default_output_path
-from Input.input_loader import InputLoader
-from Analyze.postfiltered import VectorFiltering
 from Analyze.normalize import DataNormalizer
-from Analyze.cleanfilter import cleanfilter
 from Analyze.finderprint import Fingerprint
 import json
 from Analyze.ExploitabilityAnalysis import ExploitAnalyze
 from Analyze.payloadMutation import PayloadMutation
-from Replay.replay_request import ReplayRequest
 VERSION = "2025.1.0.0"
 
 _SEVERITY_RANK = {"Low": 0, "Medium": 1, "High": 2, "Critical": 3}
@@ -136,42 +132,36 @@ def main():
         description="Insecure deserialization detection tool"
     )
 
-    parser.add_argument("--setup", action="store_true", help="Set up tool")
     parser.add_argument("--version", action="store_true", help="Show version")
     parser.add_argument("--update", action="store_true", help="Update tool")
 
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    scan_cmd = subparsers.add_parser("scan", help="Scan target")
-    scan_cmd.add_argument("--har", type=str, help="Input HAR file")
-    scan_cmd.add_argument("-o", "--output", type=str, help="Export scan result file")
-
-    analyze_cmd = subparsers.add_parser("analyze", help="Analyze input vectors")
-    analyze_cmd.add_argument("-i", "--input", type=str, required=True, help="Input scan file")
-    analyze_cmd.add_argument("-o", "--output", type=str, help="Export analyze result")
-
-    assess_cmd = subparsers.add_parser("assess", help="Risk assessment")
-    assess_cmd.add_argument("-i", "--input", type=str, required=True, help="Input analyze file")
-    assess_cmd.add_argument("-o", "--output", type=str, help="Export assessment result")
-
-    report_cmd = subparsers.add_parser("report", help="Generate report")
-    report_cmd.add_argument("-i", "--input", type=str, required=True, help="Input assessment file")
-    report_cmd.add_argument("--format", choices=["json", "pdf", "html"], default="json")
-    report_cmd.add_argument("-o", "--output", type=str, help="Output report file")
-
     serve_cmd = subparsers.add_parser("serve", help="Run local bridge server for the browser extension")
     serve_cmd.add_argument("--host", type=str, default="127.0.0.1", help="Bind host (loopback only by default)")
     serve_cmd.add_argument("--port", type=int, default=8099, help="Bind port")
+
+    run_cmd = subparsers.add_parser(
+        "run",
+        help="Full pipeline (scan->analyze->assess->OOB) on a HAR in one shot — "
+             "identical output to the browser extension (same run_pipeline)",
+    )
+    run_cmd.add_argument("--har", type=str, required=True, help="Input HAR file")
+    run_cmd.add_argument("-o", "--output", type=str, help="Export report file (default: results/<date>/report_<time>.json)")
+    run_cmd.add_argument("--oob-domain", type=str, default=None,
+                         help="OOB collector domain to embed in canaries (same field the extension sends). "
+                              "Omit to fall back to config.json/env, or run detect-only when none is configured.")
+    run_cmd.add_argument("--no-replay", action="store_true",
+                         help="Static detection only — skip replay/assess/OOB (scan->analyze stages)")
+    run_cmd.add_argument("--dump-stages", action="store_true",
+                         help="Also write per-stage files (<report>.scan/.analyze/.assess.json) next to "
+                              "the report, for stage-by-stage inspection — one command, no 4-command chain")
 
     args = parser.parse_args()
     handle_arg(args)
 
 
 def handle_arg(args):
-
-    if args.setup:
-        print("[*] Initializing environment...")
-        return
 
     if args.version:
         print(f"EthicalQuoc version {VERSION}")
@@ -181,32 +171,13 @@ def handle_arg(args):
         print("[*] Updating EthicalQuoc...")
         return
 
-    if args.command == "scan":
-
-        if not args.har:
-            print("[!] Error: scan requires --har")
-            return
-
-        total_vectors = []
-
-        if args.har:
-            loader = HarLoader(args.har)
-            har_vectors = loader.parse()
-            total_vectors.extend(har_vectors)
-            print(f"[+] HAR collected: {len(har_vectors)} vectors")
-
-        print(f"[+] Total collected: {len(total_vectors)} vectors")
-
-        save_output_file_type(
-            vectors=total_vectors,
-            target_output_name=args.output or default_output_path("scan"),
-            phase="scan",
-            version=VERSION
-        )
-
-    elif args.command == "analyze":
-
-        print(f"[*] Analyzing: {args.input}")
+    if args.command == "run":
+        # Single source of truth: route the CLI through the EXACT same pipeline the
+        # browser extension uses (Server.serve.run_pipeline), so a CLI report is
+        # byte-for-byte the same shape as an extension report — same per-vector
+        # finding aggregation, same severity escalation, same OOB confirmation,
+        # same sort/stats. Lazy import avoids the serve<->main circular import.
+        from Server.serve import run_pipeline
 
         if platform.system() != "Windows":
             print(
@@ -219,117 +190,45 @@ def handle_arg(args):
                 "run natively on Windows or via WSL2 (see README)."
             )
 
-        results = []
+        with open(args.har, "r", encoding="utf-8") as f:
+            har_data = json.load(f)
 
-        if args.input:
-            reader = InputLoader(args.input)
-            file_read = reader.load()
-            vector_filtered = VectorFiltering(file_read)
-            vector_filtered_list = vector_filtered.filter()
-            print(f"[+] Vectors after filter: {len(vector_filtered_list)}")
-            clean_filter = cleanfilter(vector_filtered_list)
-            clean_filter.clean_and_output()
-
-            for i in clean_filter._clean_all():
-                entry = _analyze_one(i)
-                print(f"Normalize is: {entry['normalized']}")
-                print(json.dumps(entry["fingerprint"], indent=4, ensure_ascii=False))
-                print(json.dumps(entry["exploit_analysis"], indent=4, ensure_ascii=False))
-                print(entry["mutations"])
-                results.append(entry)
-
-        save_output_file_type(
-            vectors=results,
-            target_output_name=args.output or default_output_path("analyze"),
-            phase="analyze",
-            version=VERSION
+        stages = {} if args.dump_stages else None
+        result = run_pipeline(
+            har_data,
+            do_replay=not args.no_replay,
+            oob_domain=args.oob_domain,
+            stages_out=stages,
         )
 
-    elif args.command == "assess":
+        out_path = args.output or default_output_path("report")
+        parent_dir = os.path.dirname(out_path)
+        if parent_dir:
+            os.makedirs(parent_dir, exist_ok=True)
+        with open(out_path, "w", encoding="utf-8") as f:
+            json.dump(result, f, indent=4, ensure_ascii=False)
 
-        print(f"[*] Assessing risk for: {args.input}")
+        if stages is not None:
+            # Same single run, dumped stage-by-stage for inspection (no 4-command chain).
+            base = out_path[:-5] if out_path.lower().endswith(".json") else out_path
+            for phase in ("scan", "analyze", "assess"):
+                save_output_file_type(
+                    vectors=stages.get(phase, []),
+                    target_output_name=f"{base}.{phase}.json",
+                    phase=phase,
+                    version=VERSION,
+                )
 
-        results = []
-
-        if args.input:
-            with open(args.input, "r", encoding="utf-8") as f:
-                analyze_data = json.load(f)
-
-            replayer = ReplayRequest()
-
-            for entry in analyze_data.get("vectors", []):
-                mutations = entry.get("mutations", [])
-                if not mutations:
-                    continue
-
-                for mutation in mutations:
-                    replay_result = replayer.replay(mutation)
-                    print(json.dumps(replay_result, indent=4, ensure_ascii=False, default=str))
-
-                    exploit_analysis = _apply_replay_confirmation(
-                        entry.get("exploit_analysis") or {}, replay_result, mutation
-                    )
-
-                    results.append({
-                        "exploit_analysis": exploit_analysis,
-                        "mutation": mutation,
-                        "replay": replay_result,
-                    })
-
-        save_output_file_type(
-            vectors=results,
-            target_output_name=args.output or default_output_path("assess"),
-            phase="assess",
-            version=VERSION
+        stats = result.get("stats", {})
+        oob = stats.get("oob", {}) if isinstance(stats.get("oob"), dict) else {}
+        print(
+            f"[+] Vectors scanned: {stats.get('vectors_scanned')} | after filter: {stats.get('after_filter')} | "
+            f"findings: {stats.get('findings')} | dynamic-strong: {stats.get('dynamic_strong')} | "
+            f"OOB: {oob.get('status')}"
+            + (f" (confirmed {oob.get('confirmed')})" if oob.get('status') == 'ran' else "")
         )
-            
-    elif args.command == "report":
-
-        print(f"[*] Generating {args.format.upper()} report from {args.input}")
-
-        if args.format != "json":
-            print(f"[!] Format '{args.format}' not implemented yet — falling back to json")
-
-        findings = []
-
-        if args.input:
-            with open(args.input, "r", encoding="utf-8") as f:
-                assess_data = json.load(f)
-
-            for entry in assess_data.get("vectors", []):
-                exploit_analysis = entry.get("exploit_analysis") or {}
-                replay = entry.get("replay") or {}
-                findings.append({
-                    "exploit_type": exploit_analysis.get("exploit_type"),
-                    "severity": exploit_analysis.get("severity"),
-                    "severity_note": exploit_analysis.get("severity_note"),
-                    "evidence": exploit_analysis.get("evidence"),
-                    "score": exploit_analysis.get("score"),
-                    "suggested_probe": exploit_analysis.get("suggested_probe"),
-                    "notes": exploit_analysis.get("notes"),
-                    "mutation": entry.get("mutation"),
-                    "observations": exploit_analysis.get("observations", []),
-                    "replay_note": exploit_analysis.get("replay_note"),
-                    "baseline": replay.get("baseline"),
-                    "mutated": replay.get("mutated"),
-                })
-
-        results = {
-            "summary": {
-                "total_findings": len(findings),
-                "disclaimer": "All findings are Suspected — the tool never auto-confirms; verify each manually.",
-            },
-            "findings": findings,
-        }
-
-        print(f"[+] Total findings: {len(findings)} — all require manual review, tool does not auto-confirm")
-
-        save_output_file_type(
-            vectors=results,
-            target_output_name=args.output or default_output_path("report"),
-            phase="report",
-            version=VERSION
-        )
+        print(f"[+] All findings are Suspected — tool never auto-confirms; verify each manually.")
+        print(f"[+] Report saved to {out_path}")
 
     elif args.command == "serve":
         from Server.serve import serve

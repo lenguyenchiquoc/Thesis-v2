@@ -68,7 +68,7 @@ cd Thesis
 .\setup.ps1                 # one-time: installs Ubuntu (WSL2) + java/php/ruby/python3 inside it
 .\ethicalquoc.ps1 analyze -i results/scan_output.json -o results/analyze_output.json
 ```
-`setup.ps1` is idempotent (safe to re-run) — it installs the `Ubuntu` WSL distro if missing, then `java`/`php`/`ruby`/`python3` inside it, and enables `phar.readonly=0` for phpggc. After that, `ethicalquoc.ps1 <args>` runs `main.py` inside that Ubuntu WSL environment for every command — arguments are passed straight through, e.g. `.\ethicalquoc.ps1 scan --har TestCase/comprehensive.har -o results/scan.json`.
+`setup.ps1` is idempotent (safe to re-run) — it installs the `Ubuntu` WSL distro if missing, then `java`/`php`/`ruby`/`python3` inside it, and enables `phar.readonly=0` for phpggc. After that, `ethicalquoc.ps1 <args>` runs `main.py` inside that Ubuntu WSL environment for every command — arguments are passed straight through, e.g. `.\ethicalquoc.ps1 run --har TestCase/comprehensive.har -o results/report.json`.
 
 This gets **all 4 mutation paths working from one command** (`ysoserial`, `phpggc`, Ruby Marshal, `ysonet`). The key trick: WSL2 has built-in Windows interop, so a Linux process running inside it can directly execute `tools/dotnet/ysonet.exe` (a real Windows binary) — unlike a Docker container, which is isolated from the Windows kernel and needs `mono` (confirmed by testing not to work for this tool's gadgets, see [Known limitations](#known-limitations)). Requires Windows 10 (2004+) or 11 with virtualization enabled; `setup.ps1` tells you the exact command to run if WSL itself isn't installed yet.
 
@@ -99,25 +99,24 @@ If a runtime is missing, the corresponding mutation returns a clear `{"error": .
 
 ## Usage
 
-The tool is invoked through `main.py` with one of four subcommands, chained via JSON files:
+The tool runs the whole pipeline (scan → filter → normalize → fingerprint → exploit analysis → mutate → replay → OOB confirm) in one command on a HAR exported from your browser's DevTools. This is the exact same `run_pipeline` the browser extension uses, so a CLI report is identical in shape to an extension report.
 
 ```bash
-# 1. Collect HTTP vectors from a HAR file exported from your browser's DevTools
-python main.py scan --har capture.har -o results/scan_output.json
-
-# 2. Run the full analysis pipeline: filter -> normalize -> fingerprint -> exploit analysis -> mutate
-python main.py analyze -i results/scan_output.json -o results/analyze_output.json
-
-# 3. Replay generated payloads against the live target and confirm/deny each finding
-python main.py assess -i results/analyze_output.json -o results/assess_output.json
-
-# 4. Generate a report split into Confirmed / Suspected findings
-python main.py report -i results/assess_output.json -o results/report_output.json
+# Full pipeline in one shot (replay + OOB confirmation included)
+python main.py run --har capture.har -o results/report.json
 ```
 
-Each stage's output is plain JSON and can be inspected manually — see `results/` for examples.
+Useful flags:
 
-`-o` is optional on every subcommand. If omitted, the output is still saved — under `results/<DDMMYYYY>/<phase>_<HHMMSS>.json` (the date folder is created automatically), so nothing is silently lost when you forget to name an output file.
+| Flag | Effect |
+|---|---|
+| `--oob-domain <collector>` | Embed this out-of-band collector domain in canary payloads (same field the extension sends). Omit to fall back to `config.json`/env, or run detect-only when none is configured. |
+| `--no-replay` | Static detection only — stop after mutate, skip replay/assess/OOB (no live requests are sent). |
+| `--dump-stages` | In the same run, also write `<report>.scan.json` / `.analyze.json` / `.assess.json` next to the report, so each stage's output can be inspected manually — no separate commands needed. |
+
+`-o` is optional. If omitted, the report is still saved — under `results/<DDMMYYYY>/report_<HHMMSS>.json` (the date folder is created automatically), so nothing is silently lost when you forget to name an output file. Each dumped stage file is plain JSON — see `results/` for examples.
+
+> The browser extension talks to a local bridge: `python main.py serve` (binds `127.0.0.1:8099` by default). The HAR carries real session cookies, so the server is loopback-only and must never be exposed.
 
 ## Configuration
 

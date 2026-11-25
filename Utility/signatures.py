@@ -1,4 +1,5 @@
 import base64
+import json
 import re
 import urllib.parse
 
@@ -220,7 +221,8 @@ def _decoded_bytes_look_serialized(raw: bytes, _depth: int = 0) -> bool:
         return False
     if raw[:2] in (b'\x1f\x8b', b'\x78\x9c', b'\x78\x01', b'\x78\xda'):
         return True
-    if any(raw.startswith(m) for m in JAVA_MAGIC_BYTES + PICKLE_MAGIC_BYTES + RUBY_MAGIC_BYTES):
+    if any(raw.startswith(m) for m in
+           JAVA_MAGIC_BYTES + PICKLE_MAGIC_BYTES + RUBY_MAGIC_BYTES + DOTNET_MAGIC_BYTES):
         return True
     txt = raw.decode('latin-1', 'ignore')
     low = txt.lower()
@@ -338,4 +340,34 @@ def looks_like_serialized(value: str) -> bool:
     if any(kw in decoded_lower for kw in ["phar://", "gopher://", "expect://", "php://", "file://", "data://", "serialize", "unserialize", "pickle", "marshal", "jndi:", "ldap://", "rmi://"]):
         return True
 
+    # A serialized value nested as a STRING inside a JSON body is quote-escaped there
+    # (`{"backup":"O:11:\"Preferences\"…"}`), so every `"`-anchored pattern above misses it.
+    # Re-check each JSON string leaf on its unescaped form (bug N, 2026-11-25) — the same
+    # json.loads unescape normalize.py already applies (JWT-claim fix). Each leaf is judged by
+    # this very gate, so it can only pass if it would pass when sent on its own.
+    if any(looks_like_serialized(s) for s in _json_string_leaves(value)):
+        return True
+
     return False
+
+
+def _json_string_leaves(value: str, limit: int = 200) -> list:
+    """String leaves (values and keys) of a JSON object/array body; [] when not JSON."""
+    if not value.lstrip().startswith(("{", "[")):
+        return []
+    try:
+        root = json.loads(value)
+    except ValueError:
+        return []
+    out, stack = [], [root]
+    while stack and len(out) < limit:
+        node = stack.pop()
+        if isinstance(node, dict):
+            for k, v in node.items():
+                out.append(k)
+                stack.append(v)
+        elif isinstance(node, list):
+            stack.extend(node)
+        elif isinstance(node, str) and node != value:
+            out.append(node)
+    return [s for s in out if isinstance(s, str) and len(s) >= 10]

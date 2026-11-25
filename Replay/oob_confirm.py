@@ -103,6 +103,48 @@ def poll_oob(collector_url: str, token: str) -> int:
         return 0
 
 
+_SEVERITY_RANK = {"Low": 0, "Medium": 1, "High": 2, "Critical": 3}
+
+# OOB canaries whose callback can only happen if attacker-chosen code/command ran
+# (phpggc system/exec/passthru curl, pickle/yaml/jsonpickle __reduce__ urlopen,
+# node-serialize / js-yaml function http.get, ysonet/Json.NET Process.Start, Java
+# CommonsCollections Runtime.exec).
+_EXEC_OOB_TYPES = frozenset({
+    "php_object_oob", "pickle_oob", "jsonpickle_oob", "yaml_oob",
+    "yaml_js_function_oob", "node_serialize_oob",
+    "dotnet_jsonnet_oob", "dotnet_ysonet_oob", "java_rce_escalation",
+})
+# OOB canaries that only perform a lookup/fetch (Java URLDNS, Jackson/Fastjson JNDI,
+# Ruby Gem::Requirement->RemoteFetcher which deliberately stops at the fetch).
+_LOOKUP_OOB_TYPES = frozenset({
+    "java_urldns", "fastjson_oob", "jackson_oob",
+    "oj_detection_oob", "yaml_detection_oob",
+})
+
+
+def _escalate_on_oob(finding: dict) -> None:
+    """Raise severity of an OOB-confirmed finding (never lowers). The collector only returns
+    a hit COUNT per token and every canary of the vector shares that token, so the hit can be
+    attributed to code execution only when ALL OOB-capable attempts of the vector are
+    exec-type. Mixed or lookup-only vectors still prove the sink deserialized attacker input
+    -> at least High. Still Suspected (note text says so); nothing is auto-confirmed."""
+    types = {a.get("payload_type") for a in finding.get("attempts") or []
+             if not a.get("skipped")}
+    exec_t = types & _EXEC_OOB_TYPES
+    lookup_t = types & _LOOKUP_OOB_TYPES
+    if exec_t and not lookup_t:
+        tier = "Critical"
+        reason = ("OOB callback on a token carried only by command/code-execution canaries "
+                  "(" + ", ".join(sorted(exec_t)) + ") — suspected RCE")
+    else:
+        tier = "High"
+        reason = "OOB callback confirms the sink deserialized attacker-supplied input"
+    current = finding.get("severity") or "Low"
+    if _SEVERITY_RANK[tier] > _SEVERITY_RANK.get(current, 0):
+        finding["severity"] = tier
+        finding["severity_note"] = f"raised from {current} — {reason}"
+
+
 def oob_confirm(findings: list, token_by_idx: dict, base_domain: str) -> dict:
     """After replay, poll the self-hosted collector and elevate any finding whose
     unique per-vector token received an out-of-band callback (DNS/HTTP) to
@@ -159,6 +201,7 @@ def oob_confirm(findings: list, token_by_idx: dict, base_domain: str) -> dict:
                 f"lookup/request (suspected; verify manually — a callback does not by itself "
                 f"prove arbitrary code execution)"
             ] + list(f.get("indicators", []))
+            _escalate_on_oob(f)
             print(f"    [oob] CONFIRMED strong: {f.get('location')}/{f.get('name')} "
                   f"{f.get('url')} ({hits} hit(s))")
     return {"status": "ran", "collector": collector_url, "base_domain": base_domain,

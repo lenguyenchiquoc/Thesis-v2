@@ -1,0 +1,15 @@
+{
+    "target": "localhost:8092",
+    "disclaimer": "All findings are Suspected — the tool flags candidates and never auto-confirms; verify each manually.",
+    "stats": {
+        "vectors_scanned": 17,
+        "after_filter": 0,
+        "findings": 0,
+        "dynamic_strong": 0,
+        "oob": {
+            "status": "not_configured",
+            "detail": "no OOB domain/collector configured — detect-only run"
+        }
+    },
+    "findings": []
+}

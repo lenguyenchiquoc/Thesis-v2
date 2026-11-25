@@ -1,6 +1,6 @@
 import json
 import os
-from urllib.parse import urlparse
+from urllib.parse import parse_qsl, unquote_plus, urlparse
 
 
 class HarLoader:
@@ -65,8 +65,21 @@ class HarLoader:
 
         request_context = self._build_request_context(req)
 
+        # Query params are re-parsed from the URL itself, not taken from queryString[]: HAR
+        # producers disagree on that array (Chrome DevTools keeps values %-encoded, the
+        # extension's URLSearchParams decodes them), and the encoded form made replay encode
+        # the payload twice (bug P1, 2026-11-25). Values come out DECODED; replay
+        # (_send, url_param) percent-encodes exactly once. latin-1 keeps every byte 1:1,
+        # matching replay's quote(..., encoding="latin-1").
+        url_params = self._parse_urlencoded(urlparse(url).query)
+        for name, value in url_params:
+            self._add_vector(url, req['method'], "url_param", name, value, request_context)
+        # A param listed only in queryString[] (URL carries no such query — hand-built /
+        # synthetic HARs, e.g. TestCase/comprehensive.har) keeps the legacy as-is reading.
+        in_url = {name for name, _ in url_params}
         for param in req.get('queryString', []):
-            self._add_vector(url, req['method'], "url_param", param['name'], param['value'], request_context)
+            if param['name'] not in in_url:
+                self._add_vector(url, req['method'], "url_param", param['name'], param['value'], request_context)
 
         for cookie in req.get('cookies', []):
             self._add_vector(url, req['method'], "cookie", cookie['name'], cookie['value'], request_context)
@@ -78,12 +91,38 @@ class HarLoader:
 
         post_data = req.get('postData', {})
 
-        if 'params' in post_data:
+        if self._is_urlencoded_form(post_data, request_context["headers"]):
+            # A urlencoded form body is split into its fields here, for every HAR producer,
+            # from the raw wire text (bug P, 2026-11-25): DevTools' params[] keep values
+            # %-encoded (-> replay double-encoded, P1) and the extension records no params at
+            # all, so the whole "cart=..." body became one raw_body slot whose key the payload
+            # then overwrote (P2). Values come out DECODED; replay (_send, form_body) swaps
+            # just that pair and percent-encodes it exactly once.
+            if 'text' in post_data:
+                fields = self._parse_urlencoded(post_data['text'] or "")
+            else:  # params only, no wire text: same %-decoding as the text path
+                fields = [(unquote_plus(p['name'], encoding="latin-1"),
+                           unquote_plus(p.get('value', ""), encoding="latin-1"))
+                          for p in post_data.get('params', [])]
+            for name, value in fields:
+                self._add_vector(url, req['method'], "form_body", name, value, request_context)
+
+        elif 'params' in post_data:
             for p in post_data['params']:
                 self._add_vector(url, req['method'], "form_body", p['name'], p['value'], request_context)
 
         elif 'text' in post_data:
             self._add_vector(url, req['method'], "raw_body", "payload", post_data['text'], request_context)
+
+    @staticmethod
+    def _parse_urlencoded(raw):
+        return parse_qsl(raw, keep_blank_values=True, encoding="latin-1")
+
+    @staticmethod
+    def _is_urlencoded_form(post_data, headers):
+        mime = post_data.get('mimeType') or next(
+            (v for k, v in headers.items() if k.lower() == "content-type"), "")
+        return "application/x-www-form-urlencoded" in (mime or "").lower()
 
     def _dedup(self, vectors):
         """Collapse vectors identical on (url, method, location, name, value) —

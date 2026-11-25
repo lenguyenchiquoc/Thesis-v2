@@ -92,6 +92,11 @@ def _apply_replay_confirmation(exploit_analysis: dict, replay_result: dict, muta
     return result
 
 
+def _is_format_hint_header(vector: dict) -> bool:
+    return (str(vector.get("location") or "").lower() == "header"
+            and str(vector.get("name") or "").lower() == "content-type")
+
+
 def _analyze_one(vector: dict) -> dict:
     value = vector["cleaned_value"]
     normalizer = DataNormalizer(value)
@@ -108,7 +113,20 @@ def _analyze_one(vector: dict) -> dict:
     mutation_vector["transform_chain"] = (
         list(vector.get("clean_steps") or []) + normalizer.get_transform_chain(candidate)
     )
-    mutations = PayloadMutation(exploit_result, mutation_vector).mutate()
+    if _is_format_hint_header(vector):
+        # The Content-Type VALUE (e.g. application/x-java-serialized-object) only labels the body
+        # format — it is not where the server deserializes. Injecting binary gadgets into the header
+        # just fails urllib with "Invalid header value" (bug B, 2026-11-21). The body itself is a
+        # separate raw_body vector and gets the payloads there.
+        mutations = []
+        exploit_result = dict(exploit_result)
+        exploit_result["notes"] = " | ".join(filter(None, [
+            exploit_result.get("notes"),
+            "Content-Type header is a format hint, not an injection slot — no payload sent here; "
+            "the request body is tested as its own raw_body vector",
+        ]))
+    else:
+        mutations = PayloadMutation(exploit_result, mutation_vector).mutate()
 
     return {
         "vector": {

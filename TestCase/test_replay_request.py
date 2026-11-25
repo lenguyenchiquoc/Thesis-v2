@@ -283,5 +283,102 @@ class TestSendEncodesContextBodyAsUtf8(unittest.TestCase):
         self.assertEqual(captured["data"], body.encode("utf-8"))
 
 
+def _capture_send(ctx, location="cookie", name="ref_tag", value="x", url="http://localhost/api/x"):
+    import urllib.request
+    from unittest import mock
+    captured = {}
+
+    class _FakeResp:
+        status = 200
+        def __enter__(self): return self
+        def __exit__(self, *a): return False
+        def read(self): return b"ok"
+
+    def _fake_urlopen(req, timeout=None):
+        captured["data"] = req.data
+        captured["headers"] = {k.lower(): v for k, v in req.header_items()}
+        return _FakeResp()
+
+    with mock.patch.object(urllib.request, "urlopen", _fake_urlopen):
+        ReplayRequest()._send(url, "POST", location, name, value, ctx)
+    return captured
+
+
+class TestSendKeepsBinaryContextBodyByteExact(unittest.TestCase):
+    """Bug A (2026-11-21) regression: a binary body (Java ObjectInputStream, HAR stores it one char
+    per byte: \\xac\\xed -> "¬í") was re-encoded as UTF-8 by the GAP-A fix, so the BASELINE reached the
+    server as C2 AC C3 AD ("invalid stream header: C2ACC3AD"). A binary Content-Type must go out
+    latin-1 (byte-exact) while text bodies stay UTF-8."""
+
+    JAVA_BODY = "\xac\xed\x00\x05t\x00\x05hello"
+
+    def test_java_serialized_body_is_sent_byte_exact(self):
+        ctx = {"headers": {"Content-Type": "application/x-java-serialized-object"},
+               "cookies": {}, "body": self.JAVA_BODY}
+        data = _capture_send(ctx)["data"]
+        self.assertEqual(data[:4], b"\xac\xed\x00\x05")
+        self.assertEqual(data, self.JAVA_BODY.encode("latin-1"))
+
+    def test_octet_stream_body_is_sent_byte_exact(self):
+        ctx = {"headers": {"content-type": "application/octet-stream"}, "cookies": {}, "body": "\x00\x01\xff\xfe"}
+        self.assertEqual(_capture_send(ctx)["data"], b"\x00\x01\xff\xfe")
+
+    def test_text_body_with_latin1_range_char_stays_utf8(self):
+        body = '{"name":"café"}'
+        ctx = {"headers": {"Content-Type": "application/json"}, "cookies": {}, "body": body}
+        self.assertEqual(_capture_send(ctx)["data"], body.encode("utf-8"))
+
+    def test_binary_content_type_with_non_latin1_char_falls_back_to_utf8(self):
+        body = "nguyẻn"
+        ctx = {"headers": {"Content-Type": "application/octet-stream"}, "cookies": {}, "body": body}
+        self.assertEqual(_capture_send(ctx)["data"], body.encode("utf-8"))
+
+
+class TestContextBodyCharsetAndMagicFallback(unittest.TestCase):
+    """Bug A refinement (2026-11-21): an explicit `charset=` wins; a binary body whose
+    Content-Type is missing/mislabelled is still caught by its serialized-stream magic bytes."""
+
+    enc = staticmethod(ReplayRequest._encode_context_body)
+
+    def test_charset_iso_8859_1_sends_latin1(self):
+        self.assertEqual(self.enc("café", {"Content-Type": "text/plain; charset=iso-8859-1"}), b"caf\xe9")
+
+    def test_charset_utf8_sends_utf8(self):
+        self.assertEqual(self.enc("café", {"Content-Type": "text/plain; charset=UTF-8"}), b"caf\xc3\xa9")
+
+    def test_quoted_charset_is_parsed(self):
+        self.assertEqual(self.enc("café", {"Content-Type": 'text/plain; charset="ISO-8859-1"'}), b"caf\xe9")
+
+    def test_char_outside_declared_charset_falls_back_to_utf8(self):
+        self.assertEqual(self.enc("ẻ", {"Content-Type": "text/plain; charset=iso-8859-1"}), "ẻ".encode("utf-8"))
+
+    def test_unknown_charset_falls_back_to_utf8(self):
+        self.assertEqual(self.enc("café", {"Content-Type": "text/plain; charset=no-such-codec"}), b"caf\xc3\xa9")
+
+    def test_mislabelled_java_body_caught_by_magic(self):
+        body = "\xac\xed\x00\x05t\x00\x05hello"
+        self.assertEqual(self.enc(body, {"Content-Type": "text/plain"}), body.encode("latin-1"))
+
+    def test_unlabelled_pickle_body_caught_by_magic(self):
+        body = "\x80\x04\x95\x10\x00"
+        self.assertEqual(self.enc(body, {}), body.encode("latin-1"))
+
+    def test_plain_json_without_charset_stays_utf8(self):
+        self.assertEqual(self.enc('{"a":"é"}', {"Content-Type": "application/json"}), '{"a":"é"}'.encode("utf-8"))
+
+
+class TestSendDropsConditionalHeaders(unittest.TestCase):
+    """Bug E (2026-11-21): If-None-Match / If-Modified-Since copied from the HAR made the server
+    answer every baseline AND mutated request with an empty 304, so nothing could be compared."""
+
+    def test_conditional_headers_are_not_forwarded(self):
+        ctx = {"headers": {"If-None-Match": 'W/"abc"', "If-Modified-Since": "Sat, 21 Nov 2026 00:00:00 GMT",
+                           "X-Keep": "1"}, "cookies": {}, "body": None}
+        headers = _capture_send(ctx)["headers"]
+        self.assertNotIn("if-none-match", headers)
+        self.assertNotIn("if-modified-since", headers)
+        self.assertEqual(headers.get("x-keep"), "1")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

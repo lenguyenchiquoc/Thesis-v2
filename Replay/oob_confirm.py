@@ -154,8 +154,10 @@ def oob_confirm(findings: list, token_by_idx: dict, base_domain: str) -> dict:
             f["evidence"] = "dynamic-strong"
             f["oob_confirmed"] = True
             f["indicators"] = [
-                f"OOB callback received ({hits} hit(s)) on token {token} — confirmed "
-                f"out-of-band interaction: the payload was deserialized and executed"
+                f"OOB callback received ({hits} hit(s)) on token {token} — out-of-band "
+                f"interaction observed: the payload was deserialized and triggered an outbound "
+                f"lookup/request (suspected; verify manually — a callback does not by itself "
+                f"prove arbitrary code execution)"
             ] + list(f.get("indicators", []))
             print(f"    [oob] CONFIRMED strong: {f.get('location')}/{f.get('name')} "
                   f"{f.get('url')} ({hits} hit(s))")

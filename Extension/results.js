@@ -78,12 +78,16 @@ function render(data) {
   if (!(data.findings || []).length) { box.innerHTML = `<div class="empty">No deserialization-related vectors found.</div>`; return; }
 
   for (const f of data.findings) {
-    const div = document.createElement("div");
-    div.className = "finding" + (f.evidence === "dynamic-strong" ? " vuln" : "");
+    // Collapsed by default: <summary> is the one-line overview, the body opens on click.
+    const det = document.createElement("details");
+    det.className = "finding" + (f.evidence === "dynamic-strong" ? " vuln" : "");
     const oobPill = f.oob_confirmed ? `<span class="pill ev-oob">OOB confirmed ✓</span>` : "";
-    let h = `<div class="ftop"><div><b>${esc(f.type)}</b> · ${esc(f.subtype || f.exploit_type || "-")}</div><div>${evPill(f.evidence)}${oobPill}</div></div>`;
     const occ = Number(f.occurrences) > 1 ? ` <span class="pill occ">captured ${f.occurrences}×, tested once</span>` : "";
-    h += `<div class="ep">${esc(f.method)} ${esc(f.url)} &nbsp;[${esc(f.location)}/${esc(f.name)}]${occ}</div>`;
+    let h = `<summary>` +
+            `<div class="ftop"><div><b>${esc(f.type)}</b> · ${esc(f.subtype || f.exploit_type || "-")}</div>` +
+            `<div class="pills">${sevPill(f.severity)}${evPill(f.evidence)}${oobPill}</div></div>` +
+            `<div class="ep">${esc(f.method)} ${esc(f.url)} &nbsp;[${esc(f.location)}/${esc(f.name)}]${occ}</div>` +
+            `</summary><div class="fbody">`;
     if (f.oob_token) {
       const oobStat = f.oob_confirmed
         ? `<span class="pill ev-oob">callback received ✓</span>`
@@ -99,24 +103,55 @@ function render(data) {
     if (f.notes) h += `<div class="kv">${esc(f.notes)}</div>`;
     if (f.normalized && f.normalized.length) h += `<div class="kv">Normalized candidate:</div><pre>${esc(f.normalized[0])}</pre>`;
 
-    for (const a of f.attempts || []) {
-      h += `<div class="attempt">`;
-      h += `<div><span class="pill ptype">${esc(a.payload_type)}</span>${a.chain ? ` <span class="kv" style="display:inline">· ${esc(a.chain)}</span>` : ""}` +
-           sigBadge(a.signal) +
-           (a.skipped ? ` <span class="badge safe">skipped</span>` : "") + `</div>`;
-      if (a.payload) h += `<div class="kv">Payload sent:</div><pre>${esc(a.payload)}</pre>`;
-      if (a.reason) h += `<div class="kv">Skipped: ${esc(a.reason)}</div>`;
-      if (a.baseline) {
-        h += `<div class="kv">Baseline → Mutated: ${statusCode(a.baseline.status)} (${a.baseline.length}b) → ${statusCode(a.mutated.status)} (${a.mutated.length}b)${deltaSpan(a.baseline.length, a.mutated.length)}</div>`;
-        if (a.mutated.body_sample) h += `<div class="kv">Mutated response:</div><pre>${esc(a.mutated.body_sample)}</pre>`;
+    const attempts = f.attempts || [];
+    if (attempts.length) {
+      const nStrong = attempts.filter((a) => a.signal === "strong").length;
+      const nSkipped = attempts.filter((a) => a.signal === "skipped" || a.skipped).length;
+      h += `<details class="attempts"><summary>Attempts (${attempts.length})` +
+           (nStrong ? ` · <span class="code err">${nStrong} strong</span>` : "") +
+           (nSkipped ? ` · ${nSkipped} skipped` : "") + `</summary>`;
+      for (const a of attempts) {
+        const codes = a.baseline && a.mutated
+          ? ` <span class="kv" style="display:inline">${statusCode(a.baseline.status)} → ${statusCode(a.mutated.status)}</span>`
+          : "";
+        h += `<details class="attempt"><summary>` +
+             `<span class="pill ptype">${esc(a.payload_type)}</span>${a.chain ? ` <span class="kv" style="display:inline">· ${esc(a.chain)}</span>` : ""}` +
+             sigBadge(a.signal) +
+             (a.signal === "skipped" || a.skipped ? ` <span class="badge safe">skipped</span>` : "") + codes +
+             `</summary>`;
+        if (a.payload) h += `<div class="kv">Payload sent:</div><pre>${esc(a.payload)}</pre>`;
+        if (a.reason) h += `<div class="kv">Skipped: ${esc(a.reason)}</div>`;
+        if (a.baseline) {
+          h += `<div class="kv">Baseline → Mutated: ${statusCode(a.baseline.status)} (${a.baseline.length}b) → ${statusCode(a.mutated.status)} (${a.mutated.length}b)${deltaSpan(a.baseline.length, a.mutated.length)}</div>`;
+          if (a.mutated.body_sample) h += `<div class="kv">Mutated response:</div><pre>${esc(a.mutated.body_sample)}</pre>`;
+        }
+        for (const ind of (a.indicators || [])) h += `<div class="ind${isStrongInd(ind) ? " strong" : ""}">• ${esc(ind)}</div>`;
+        h += `</details>`;
       }
-      for (const ind of (a.indicators || [])) h += `<div class="ind${isStrongInd(ind) ? " strong" : ""}">• ${esc(ind)}</div>`;
-      h += `</div>`;
+      h += `</details>`;
     }
-    div.innerHTML = h;
-    box.appendChild(div);
+    h += `</div>`;
+    det.innerHTML = h;
+    box.appendChild(det);
   }
 }
+
+function setAllOpen(open) {
+  document.querySelectorAll("#findings details").forEach((d) => { d.open = open; });
+}
+
+// Print / Save PDF must show everything: open all before printing, restore the user's view after.
+let _openBeforePrint = null;
+window.addEventListener("beforeprint", () => {
+  const all = [...document.querySelectorAll("#findings details")];
+  _openBeforePrint = all.map((d) => d.open);
+  all.forEach((d) => { d.open = true; });
+});
+window.addEventListener("afterprint", () => {
+  if (!_openBeforePrint) return;
+  document.querySelectorAll("#findings details").forEach((d, i) => { d.open = !!_openBeforePrint[i]; });
+  _openBeforePrint = null;
+});
 
 function download(filename, text, mime) {
   const blob = new Blob([text], { type: mime });
@@ -144,4 +179,6 @@ chrome.storage.local.get("scan", ({ scan }) => {
   document.getElementById("dlJson").onclick = () => download(`ethicalquoc-report-${ts}.json`, JSON.stringify(lastReport, null, 2), "application/json");
   document.getElementById("dlHtml").onclick = () => download(`ethicalquoc-report-${ts}.html`, toHtml(lastReport), "text/html");
   document.getElementById("print").onclick = () => window.print();
+  document.getElementById("expandAll").onclick = () => setAllOpen(true);
+  document.getElementById("collapseAll").onclick = () => setAllOpen(false);
 });

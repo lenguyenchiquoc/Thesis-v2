@@ -12,9 +12,24 @@
     .bar { display:flex; gap:10px; margin-bottom:18px; }
     button { font: inherit; padding: 8px 14px; border-radius:7px; border:1px solid var(--line);
              background:var(--chip); cursor:pointer; }
-    .finding { border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin-bottom:14px; }
+    .finding { border:1px solid var(--line); border-radius:10px; padding:10px 16px; margin-bottom:10px; }
     .finding.vuln { border-color:#fecaca; background:#fef2f2; }
     .ftop { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+    .ftop .pills { display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; }
+    .fbody { margin-top:6px; padding-top:8px; border-top:1px dashed var(--line); }
+
+    /* Collapsible sections: custom ▸ chevron (rotates when open) instead of the native marker. */
+    details > summary { list-style:none; cursor:pointer; position:relative; padding-left:18px; }
+    details > summary::-webkit-details-marker { display:none; }
+    details > summary::before { content:"▸"; position:absolute; left:0; top:0; color:var(--muted);
+                                transition:transform .15s; }
+    details[open] > summary::before { transform:rotate(90deg); }
+    details > summary:hover { color:var(--blue); }
+    .finding > summary .ep { margin-bottom:0; }
+    details.attempts { margin-top:10px; }
+    details.attempts > summary { font-weight:600; color:#374151; padding:4px 0 4px 18px; }
+    .attempt > summary { padding:2px 0 2px 18px; }
+    .attempt[open] > summary { margin-bottom:6px; }
     .badge { font-size:11px; padding:3px 9px; border-radius:11px; white-space:nowrap; }
     .badge.vuln { background:var(--red); color:#fff; } .badge.safe { background:#e5e7eb; color:#374151; }
     .ep { font-family: ui-monospace, monospace; font-size:12px; color:var(--muted); margin:6px 0; word-break:break-all; }
@@ -61,6 +76,9 @@
     <button id="dlJson">Download JSON</button>
     <button id="dlHtml">Download HTML</button>
     <button id="print">Print / Save PDF</button>
+    <span style="flex:1"></span>
+    <button id="expandAll">Expand all</button>
+    <button id="collapseAll">Collapse all</button>
   </div>
   <div id="findings"></div>
   <script src="results.js"></script>

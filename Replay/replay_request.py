@@ -8,6 +8,7 @@ import urllib.parse
 import urllib.request
 from typing import cast
 
+from Utility import signatures
 from Utility.schemas import HttpProbeSample, Mutation, RequestContext, ReplayResult, ReplaySkipped
 from Utility.transforms import TransformError, rebuild
 
@@ -156,6 +157,57 @@ class ReplayRequest:
                 current = urllib.parse.quote(current, safe="", encoding="latin-1")
         return current
 
+    # Never forwarded from the HAR: content-length/host are recomputed, accept-encoding would make the
+    # server gzip the reply (urllib does not inflate), and the conditional If-None-Match /
+    # If-Modified-Since turn every baseline AND mutated reply into an empty 304 (bug E, 2026-11-21).
+    DROPPED_REQUEST_HEADERS = ("content-length", "host", "accept-encoding",
+                               "if-none-match", "if-modified-since")
+
+    # Content-Types whose body is raw bytes. The HAR stores such a body one char per byte
+    # (\xac\xed -> "¬í"), so it must go back out as latin-1; UTF-8 would turn 0xAC into C2 AC
+    # and corrupt the stream (bug A, 2026-11-21 — Java baseline "invalid stream header: C2ACC3AD").
+    BINARY_CONTENT_TYPES = ("octet-stream", "x-java-serialized-object", "x-java-object",
+                            "msgpack", "x-protobuf", "x-python-pickle", "x-ruby-marshal")
+
+    # Leading bytes of a serialized stream no text body ever starts with — fallback for a binary
+    # body whose Content-Type is missing or mislabelled (e.g. raw pickle sent as text/plain).
+    BINARY_BODY_MAGIC = tuple(
+        signatures.JAVA_MAGIC_BYTES + signatures.PICKLE_MAGIC_BYTES
+        + signatures.RUBY_MAGIC_BYTES + signatures.DOTNET_MAGIC_BYTES
+    )
+    _CHARSET_RE = re.compile(r'charset\s*=\s*"?([A-Za-z0-9._:-]+)', re.IGNORECASE)
+
+    @classmethod
+    def _encode_context_body(cls, body: str, headers: dict) -> bytes:
+        """Turn the original HAR body (a str) back into the bytes the browser sent, for the
+        baseline/context request. The HAR mixes real text (Vietnamese 'ẻ' U+1EBB in a JSON body)
+        with one-char-per-byte binary dumps ("¬í" = AC ED), so the choice comes from the request
+        itself, in this order:
+          1. an explicit `charset=` -> that codec (iso-8859-1 -> latin-1, utf-8 -> UTF-8, ...)
+          2. a binary Content-Type (no charset)  -> latin-1, byte-exact
+          3. body starts with a known serialized-stream magic -> latin-1 (mislabelled binary)
+          4. otherwise -> UTF-8 (JSON / form / modern web default; GAP A 2026-11-06)
+        Any step whose codec cannot represent the string falls through to UTF-8."""
+        content_type = next((v for k, v in headers.items() if k.lower() == "content-type"), "") or ""
+
+        m = cls._CHARSET_RE.search(content_type)
+        if m:
+            try:
+                return body.encode(m.group(1))
+            except (LookupError, UnicodeEncodeError):
+                return body.encode("utf-8")  # unknown codec / chars outside the declared charset
+
+        try:
+            as_bytes = body.encode("latin-1")
+        except UnicodeEncodeError:
+            return body.encode("utf-8")  # has chars > 0xFF, so it was never a one-char-per-byte dump
+
+        if any(t in content_type.lower() for t in cls.BINARY_CONTENT_TYPES):
+            return as_bytes
+        if as_bytes.startswith(cls.BINARY_BODY_MAGIC):
+            return as_bytes
+        return body.encode("utf-8")
+
     def _send(
         self, url: str, method: str, location: str, name: str, value: str | None,
         request_context: "RequestContext | None" = None,
@@ -163,12 +215,12 @@ class ReplayRequest:
         request_context = request_context or {}
         headers = {
             k: v for k, v in (request_context.get("headers") or {}).items()
-            if k.lower() not in ("content-length", "host", "accept-encoding") and not k.startswith(":")
+            if k.lower() not in self.DROPPED_REQUEST_HEADERS and not k.startswith(":")
         }
         headers.setdefault("User-Agent", "EthicalQuoc/replay")
         cookies = dict(request_context.get("cookies") or {})
         ctx_body = request_context.get("body")
-        body = ctx_body.encode("utf-8") if isinstance(ctx_body, str) else None
+        body = self._encode_context_body(ctx_body, headers) if isinstance(ctx_body, str) else None
         target_url = url
 
         if location == "cookie":
@@ -373,7 +425,7 @@ class ReplayRequest:
             indicators.append(
                 f"Response reveals a reconstructed object of type {sorted(new_object_classes)} "
                 f"not present in baseline — the server instantiated an attacker-named type "
-                f"(deserialization executed)"
+                f"(the input was deserialized)"
             )
             strong_signal = True
 

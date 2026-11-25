@@ -119,6 +119,46 @@ class TestMutationLandsExactlyWhereTheCandidateCameFrom(unittest.TestCase):
         self.assertNotIn("=", rebuilt)
 
 
+def _clean(value, location, name="payload"):
+    return cleanfilter([{"source": "t", "url": "http://x/", "method": "POST",
+                         "location": location, "name": name, "value": value}])._clean_all()
+
+
+class TestCookieSplitOnlyAppliesToCookies(unittest.TestCase):
+    """Bug D (2026-11-21): the '; ' Cookie-pair split ran on raw_body too. A node-serialize body
+    `..."_$$ND_FUNC$$_function () { return 1; }"}` was cut at '; ', so replay kept the old tail
+    after the payload (`{"rce":...}; }"}`) -> JSON parse error 500, blind sink lost its OOB."""
+
+    NODE_BODY = '{"theme":"dark","lang":"en","render":"_$$ND_FUNC$$_function () { return 1; }"}'
+
+    def test_raw_body_with_semicolon_space_is_kept_whole(self):
+        out = _clean(self.NODE_BODY, "raw_body")
+        self.assertEqual(len(out), 1)
+        self.assertEqual(out[0]["cleaned_value"], self.NODE_BODY)
+        self.assertEqual(out[0]["clean_steps"], [])
+
+    def test_raw_body_trailing_quote_semicolon_not_trimmed(self):
+        body = 's:5:"hello";'
+        out = _clean(body, "raw_body")
+        self.assertEqual(out[0]["cleaned_value"], body)
+        self.assertEqual(out[0]["clean_steps"], [])
+
+    def test_raw_body_payload_replaces_whole_body(self):
+        out = _clean(self.NODE_BODY, "raw_body")[0]
+        self.assertEqual(rebuild(self.NODE_BODY, out["clean_steps"], '{"rce":1}'), '{"rce":1}')
+
+    def test_cookie_header_still_split_to_serialized_segment(self):
+        header = 'a=1; session=O:4:"User":1:{s:5:"admin";b:0;}; theme=dark'
+        out = _clean(header, "header", "Cookie")
+        self.assertEqual(len(out), 1)
+        self.assertEqual(out[0]["cleaned_value"], 'O:4:"User":1:{s:5:"admin";b:0;}')
+        self.assertTrue(out[0]["clean_steps"])
+
+    def test_cookie_value_quotes_still_trimmed(self):
+        out = _clean('"O:4:"User":1:{s:5:"admin";b:0;}"', "cookie", "session")
+        self.assertEqual(out[0]["cleaned_value"], 'O:4:"User":1:{s:5:"admin";b:0;}')
+
+
 class TestLossyStepsAreRefusedNotGuessed(unittest.TestCase):
 
     def test_base64_over_text_that_is_not_base64_is_flagged_and_refused(self):

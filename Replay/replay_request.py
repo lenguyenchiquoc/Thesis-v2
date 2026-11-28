@@ -11,6 +11,7 @@ from typing import cast
 from Utility import signatures
 from Utility.schemas import HttpProbeSample, Mutation, RequestContext, ReplayResult, ReplaySkipped
 from Utility.transforms import TransformError, rebuild
+from tool_config import get_replay_settings
 
 
 class ReplayRequest:
@@ -22,15 +23,19 @@ class ReplayRequest:
         "internal server error", "500 internal", "segmentation fault",
     ]
 
-    TIME_DELAY_THRESHOLD_SEC = 4.0
-
     DESER_SPECIFIC_MARKERS = (
         "unserialize()", "objectinputstream", "invalidclassexception",
         "classnotfoundexception", "yaml.constructor", "pickle.unpicklingerror",
     )
 
-    def __init__(self, timeout: int = 10, verify_tls: bool = True):
-        self.timeout = timeout
+    def __init__(self, timeout: float | None = None, verify_tls: bool = True):
+        # Thresholds come from config.json "replay" (tool_config.get_replay_settings); their
+        # defaults live ONLY in tool_config._DEFAULT_REPLAY — no copy here to drift from.
+        settings = get_replay_settings()
+        self.TIME_DELAY_THRESHOLD_SEC = settings["time_delay_threshold_sec"]
+        self.CONTENT_DIFF_SIMILARITY_THRESHOLD = settings["content_similarity_threshold"]
+        self.LENGTH_CHANGE_RATIO = settings["length_change_ratio"]
+        self.timeout = timeout if timeout is not None else settings["request_timeout_sec"]
         self.verify_tls = verify_tls
 
     def replay(self, payload: Mutation) -> ReplayResult:
@@ -291,7 +296,7 @@ class ReplayRequest:
         parts.append(f"{urllib.parse.quote(name, safe='')}={encoded_value}")
         return "&".join(parts)
 
-    CONTENT_DIFF_SIMILARITY_THRESHOLD = 0.8
+    # Internal, deliberately NOT in config.json: how many characters of a body are compared.
     COMPARE_BODY_LIMIT = 20000
 
     VOLATILE_PATTERNS = [
@@ -369,7 +374,7 @@ class ReplayRequest:
                 strong_signal = True
 
         length_delta = abs(mutated["length"] - baseline["length"])
-        length_changed_significantly = baseline["length"] > 0 and length_delta / baseline["length"] > 0.5
+        length_changed_significantly = baseline["length"] > 0 and length_delta / baseline["length"] > self.LENGTH_CHANGE_RATIO
         if length_changed_significantly:
             reflected = self._is_mere_reflection(
                 mutated.get("body_compare") or mutated["body_sample"], injected_value)

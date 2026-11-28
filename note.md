@@ -1,5 +1,95 @@
 # Ghi chú tiến độ — EthicalQuoc
 
+**[2026-11-28 — ✅ NGƯỠNG REPLAY CHUYỂN RA `config.json` (mục `"replay"`). User: "làm 1 file config… user vào thẳng config chỉnh 6s, 7s… chứ không mò code"; chốt "làm cái config trước" (trước task cài 1 bước). Mặc định GIỮ NGUYÊN → không đổi kết quả phát hiện.]**
+- **4 khoá**:
+  - `time_delay_threshold_sec` = 4 (trước là hằng `TIME_DELAY_THRESHOLD_SEC`).
+  - `content_similarity_threshold` = 0.8 (`CONTENT_DIFF_SIMILARITY_THRESHOLD`, dùng ở 2 chỗ: content-diff và hạ cấp nhờ control).
+  - `length_change_ratio` = 0.5 (trước viết cứng `> 0.5` trong `_compare`).
+  - `request_timeout_sec` = 10 (trước là mặc định `timeout=10` của `ReplayRequest.__init__`).
+- **[tool_config.py]**: thêm `_DEFAULT_REPLAY` + `get_replay_settings()`. Kiểm từng khoá:
+  - Phải là số (bool không tính là số), > 0; riêng similarity phải nằm trong (0, 1].
+  - Khoá lạ (gõ sai tên), giá trị sai, hoặc `"replay"` không phải object → in `[!]` rồi dùng mặc định.
+  - `time_delay >= timeout` → cảnh báo "can never fire" (request bị cắt trước khi kịp vượt ngưỡng).
+- **[Replay/replay_request.py]**: `__init__(timeout=None)` đọc settings, gán theo instance (`self.TIME_DELAY_THRESHOLD_SEC`, `self.CONTENT_DIFF_SIMILARITY_THRESHOLD`, `self.LENGTH_CHANGE_RATIO`, `self.timeout`). Tham số `timeout` truyền tay vẫn được ưu tiên.
+  - **Dọn (cùng ngày, user hỏi "config rồi sao code vẫn cần")**: xoá 3 hằng class trùng lặp (`TIME_DELAY_THRESHOLD_SEC=4.0`, `CONTENT_DIFF_SIMILARITY_THRESHOLD=0.8`, `LENGTH_CHANGE_RATIO=0.5`). `__init__` luôn ghi đè nên chúng không bao giờ được dùng, mà giữ thì mặc định nằm 2 nơi, dễ lệch nhau. Giờ mặc định **chỉ** nằm ở `tool_config._DEFAULT_REPLAY`.
+  - **Giữ** `COMPARE_BODY_LIMIT = 20000`: giới hạn nội bộ (số ký tự body đem so), cố ý không đưa ra config.
+  - Test: thay test "class default không bị đổi" bằng `test_instances_do_not_share_settings` + `test_defaults_live_only_in_tool_config`. Suite **228 OK**, pair IDENTICAL, eval không đổi. `serve.py:64` / `debug_pipeline.py` tạo `ReplayRequest()` nên CLI `run` lẫn extension đều đọc config.
+- **[config.json]**: thêm mục `"replay"` với đúng giá trị mặc định. **[README.md]** mục Configuration: thêm bảng 4 khoá, ràng buộc delay < timeout và cảnh báo chỉnh ngưỡng làm đổi FP/FN.
+- **Test mới** [TestCase/test_replay_config.py] (12 test):
+  - Không có mục `replay` → mặc định.
+  - config.json đi kèm repo == mặc định.
+  - Giá trị tuỳ chỉnh được áp dụng.
+  - Giá trị sai / khoá lạ / mục không phải object → mặc định + cảnh báo.
+  - Cảnh báo delay ≥ timeout.
+  - Ngưỡng 6s: chậm 5s không kích hoạt, 6.5s thì kích hoạt.
+  - Ratio 0.3 bắt được +40%, mặc định 0.5 thì không.
+  - Timeout lấy từ config, và tham số truyền tay thắng config.
+  - Instance không làm đổi hằng của class.
+- **Verify**:
+  - Suite **Ran 227, OK** (215 + 12).
+  - Pair-HAR pair1–7 **IDENTICAL** với `pairs_P_after.json` và `pairs_NO_after.json` (41 finding).
+  - eval TOOL TP=34 FP=9 FN=0, F1=0.883; type accuracy 7/7 (không đổi).
+  - ⚠️ Pair-HAR và eval chạy **không replay** nên chỉ chứng minh phần tĩnh không đổi. Đường replay được kiểm bằng unit test `_compare`. Chưa quét live vì Docker đang tắt.
+
+**[2026-11-28 — ✅ BỎ cờ global `--version` (user: "bỏ cái --version đi"). Đóng bug UX note ~343 phần `--version`.]**
+- [main.py]: xoá `parser.add_argument("--version", ...)` và nhánh `if args.version: print(...VERSION)` trong `handle_arg`. **Giữ hằng `VERSION`**: vẫn dùng cho `save_output_file_type(..., version=VERSION)` khi `run --dump-stages`.
+- CLI giờ chỉ còn `[-h] [--update] {serve,run}`. Gõ `--version` sẽ bị argparse báo lỗi thiếu `command` (exit 2), như với mọi cờ lạ.
+- `--update` (stub chỉ in "[*] Updating...") vẫn còn, vẫn dính đúng bug cũ (không chạy được khi đứng một mình). Chưa đụng tới, chờ user.
+- Verify:
+  - `py_compile` OK, `--help` sạch.
+  - Suite **Ran 215, OK**.
+  - `run --no-replay` trên comprehensive.har vẫn ghi report bình thường.
+  - `eval/evaluate.py`: TOOL TP=34 FP=9 FN=0, F1=0.883; type accuracy 7/7.
+  - Không chạy pair-HAR: thay đổi chỉ nằm ở phần parse cờ CLI, không đụng pipeline.
+
+**[2026-11-26 — 📌 TASK MỚI (CHƯA LÀM): biến EthicalQuoc thành "app" kiểu các tool CLI — cài 1 bước, rồi gõ lệnh là dùng. User: "Phát triển kiểu app, giống kiểu các tool ấy, setup rất đơn giản, kiểu install 1 bước rồi dùng command để dùng thôi".]**
+- **Mục tiêu UX**: 1 lệnh cài, sau đó gọi lệnh `ethicalquoc` ở bất kỳ thư mục nào (không phải `cd` vào repo rồi `python main.py ...`), VD:
+  - `ethicalquoc run --har x.har -o report.json`
+  - `ethicalquoc serve` (cho extension)
+- **Hiện trạng**:
+  - Chạy bằng `python main.py {serve,run}`.
+  - Đã có `Dockerfile` (`ENTRYPOINT python main.py`), `setup.ps1` và `setup-wsl.sh`.
+  - Chưa có `pyproject.toml`/entry point.
+  - Kế hoạch 19/11 (note ~319) mới dừng ở mức "Docker image + zip + setup".
+- **Điểm khó cốt lõi**: tool không chỉ cần Python mà còn cần **java** (ysoserial), **php** (phpggc, `phar.readonly=0`), **ruby**, **.NET/ysonet** (chỉ chạy trên Windows). Vì vậy "1 bước" phải lo luôn các runtime này, không chỉ pip.
+- **Các hướng (chọn khi làm)**:
+  1. **`pyproject.toml` + `[project.scripts] ethicalquoc = ...`, cài bằng `pipx install`**. Có lệnh thật trên PATH. Nhưng runtime java/php/ruby phải có sẵn → cần kiểm tra runtime lúc chạy và báo thiếu gì.
+  2. **Docker làm runtime + script wrapper `ethicalquoc`** (gọi `docker run --rm -v "$PWD:/data" ...`). Cài 1 bước thật sự, đủ java/php/ruby, đa OS (graders dùng Mac). Thiếu .NET (known-limitation, phải ghi README).
+  3. **Script cài 1 dòng** (`curl … | sh`, `iwr … | iex`): tiện, nhưng là mô hình "chạy script từ mạng", phải ghi rõ trong README. Không làm auto-run khi unzip (đã chốt 19/11).
+- **Việc liên quan nên gộp vào**:
+  - ~~Bug `--version`~~ (đã bỏ cờ 28/11). `--update` còn cùng bug (note ~343): bỏ hoặc sửa khi làm task này.
+  - Đường dẫn `tools/`, `config.json`, `results/` đang tương đối theo repo → khi cài thành lệnh toàn cục phải định vị theo vị trí package hoặc thư mục người dùng.
+- **Thời điểm**: đây là **đóng gói/feature UX**, không phải TEST+FIX → theo freeze tới 31/12 thì làm **gần nộp, sau khi test xong**, trừ khi user chốt làm sớm hơn. Chờ user chọn hướng.
+
+**[2026-11-26 — 📋 Output EXTENSION của user trên .NET secure :8091 (`ethicalquoc-report-2026-11-26T04-08-59.json`) sau khi đổi `bin-sample` sang JSON. KHÔNG SỬA GÌ.]**
+- 255 vector → 14 finding, **0 strong, 0 OOB** (14 token poll, confirmed 0).
+- Xác nhận live: `GET /api/bin-sample` trả `{"sample":"eyJUaGVtZSI6ImRhcmsiLCJMYW5nIjoiZW4ifQ=="}` (= base64 `{"Theme":"dark","Lang":"en"}`), `import-bin` trả `{"success":true,"restored":{"Theme":"dark","Lang":"en"}}` → **không còn finding body nào** (trước: 1 × `import-bin` do header BinaryFormatter).
+- Cả 14 finding = cookie `ref_tag` (`O:3:"Tag":1:{s:4:"name";s:7:"organic";}`, PHP "Identity Spoofing", High nhãn tĩnh, weak) trên 14 URL — cookie do JS lab **Java** đặt, rò sang mọi cổng `localhost`. Mọi attempt (18 mutation/finding) có mutated == baseline (cùng status + length) → .NET không đọc cookie này.
+- Lần này không có finding `session` cũ (khác report Node :8089).
+
+**[2026-11-26 — 📋 Output EXTENSION của user trên Node secure :8089 (`ethicalquoc-report-2026-11-26T03-58-54.json`) sau khi sửa dashboard. KHÔNG SỬA GÌ.]**
+- 265 vector → 16 finding, **0 strong, 0 OOB**. Xác nhận live qua extension: 4 sink body (`import`/`restore-prefs`/`import-async`/`import-yaml`) **không còn finding** (trước: 4 × node-serialize/js-yaml weak do blob gõ cứng).
+- 14 × cookie `ref_tag` (PHP "Identity Spoofing", High, weak) ở mọi endpoint: cookie do JS lab **Java** đặt, trình duyệt gửi chung cho mọi cổng `localhost` (cookie không tách theo port) — nhiễu chéo lab đã biết, không phải của Node.
+- 1 × cookie `session` @ `POST /api/login` = node-serialize (`_$$ND_FUNC$$_function () { return this.username; }`), Critical (nhãn tĩnh), weak: cookie **cũ của node-vuln :8088** còn trong trình duyệt, gửi kèm lúc login :8089 (sau login bị thay bằng cookie HMAC-JSON của secure — các endpoint khác không có finding session). Cùng nguyên nhân chia sẻ cookie localhost.
+- 1 × `import-config` Prototype Pollution weak — cố ý (note ~547), guard chặn (`pollutionProof` null).
+- Cách tránh nhiễu khi quét: xoá cookie `localhost` trước mỗi lab, hoặc mở mỗi lab bằng host khác (`localhost` vs `127.0.0.1`).
+
+**[2026-11-26 — ✅ LAB SECURE: Node bỏ blob gõ cứng `_$$ND_FUNC$$_`, .NET `bin-sample` bỏ header BinaryFormatter. User: "làm 2 cái này"; .NET user chọn "Đổi sang JSON" sau khi tôi báo đây là quyết định CÓ CHỦ ĐÍCH ngày 08/11 (note ~529: blob inert giữ để scanner vẫn thấy vector). Tool KHÔNG đổi.]**
+- **node-app-secure** (hoàn tất việc tồn từ 14/11, note ~455): `services.js` thêm `prefsService.sample()` = `JSON.stringify({theme,lang})` và `configService.sampleYaml()` = `yaml.dump({name,enabled})` (không function — JSON/YAML-JSON_SCHEMA không chở được code); `routes.js` thêm `GET /api/export-prefs` + `/api/export-yaml` (y dòng vuln); `public/dashboard.html` = **copy nguyên vuln** (BLOBS/loadBlob/wireRestore, bỏ 4 textarea gõ cứng; textarea `cfg` có `__proto__` giữ nguyên ở cả 2 bản — cố ý, note ~547). `node --check` OK. Live: export→import/restore/async/yaml đều 200; tamper IIFE `_$$ND_FUNC$$_…execSync('id')` → chỉ lưu thành chuỗi, không chạy.
+- **dotnet-app-secure**: `BinPrefsService.Sample()` = base64(System.Text.Json `{"Theme":"dark","Lang":"en"}`); `Restore()` = base64 → `JsonDocument.Parse` (data only); endpoint `import-bin` truyền body thật, lỗi → 400 `invalid backup` (không lộ chi tiết); card dashboard bỏ chữ "BinaryFormatter". Live: round-trip 200; blob BinaryFormatter → 400.
+- **Quét lại** (2 định dạng HAR, collector bật): **Node secure 5 → 1** (còn `import-config` Prototype Pollution **weak** — guard chặn đúng, `pollutionProof` null), **.NET secure 1 → 0**. 0 strong / 0 OOB. Bản vuln không đổi file nào.
+
+**[2026-11-26 — ✅ QUÉT LẠI 6 LAB SECURE SAU FIX P, cả 2 định dạng HAR (DevTools + extension). User: "quét lại lab secure xem có finding mới không". KHÔNG SỬA CODE.]**
+- HAR ghi bằng scratchpad `record_lab_har.py` (thêm luồng PHP; `FMT` devtools|extension), 12 file `sec_<lang>_<fmt>.har/.json` trong scratchpad. 2 định dạng cho **cùng tập finding** ở mọi lab.
+- **0 strong, 0 OOB ở cả 6 lab secure.** PHP/Python/Ruby: 0 finding. Node 5 (= trước, blob `_$$ND_FUNC$$_` gõ cứng — tồn đọng đã biết), .NET 1 (= trước, `import-bin` header BinaryFormatter trong `bin-sample` — tồn đọng đã biết).
+- Java secure 21 → 26: +5 đều từ endpoint MỚI `/api/cart` (thêm 2026-11-25): 4 cookie `session`/`ref_tag` gửi kèm GET/POST `/api/cart` (weak, cùng mẫu cũ) + `form_body/cart` **weak**, 7/7 HTTP 400 `{"error":"Invalid cart"}` = allow-list chặn đúng. Severity High trên các finding weak là nhãn TĨNH (như các finding Java secure khác) — không phải phát hiện mới.
+- Sau quét: tắt collector, `docker restart node-secure-app`.
+
+**[2026-11-26 — ✅ QUÉT LẠI 6 HAR `Input/` SAU FIX P (`results/<tên>_v2.json`). User: "chạy lại các file har trong Input". KHÔNG SỬA CODE.]**
+- harNet 26/6/0, harNode 29/7/6, harPy 22/6/6, harRuby 19/5/2, java_v1 31/7/5 (finding/strong/OOB) — **y hệt lần trước** (cùng key, severity, evidence, oob).
+- src4: 35 finding, 6 strong, OOB **5→6**; khác biệt DUY NHẤT: `POST cart.php form_body/cart` **High → Critical + OOB** (14/14 HTTP 200, có attempt in `root` = whoami chạy; trước: 14×500 `Error at offset 0`). Đúng kỳ vọng fix P, không hồi quy chỗ khác.
+- Trước khi quét: Docker tắt ⇒ bật Docker Desktop + `docker start` 12 container (node-vuln-app khởi động lại ⇒ prototype sạch); sau quét đã `docker restart node-vuln-app` lại.
+
 **[2026-11-25 (khuya) — ✅ FIX P (form-urlencoded / query replay sai: P1 DevTools mã hoá 2 lần, P2 extension mất tên field). User: "ok sửa đi".]**
 - **Sửa** ([har_loader.py](Scanner/har_loader.py) `_process_entry`, 1 chỗ, dùng chung mọi ngôn ngữ):
   - **Form**: nếu `mimeType` (hoặc header Content-Type) là `application/x-www-form-urlencoded` ⇒ tự tách `postData.text` bằng `parse_qsl(keep_blank_values=True, encoding="latin-1")` thành từng vector `form_body` ĐÃ GIẢI MÃ — không tin `params[]` (DevTools giữ %-encode) và không còn biến cả body thành `raw_body` (extension không có `params`). Không có `text` mà có `params` ⇒ `unquote_plus` từng giá trị. Body không phải urlencoded (JSON/YAML/multipart…) giữ nguyên đường cũ.

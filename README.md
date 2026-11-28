@@ -130,7 +130,13 @@ Third-party exploitation tools are **not bundled with a fixed absolute path** �
         "ysonet": "tools/dotnet/ysonet.exe",
         "gopherus": "tools/gopherus/gopherus.py"
     },
-    "oob_domain": ""
+    "oob_domain": "",
+    "replay": {
+        "time_delay_threshold_sec": 4,
+        "content_similarity_threshold": 0.8,
+        "length_change_ratio": 0.5,
+        "request_timeout_sec": 10
+    }
 }
 ```
 
@@ -138,6 +144,16 @@ Third-party exploitation tools are **not bundled with a fixed absolute path** �
 - To point at tools installed elsewhere, either edit `config.json` directly or set the `ETHICALQUOC_CONFIG` environment variable to a different config file path.
 - `ysoserial-all.jar`, `phpggc`, and [ysonet](https://github.com/irsdl/ysonet) (actively maintained fork/replacement of the now largely inactive `pwntester/ysoserial.net`) are all vendored under `tools/` — cloning the repo is enough, nothing to download separately for Java/PHP/.NET mutation. Only Gopherus is not bundled — install it separately and update `config.json` if you need the enhanced SSRF path (a manual fallback payload is generated even without it).
 - `ysonet.exe` targets .NET Framework — it runs out of the box on Windows 10/11, which ship .NET Framework 4.8 pre-installed as an OS component (no separate .NET install needed). It does **not** run on Linux/macOS or inside the Docker image (see [Known limitations](#known-limitations)); on those platforms, `.NET` mutation returns a clear error/hint instead of a payload.
+- `replay` — thresholds of the replay oracle (baseline / mutated / control comparison in `Replay/replay_request.py`). Edit them here instead of in the code; a missing section or key uses the default shown, and an invalid value (wrong type, out of range, unknown key) is reported at startup and replaced by its default:
+
+  | Key | Default | Meaning |
+  |---|---|---|
+  | `time_delay_threshold_sec` | `4` | Mutated response at least this many seconds slower than baseline → time-based **strong** signal |
+  | `content_similarity_threshold` | `0.8` | Body similarity (0–1) for "small localized content change" and for the control-probe downgrade |
+  | `length_change_ratio` | `0.5` | Length change above this fraction of the baseline length → "length changed significantly" |
+  | `request_timeout_sec` | `10` | HTTP timeout per replayed request |
+
+  `time_delay_threshold_sec` must stay **below** `request_timeout_sec`, otherwise the request is cut off before it can exceed the threshold and the time-based signal never fires (the tool warns about this). The defaults are the values the tool was evaluated with — changing them changes what is flagged: lower similarity / ratio → more findings and more false positives; a higher delay threshold → slow-but-real sinks may be missed.
 - `oob_domain` — set this to your own Burp Collaborator or Interactsh subdomain (or set `ETHICALQUOC_OOB_DOMAIN`) to have URLDNS and blind-SSRF payloads embed a real canary instead of a placeholder. Interaction logs must still be checked manually — this tool does not poll an OOB provider's API for you.
 
 ## Project structure

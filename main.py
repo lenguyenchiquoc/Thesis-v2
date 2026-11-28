@@ -150,7 +150,6 @@ def main():
         description="Insecure deserialization detection tool"
     )
 
-    parser.add_argument("--version", action="store_true", help="Show version")
     parser.add_argument("--update", action="store_true", help="Update tool")
 
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -180,10 +179,6 @@ def main():
 
 
 def handle_arg(args):
-
-    if args.version:
-        print(f"EthicalQuoc version {VERSION}")
-        return
 
     if args.update:
         print("[*] Updating EthicalQuoc...")

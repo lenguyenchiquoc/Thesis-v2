@@ -166,6 +166,58 @@ def _looks_like_ip_or_hostport(base: str) -> bool:
     return len(labels) == 4 and all(lbl.isdigit() for lbl in labels)
 
 
+# Replay oracle thresholds (Replay/replay_request.py _compare). Defaults are the values the
+# tool was evaluated with — a config.json without a "replay" section, or with any key
+# missing/invalid, behaves exactly as before. Changing them changes what gets flagged.
+_DEFAULT_REPLAY = {
+    # mutated response at least this many seconds slower than baseline -> time-based strong
+    "time_delay_threshold_sec": 4.0,
+    # body similarity (0..1) for "small localized content diff" and for the control-probe downgrade
+    "content_similarity_threshold": 0.8,
+    # |mutated-baseline| / baseline length above this ratio -> "length changed significantly"
+    "length_change_ratio": 0.5,
+    # per-request HTTP timeout for baseline / mutated / control
+    "request_timeout_sec": 10.0,
+}
+
+
+def get_replay_settings() -> dict:
+    """Replay thresholds from config.json's "replay" section, validated key by key: a bad
+    value is reported and replaced by its default, never silently used."""
+    settings = dict(_DEFAULT_REPLAY)
+    section = _load_raw_config().get("replay")
+    if section is None:
+        return settings
+    if not isinstance(section, dict):
+        print('[!] config.json "replay" must be an object — using built-in replay defaults')
+        return settings
+
+    for key, value in section.items():
+        if key not in _DEFAULT_REPLAY:
+            print(f'[!] config.json replay.{key}: unknown key — ignored '
+                  f'(known: {", ".join(_DEFAULT_REPLAY)})')
+            continue
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            print(f'[!] config.json replay.{key}={value!r}: must be a number — '
+                  f'using default {_DEFAULT_REPLAY[key]}')
+            continue
+        value = float(value)
+        valid = 0 < value <= 1 if key == "content_similarity_threshold" else value > 0
+        if not valid:
+            rule = "between 0 (exclusive) and 1" if key == "content_similarity_threshold" else "> 0"
+            print(f'[!] config.json replay.{key}={value}: must be {rule} — '
+                  f'using default {_DEFAULT_REPLAY[key]}')
+            continue
+        settings[key] = value
+
+    if settings["time_delay_threshold_sec"] >= settings["request_timeout_sec"]:
+        print(f'[!] config.json replay: time_delay_threshold_sec ({settings["time_delay_threshold_sec"]}) '
+              f'>= request_timeout_sec ({settings["request_timeout_sec"]}) — a mutated request is cut '
+              f'off by the timeout before it can exceed the delay threshold, so the time-based signal '
+              f'can never fire. Raise request_timeout_sec above the threshold.')
+    return settings
+
+
 def get_oob_wait_seconds() -> float:
     """Seconds to wait after replay before polling the collector — OOB callbacks are
     asynchronous and can lag the request that triggered them."""
